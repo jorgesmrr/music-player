@@ -27,12 +27,10 @@ import android.media.session.PlaybackState;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,7 +39,6 @@ import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
 import com.example.android.uamp.utils.NetworkHelper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -131,6 +128,12 @@ public class MediaBrowserFragment extends Fragment {
             }
         };
 
+    public static MediaBrowserFragment newInstance(String mediaId){
+        MediaBrowserFragment fragment = new MediaBrowserFragment();
+        fragment.setMediaId(mediaId);
+        return fragment;
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -148,18 +151,19 @@ public class MediaBrowserFragment extends Fragment {
         mErrorView = rootView.findViewById(R.id.playback_error);
         mErrorMessage = (TextView) mErrorView.findViewById(R.id.error_message);
 
-        mBrowserAdapter = new BrowseAdapter(getActivity());
+        mMediaId = getMediaId();
 
-        ListView listView = (ListView) rootView.findViewById(R.id.list_view);
-        listView.setAdapter(mBrowserAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mBrowserAdapter = new BrowseAdapter(getActivity(), mMediaId, new BrowseAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(MediaBrowser.MediaItem mediaItem) {
                 checkForUserVisibleErrors(false);
-                MediaBrowser.MediaItem item = mBrowserAdapter.getItem(position);
-                mMediaSelectedListener.onMediaItemSelected(item);
+                mMediaSelectedListener.onMediaItemSelected(mediaItem);
             }
         });
+
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.list_view);
+        recyclerView.setLayoutManager(mBrowserAdapter.getSuitableLayoutManager(getActivity()));
+        recyclerView.setAdapter(mBrowserAdapter);
 
         return rootView;
     }
@@ -223,7 +227,7 @@ public class MediaBrowserFragment extends Fragment {
         if (isDetached()) {
             return;
         }
-        mMediaId = getMediaId();
+
         if (mMediaId == null) {
             mMediaId = mMediaSelectedListener.getMediaBrowser().getRoot();
         }
@@ -316,40 +320,6 @@ public class MediaBrowserFragment extends Fragment {
                     }
                 });
             }
-        }
-    }
-
-    // An adapter for showing the list of browsed MediaItem's
-    private static class BrowseAdapter extends ArrayAdapter<MediaBrowser.MediaItem> {
-
-        public BrowseAdapter(Activity context) {
-            super(context, R.layout.media_list_item, new ArrayList<MediaBrowser.MediaItem>());
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            MediaBrowser.MediaItem item = getItem(position);
-            int state = MediaItemViewHolder.STATE_NONE;
-            if (item.isPlayable()) {
-                state = MediaItemViewHolder.STATE_PLAYABLE;
-                MediaController controller = ((Activity) getContext()).getMediaController();
-                if (controller != null && controller.getMetadata() != null) {
-                    String currentPlaying = controller.getMetadata().getDescription().getMediaId();
-                    String musicId = MediaIDHelper.extractMusicIDFromMediaID(
-                            item.getDescription().getMediaId());
-                    if (currentPlaying != null && currentPlaying.equals(musicId)) {
-                        if (controller.getPlaybackState().getState() ==
-                                PlaybackState.STATE_PLAYING) {
-                            state = MediaItemViewHolder.STATE_PLAYING;
-                        } else if (controller.getPlaybackState().getState() !=
-                                PlaybackState.STATE_ERROR) {
-                            state = MediaItemViewHolder.STATE_PAUSED;
-                        }
-                    }
-                }
-            }
-            return MediaItemViewHolder.setupView((Activity) getContext(), convertView, parent,
-                item.getDescription(), state);
         }
     }
 

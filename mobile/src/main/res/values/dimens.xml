@@ -15,6 +15,10 @@
   limitations under the License.
   -->
 <resources>
+    <!-- general -->
+    <dimen name="margin_view">8dp</dimen>
+    <dimen name="margin_h_list">0dp</dimen>
+
     <!-- error infobar -->
     <dimen name="error_horizontal_padding">4dp</dimen>
     <dimen name="error_vertical_padding">16dp</dimen>
@@ -24,15 +28,14 @@
     <dimen name="playback_controls_albumart_size">64dp</dimen>
     <dimen name="playback_controls_padding">8dp</dimen>
 
-    <!-- navigation drawer -->
-    <dimen name="drawer_item_icon_margin_end">32dp</dimen>
-    <dimen name="drawer_item_height">48dp</dimen>
-    <dimen name="drawer_item_horizontal_padding">16dp</dimen>
+    <!-- cards -->
+    <dimen name="margin_card">4dp</dimen>
 
-    <!-- media browser listview -->
+    <!-- media browser list -->
     <dimen name="media_item_height">72dp</dimen>
     <dimen name="media_item_icon_margin_start">12dp</dimen>
     <dimen name="media_item_text_margin_start">60dp</dimen>
+
     <!-- Margins for the ShowcaseView button -->
     <dimen name="button_margin">50dp</dimen>
 

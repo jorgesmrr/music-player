@@ -136,7 +136,7 @@ public class MainActivity extends BaseActivity {
                     mViewPager.setCurrentItem(3);
                     break;
                 default:
-                    startActivity(new Intent(this, PlaceholderActivity.class).putExtra(PlaceholderActivity.SAVED_MEDIA_ID, mediaId));
+                    startActivity(new Intent(this, MediaContainerActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId));
             }
     }
 
@@ -192,9 +192,7 @@ public class MainActivity extends BaseActivity {
                     return null;
             }
 
-            MediaBrowserFragment fragment = new MediaBrowserFragment();
-            fragment.setMediaId(mediaId);
-            return fragment;
+            return MediaBrowserFragment.newInstance(mediaId);
         }
 
         @Override
