@@ -16,7 +16,6 @@
 package com.example.android.uamp.ui;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +26,7 @@ import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -277,7 +277,6 @@ public class MediaBrowserFragment extends Fragment {
 
     private void updateTitle() {
         if (MediaIDHelper.MEDIA_ID_ROOT.equals(mMediaId)) {
-            mMediaFragmentListener.setToolbarTitle(null);
             return;
         }
 
@@ -306,13 +305,6 @@ public class MediaBrowserFragment extends Fragment {
                             ". Looking for ", mMediaId);
                         for (MediaBrowser.MediaItem item: children) {
                             LogHelper.d(TAG, "child ", item.getMediaId());
-                            if (item.getMediaId().equals(mMediaId)) {
-                                if (mMediaFragmentListener != null) {
-                                    mMediaFragmentListener.setToolbarTitle(
-                                        item.getDescription().getTitle());
-                                }
-                                return;
-                            }
                         }
                         mMediaFragmentListener.getMediaBrowser().unsubscribe(parentId);
                     }
@@ -363,7 +355,6 @@ public class MediaBrowserFragment extends Fragment {
 
     public static interface MediaFragmentListener extends MediaBrowserProvider {
         void onMediaItemSelected(MediaBrowser.MediaItem item);
-        void setToolbarTitle(CharSequence title);
     }
 
 }

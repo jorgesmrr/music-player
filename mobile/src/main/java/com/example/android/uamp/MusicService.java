@@ -421,7 +421,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 // when we get a onPlayFromMusicID call, so we can create the proper queue based
                 // on where the music was selected from (by artist, by genre, random, etc)
                 String hierarchyAwareMediaID = MediaIDHelper.createMediaID(
-                        track.getDescription().getMediaId(), MEDIA_ID_MUSICS_BY_GENRE);
+                        track.getDescription().getMediaId(), MEDIA_ID_MUSICS_ALL);
                 MediaMetadata trackCopy = new MediaMetadata.Builder(track)
                         .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
                         .build();

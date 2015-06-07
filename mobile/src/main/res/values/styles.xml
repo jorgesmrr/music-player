@@ -17,14 +17,17 @@
 <resources>
 
     <style name="UAmpAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowContentTransitions">true</item>
 
         <item name="colorPrimary">#ffff5722</item>
         <item name="colorPrimaryDark">#ffbf360c</item>
         <item name="colorAccent">#ffff5722</item>
+    </style>
+
+    <style name="UAmpAppTheme.Transluscent" parent="UAmpAppTheme">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
 
