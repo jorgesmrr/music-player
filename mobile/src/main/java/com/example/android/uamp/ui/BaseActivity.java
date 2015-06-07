@@ -17,6 +17,7 @@ package com.example.android.uamp.ui;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
@@ -78,6 +79,12 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        LogHelper.d(TAG, "onNewIntent, intent=" + intent);
+        initializeFromParams(null, intent);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         LogHelper.d(TAG, "Activity onStop");
@@ -92,9 +99,20 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
         return mMediaBrowser;
     }
 
-    protected void onMediaControllerConnected() {
-        // empty implementation, can be overridden by clients.
+    @Override
+    public void onMediaItemSelected(MediaBrowser.MediaItem item) {
+        LogHelper.d(TAG, "onMediaItemSelected, mediaId=" + item.getMediaId());
+        if (item.isPlayable()) {
+            getMediaController().getTransportControls().playFromMediaId(item.getMediaId(), null);
+        } else if (item.isBrowsable()) {
+            navigateToBrowser(item.getMediaId());
+        } else {
+            LogHelper.w(TAG, "Ignoring MediaItem that is neither browsable nor playable: ",
+                    "mediaId=", item.getMediaId());
+        }
     }
+
+    protected abstract void onMediaControllerConnected();
 
     protected void showPlaybackControls() {
         LogHelper.d(TAG, "showPlaybackControls");
@@ -199,4 +217,7 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
             }
         };
 
+    protected abstract void initializeFromParams(Bundle savedInstanceState, Intent intent);
+
+    protected abstract void navigateToBrowser(String mediaId);
 }

@@ -19,4 +19,5 @@ import android.media.browse.MediaBrowser;
 
 public interface MediaBrowserProvider {
     MediaBrowser getMediaBrowser();
+    void onMediaItemSelected(MediaBrowser.MediaItem item);
 }

@@ -228,7 +228,7 @@ public class TvBrowseFragment extends BrowseFragment {
             mMediaFragmentListener = (MediaFragmentListener) activity;
         } catch (ClassCastException ex) {
             LogHelper.e(TAG, "TVBrowseFragment can only be attached to an activity that " +
-                    "implements MediaFragmentListener", ex);
+                    "implements MediaSelectedListener", ex);
         }
     }
 

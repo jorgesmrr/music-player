@@ -18,7 +18,6 @@ package com.example.android.uamp.ui;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.media.browse.MediaBrowser;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
@@ -42,12 +41,9 @@ import java.util.List;
  * when it is created and connect/disconnect on start/stop. Thus, a MediaBrowser will be always
  * connected while this activity is running.
  */
-public class MusicPlayerActivity extends BaseActivity
-        implements MediaBrowserFragment.MediaFragmentListener {
+public class MainActivity extends BaseActivity {
 
-    private static final String TAG = LogHelper.makeLogTag(MusicPlayerActivity.class);
-    private static final String SAVED_MEDIA_ID = "com.example.android.uamp.MEDIA_ID";
-    private static final String FRAGMENT_TAG = "uamp_list_container";
+    private static final String TAG = LogHelper.makeLogTag(MainActivity.class);
 
     public static final String EXTRA_START_FULLSCREEN =
             "com.example.android.uamp.EXTRA_START_FULLSCREEN";
@@ -83,22 +79,9 @@ public class MusicPlayerActivity extends BaseActivity
     }
 
     @Override
-    public void onMediaItemSelected(MediaBrowser.MediaItem item) {
-        LogHelper.d(TAG, "onMediaItemSelected, mediaId=" + item.getMediaId());
-        if (item.isPlayable()) {
-            getMediaController().getTransportControls().playFromMediaId(item.getMediaId(), null);
-        } else if (item.isBrowsable()) {
-            navigateToBrowser(item.getMediaId());
-        } else {
-            LogHelper.w(TAG, "Ignoring MediaItem that is neither browsable nor playable: ",
-                    "mediaId=", item.getMediaId());
-        }
-    }
-
-    @Override
     protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         LogHelper.d(TAG, "onNewIntent, intent=" + intent);
-        initializeFromParams(null, intent);
         startFullScreenActivityIfNeeded(intent);
     }
 
@@ -113,8 +96,8 @@ public class MusicPlayerActivity extends BaseActivity
         }
     }
 
+    @Override
     protected void initializeFromParams(Bundle savedInstanceState, Intent intent) {
-        String mediaId = null;
         // check if we were started from a "Play XYZ" voice search. If so, we save the extras
         // (which contain the query details) in a parameter, so we can reuse it later, when the
         // MediaSession is connected.
@@ -123,16 +106,12 @@ public class MusicPlayerActivity extends BaseActivity
             mVoiceSearchParams = intent.getExtras();
             LogHelper.d(TAG, "Starting from voice search query=",
                     mVoiceSearchParams.getString(SearchManager.QUERY));
-        } else {
-            if (savedInstanceState != null) {
-                // If there is a saved media ID, use it
-                mediaId = savedInstanceState.getString(SAVED_MEDIA_ID);
-            }
         }
-        navigateToBrowser(mediaId);
+        navigateToBrowser(null);
     }
 
-    private void navigateToBrowser(String mediaId) {
+    @Override
+    protected void navigateToBrowser(String mediaId) {
         LogHelper.d(TAG, "navigateToBrowser, mediaId=" + mediaId);
 
         if (mAdapter == null) {
@@ -157,24 +136,7 @@ public class MusicPlayerActivity extends BaseActivity
                     mViewPager.setCurrentItem(3);
                     break;
                 default:
-                    //todo open activity sending mediaId
-                /*MediaBrowserFragment fragment = getBrowseFragment();
-
-                if (fragment == null || !TextUtils.equals(fragment.getMediaId(), mediaId)) {
-                    fragment = new MediaBrowserFragment();
-                    fragment.setMediaId(mediaId);
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                    transaction.setCustomAnimations(
-                            R.animator.slide_in_from_right, R.animator.slide_out_to_left,
-                            R.animator.slide_in_from_left, R.animator.slide_out_to_right);
-                    transaction.replace(R.id.container, fragment, FRAGMENT_TAG);
-                    // If this is not the top level media (root), we add it to the fragment back stack,
-                    // so that actionbar toggle and Back will work appropriately:
-                    if (mediaId != null) {
-                        transaction.addToBackStack(null);
-                    }
-                    transaction.commit();
-                }*/
+                    startActivity(new Intent(this, PlaceholderActivity.class).putExtra(PlaceholderActivity.SAVED_MEDIA_ID, mediaId));
             }
     }
 
