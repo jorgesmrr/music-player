@@ -43,4 +43,7 @@
     <!-- Margins for full screen activity-->
     <dimen name="text_view_margin">16dp</dimen>
     <dimen name="end_text_margin">16dp</dimen>
+
+    <!-- Animation -->
+    <dimen name="top_anim_height">84dp</dimen>
 </resources>

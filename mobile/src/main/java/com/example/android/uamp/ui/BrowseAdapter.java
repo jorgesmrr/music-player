@@ -26,11 +26,12 @@ import java.util.ArrayList;
  * An adapter for showing the list of browsed MediaItems
  * Created by Jorge on 07/06/2015.
  */
-public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemViewHolder> {
-    public static final int STATE_NONE = 0;
-    public static final int STATE_PLAYABLE = 1;
-    public static final int STATE_PAUSED = 2;
-    public static final int STATE_PLAYING = 3;
+public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    public static final int TYPE_NONE = 0;
+    public static final int TYPE_PLAYABLE = 1;
+    public static final int TYPE_PAUSED = 2;
+    public static final int TYPE_PLAYING = 3;
+    private static final int TYPE_PLACEHOLDER = 4;
 
     public static final int MEDIA_GENRE = 0;
     public static final int MEDIA_ARTIST = 1;
@@ -42,11 +43,17 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
     private ColorStateList mColorStatePlaying;
     private ColorStateList mColorStateNotPlaying;
     private Activity mActivity;
-    private final ArrayList<MediaBrowser.MediaItem> mMediaItems;
-    private final OnItemClickListener mListener;
-    private final int mMediaType;
+    private ArrayList<MediaBrowser.MediaItem> mMediaItems;
+    private OnItemClickListener mListener;
+    private int mMediaType;
+    private int mPlaceholderHeight;
 
-    public BrowseAdapter(Activity activity, String mediaId, OnItemClickListener listener) {
+    public BrowseAdapter(Activity activity, String mediaId, int placeholderHeight, OnItemClickListener listener) {
+        initialize(activity, mediaId, listener);
+        mPlaceholderHeight = placeholderHeight;
+    }
+
+    private void initialize(Activity activity, String mediaId, OnItemClickListener listener) {
         initializeColorStateLists(activity);
         mMediaItems = new ArrayList<>();
         mActivity = activity;
@@ -62,7 +69,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
     }
 
     @Override
-    public MediaItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layout;
         switch (mMediaType) {
             case MEDIA_ARTIST:
@@ -80,8 +87,8 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
         MediaItemViewHolder holder = new MediaItemViewHolder(itemView);
 
         switch (viewType) {
-            case STATE_NONE:
-                switch(mMediaType){
+            case TYPE_NONE:
+                switch (mMediaType) {
                     case MEDIA_GENRE:
                         holder.mImageView.setImageResource(R.drawable.ic_by_genre);
                         break;
@@ -91,13 +98,13 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
                 }
                 holder.mImageView.setVisibility(View.VISIBLE);
                 break;
-            case STATE_PLAYABLE:
+            case TYPE_PLAYABLE:
                 holder.mImageView.setImageDrawable(
                         mActivity.getDrawable(R.drawable.ic_play_arrow_black_36dp));
                 holder.mImageView.setImageTintList(mColorStateNotPlaying);
                 holder.mImageView.setVisibility(View.VISIBLE);
                 break;
-            case STATE_PLAYING:
+            case TYPE_PLAYING:
                 AnimationDrawable animation = (AnimationDrawable)
                         mActivity.getDrawable(R.drawable.ic_equalizer_white_36dp);
                 holder.mImageView.setImageDrawable(animation);
@@ -105,12 +112,15 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
                 holder.mImageView.setVisibility(View.VISIBLE);
                 animation.start();
                 break;
-            case STATE_PAUSED:
+            case TYPE_PAUSED:
                 holder.mImageView.setImageDrawable(
                         mActivity.getDrawable(R.drawable.ic_equalizer1_white_36dp));
                 holder.mImageView.setImageTintList(mColorStateNotPlaying);
                 holder.mImageView.setVisibility(View.VISIBLE);
                 break;
+            case TYPE_PLACEHOLDER:
+                return new PlaceHolder(LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.view_placeholder, parent, false));
             default:
                 holder.mImageView.setVisibility(View.GONE);
         }
@@ -119,23 +129,38 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
     }
 
     @Override
-    public void onBindViewHolder(MediaItemViewHolder holder, int position) {
-        MediaBrowser.MediaItem item = mMediaItems.get(position);
-        holder.mTitleView.setText(item.getDescription().getTitle());
-        holder.mDescriptionView.setText(item.getDescription().getSubtitle());
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof MediaItemViewHolder) {
+            MediaItemViewHolder mediaItemViewHolder = (MediaItemViewHolder) holder;
+
+            if (mPlaceholderHeight > 0)
+                position--;
+
+            MediaBrowser.MediaItem item = mMediaItems.get(position);
+            mediaItemViewHolder.mTitleView.setText(item.getDescription().getTitle());
+            mediaItemViewHolder.mDescriptionView.setText(item.getDescription().getSubtitle());
+        }
     }
 
     @Override
     public int getItemCount() {
-        return mMediaItems.size();
+        if (mPlaceholderHeight > 0)
+            return mMediaItems.size() + 1;
+        else return mMediaItems.size();
     }
 
     @Override
     public int getItemViewType(int position) {
+        if (mPlaceholderHeight > 0) {
+            if (position == 0)
+                return TYPE_PLACEHOLDER;
+            position--;
+        }
+
         MediaBrowser.MediaItem item = mMediaItems.get(position);
-        int state = STATE_NONE;
+        int state = TYPE_NONE;
         if (item.isPlayable()) {
-            state = STATE_PLAYABLE;
+            state = TYPE_PLAYABLE;
             MediaController controller = mActivity.getMediaController();
             if (controller != null && controller.getMetadata() != null) {
                 String currentPlaying = controller.getMetadata().getDescription().getMediaId();
@@ -144,10 +169,10 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
                 if (currentPlaying != null && currentPlaying.equals(musicId)) {
                     if (controller.getPlaybackState().getState() ==
                             PlaybackState.STATE_PLAYING) {
-                        state = STATE_PLAYING;
+                        state = TYPE_PLAYING;
                     } else if (controller.getPlaybackState().getState() !=
                             PlaybackState.STATE_ERROR) {
-                        state = STATE_PAUSED;
+                        state = TYPE_PAUSED;
                     }
                 }
             }
@@ -185,6 +210,17 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
 
     public interface OnItemClickListener {
         void onItemClick(MediaBrowser.MediaItem mediaItem, View sharedElement);
+    }
+
+    protected class PlaceHolder extends RecyclerView.ViewHolder {
+
+        public PlaceHolder(final View itemView) {
+            super(itemView);
+
+            RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) itemView.getLayoutParams();
+            params.height = mPlaceholderHeight;
+            itemView.setLayoutParams(params);
+        }
     }
 
     public class MediaItemViewHolder extends RecyclerView.ViewHolder {

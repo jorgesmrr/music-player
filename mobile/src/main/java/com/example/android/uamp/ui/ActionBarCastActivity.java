@@ -55,6 +55,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     private Toolbar mToolbar;
 
     private boolean mToolbarInitialized;
+    private int mStatusBarHeight;
 
     private int mItemToOpenWhenDrawerCloses = -1;
 
@@ -181,8 +182,10 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         }
         if (addPadding) {
             int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-            if (resourceId > 0)
-                mToolbar.setPadding(0, getResources().getDimensionPixelSize(resourceId), 0, 0);
+            if (resourceId > 0) {
+                mStatusBarHeight = getResources().getDimensionPixelSize(resourceId);
+                mToolbar.setPadding(0, mStatusBarHeight, 0, 0);
+            }
         }
         mToolbar.inflateMenu(R.menu.main);
         setSupportActionBar(mToolbar);
@@ -204,5 +207,9 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
                     .hideOnTouchOutside()
                     .build();
         }
+    }
+
+    public int getStatusBarHeight() {
+        return mStatusBarHeight;
     }
 }

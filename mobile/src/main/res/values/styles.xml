@@ -21,7 +21,7 @@
 
         <!-- specify enter and exit transitions -->
         <item name="android:windowEnterTransition">@transition/explode</item>
-        <item name="android:windowExitTransition">@transition/explode</item>
+        <item name="android:windowExitTransition">@null</item>
 
         <!-- specify shared element transitions -->
         <item name="android:windowSharedElementEnterTransition">
