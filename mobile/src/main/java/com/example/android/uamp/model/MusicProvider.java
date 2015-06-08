@@ -86,6 +86,10 @@ public class MusicProvider {
         mFavoriteTracks = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     }
 
+    public Album getAlbum(String id){
+        return mAlbumListById.get(id);
+    }
+
     /**
      * Get all music tracks
      */

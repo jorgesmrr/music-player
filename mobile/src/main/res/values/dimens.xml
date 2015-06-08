@@ -17,6 +17,7 @@
 <resources>
     <!-- general -->
     <dimen name="margin_view">8dp</dimen>
+    <dimen name="margin_screen">16dp</dimen>
     <dimen name="margin_h_list">0dp</dimen>
 
     <!-- error infobar -->

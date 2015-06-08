@@ -184,7 +184,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
     }
 
     public interface OnItemClickListener {
-        void onItemClick(MediaBrowser.MediaItem mediaItem);
+        void onItemClick(MediaBrowser.MediaItem mediaItem, View sharedElement);
     }
 
     public class MediaItemViewHolder extends RecyclerView.ViewHolder {
@@ -202,7 +202,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.MediaItemV
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mListener.onItemClick(mMediaItems.get(getAdapterPosition()));
+                    mListener.onItemClick(mMediaItems.get(getAdapterPosition()), mImageView);
                 }
             });
         }

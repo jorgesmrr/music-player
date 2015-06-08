@@ -124,7 +124,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_player);
-        initializeToolbar();
+        initializeToolbar(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
 

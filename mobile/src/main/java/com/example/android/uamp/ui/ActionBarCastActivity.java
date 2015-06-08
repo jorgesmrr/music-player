@@ -15,32 +15,20 @@
  */
 package com.example.android.uamp.ui;
 
-import android.app.ActivityOptions;
 import android.app.FragmentManager;
-import android.content.Intent;
-import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.PrefUtils;
-import com.example.android.uamp.utils.ResourceHelper;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
@@ -49,8 +37,8 @@ import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCa
 /**
  * Abstract activity with toolbar, navigation drawer and cast support. Needs to be extended by
  * any activity that wants to be shown as a top level activity.
- *
- * The requirements for a subclass is to call {@link #initializeToolbar()} on onCreate, after
+ * <p/>
+ * The requirements for a subclass is to call {@link #initializeToolbar(boolean)} on onCreate, after
  * setContentView() is called and have three mandatory layout elements:
  * a {@link android.support.v7.widget.Toolbar} with id 'toolbar',
  * a {@link android.support.v4.widget.DrawerLayout} with id 'drawerLayout' and
@@ -126,7 +114,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         super.onStart();
         if (!mToolbarInitialized) {
             throw new IllegalStateException("You must run super.initializeToolbar at " +
-                "the end of your onCreate method");
+                    "the end of your onCreate method");
         }
     }
 
@@ -185,11 +173,16 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         mToolbar.setTitle(titleId);
     }
 
-    protected void initializeToolbar() {
+    protected void initializeToolbar(boolean addPadding) {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         if (mToolbar == null) {
             throw new IllegalStateException("Layout is required to include a Toolbar with id " +
-                "'toolbar'");
+                    "'toolbar'");
+        }
+        if (addPadding) {
+            int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+            if (resourceId > 0)
+                mToolbar.setPadding(0, getResources().getDimensionPixelSize(resourceId), 0, 0);
         }
         mToolbar.inflateMenu(R.menu.main);
         setSupportActionBar(mToolbar);

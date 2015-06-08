@@ -402,12 +402,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
 
         } else if (MEDIA_ID_MUSICS_BY_ALBUM.equals(parentMediaId)) {
             LogHelper.d(TAG, "OnLoadChildren.ALBUMS");
-            for (String album : mMusicProvider.getAlbums()) {
+            for (String albumId : mMusicProvider.getAlbums()) {
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
-                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_MUSICS_BY_ALBUM, album))
-                                .setTitle(album)
-                                .setSubtitle(getString(R.string.browse_musics_by_album_subtitle, album))
+                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_MUSICS_BY_ALBUM, albumId))
+                                .setTitle(mMusicProvider.getAlbum(albumId).getTitle())
+                                .setSubtitle(getString(R.string.browse_musics_by_album_subtitle, albumId))
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
                 mediaItems.add(item);
@@ -449,12 +449,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         } else if (parentMediaId.startsWith(MEDIA_ID_ALBUMS_BY_ARTIST)) {
             String artist = MediaIDHelper.getHierarchy(parentMediaId)[1];
             LogHelper.d(TAG, "OnLoadChildren.ALBUMS_BY_ARTIST  artist=", artist);
-            for (String album : mMusicProvider.getAlbumsByArtist(artist)) {
+            for (String albumId : mMusicProvider.getAlbumsByArtist(artist)) {
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
-                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_MUSICS_BY_ALBUM, album))
-                                .setTitle(album)
-                                .setSubtitle(getString(R.string.browse_musics_by_album_subtitle, album))
+                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_MUSICS_BY_ALBUM, albumId))
+                                .setTitle(mMusicProvider.getAlbum(albumId).getTitle())
+                                .setSubtitle(getString(R.string.browse_musics_by_album_subtitle, albumId))
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
                 mediaItems.add(item);

@@ -57,7 +57,7 @@ public class MediaBrowserFragment extends Fragment {
 
     private BrowseAdapter mBrowserAdapter;
     private String mMediaId;
-    private MediaBrowserProvider mMediaSelectedListener;
+    private MediaBrowserListener mMediaFragmentListener;
     private View mErrorView;
     private TextView mErrorMessage;
     private BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
@@ -139,7 +139,7 @@ public class MediaBrowserFragment extends Fragment {
         super.onAttach(activity);
         // If used on an activity that doesn't implement MediaSelectedListener, it
         // will throw an exception as expected:
-        mMediaSelectedListener = (MediaBrowserProvider) activity;
+        mMediaFragmentListener = (MediaBrowserListener) activity;
     }
 
     @Override
@@ -155,9 +155,9 @@ public class MediaBrowserFragment extends Fragment {
 
         mBrowserAdapter = new BrowseAdapter(getActivity(), mMediaId, new BrowseAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(MediaBrowser.MediaItem mediaItem) {
+            public void onItemClick(MediaBrowser.MediaItem mediaItem, View sharedElement) {
                 checkForUserVisibleErrors(false);
-                mMediaSelectedListener.onMediaItemSelected(mediaItem);
+                mMediaFragmentListener.onMediaItemSelected(mediaItem, sharedElement);
             }
         });
 
@@ -173,7 +173,7 @@ public class MediaBrowserFragment extends Fragment {
         super.onStart();
 
         // fetch browsing information to fill the listview:
-        MediaBrowser mediaBrowser = mMediaSelectedListener.getMediaBrowser();
+        MediaBrowser mediaBrowser = mMediaFragmentListener.getMediaBrowser();
 
         LogHelper.d(TAG, "fragment.onStart, mediaId=", mMediaId,
                 "  onConnected=" + mediaBrowser.isConnected());
@@ -190,7 +190,7 @@ public class MediaBrowserFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        MediaBrowser mediaBrowser = mMediaSelectedListener.getMediaBrowser();
+        MediaBrowser mediaBrowser = mMediaFragmentListener.getMediaBrowser();
         if (mediaBrowser != null && mediaBrowser.isConnected() && mMediaId != null) {
             mediaBrowser.unsubscribe(mMediaId);
         }
@@ -203,7 +203,7 @@ public class MediaBrowserFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mMediaSelectedListener = null;
+        mMediaFragmentListener = null;
     }
 
     public String getMediaId() {
@@ -229,7 +229,7 @@ public class MediaBrowserFragment extends Fragment {
         }
 
         if (mMediaId == null) {
-            mMediaId = mMediaSelectedListener.getMediaBrowser().getRoot();
+            mMediaId = mMediaFragmentListener.getMediaBrowser().getRoot();
         }
         updateTitle();
 
@@ -242,9 +242,9 @@ public class MediaBrowserFragment extends Fragment {
         // subscriber or not. Currently this only happens if the mediaID has no previous
         // subscriber or if the media content changes on the service side, so we need to
         // unsubscribe first.
-        mMediaSelectedListener.getMediaBrowser().unsubscribe(mMediaId);
+        mMediaFragmentListener.getMediaBrowser().unsubscribe(mMediaId);
 
-        mMediaSelectedListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
+        mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
 
         // Add MediaController callback so we can redraw the list when metadata changes:
         if (getActivity().getMediaController() != null) {
@@ -293,7 +293,7 @@ public class MediaBrowserFragment extends Fragment {
         // is being worked out in the platform and should be available soon.
         LogHelper.d(TAG, "on updateTitle: mediaId=", mMediaId, " parentID=", parentId);
         if (parentId != null) {
-            MediaBrowser mediaBrowser = mMediaSelectedListener.getMediaBrowser();
+            MediaBrowser mediaBrowser = mMediaFragmentListener.getMediaBrowser();
             LogHelper.d(TAG, "on updateTitle: mediaBrowser is ",
                     mediaBrowser==null?"null":("not null, connected="+mediaBrowser.isConnected()));
             if (mediaBrowser != null && mediaBrowser.isConnected()) {
@@ -309,8 +309,15 @@ public class MediaBrowserFragment extends Fragment {
                             ". Looking for ", mMediaId);
                         for (MediaBrowser.MediaItem item: children) {
                             LogHelper.d(TAG, "child ", item.getMediaId());
+                            if (item.getMediaId().equals(mMediaId)) {
+                                if (mMediaFragmentListener != null) {
+                                    mMediaFragmentListener.setMediaTitle(
+                                            item.getDescription().getTitle());
+                                }
+                                return;
+                            }
                         }
-                        mMediaSelectedListener.getMediaBrowser().unsubscribe(parentId);
+                        mMediaFragmentListener.getMediaBrowser().unsubscribe(parentId);
                     }
 
                     @Override
@@ -321,6 +328,11 @@ public class MediaBrowserFragment extends Fragment {
                 });
             }
         }
+    }
+
+    public interface MediaBrowserListener extends MediaBrowserProvider {
+        void onMediaItemSelected(MediaBrowser.MediaItem item, View sharedElement);
+        void setMediaTitle(CharSequence title);
     }
 
 }

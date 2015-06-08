@@ -25,6 +25,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.view.View;
 
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
@@ -35,7 +36,7 @@ import com.example.android.uamp.utils.ResourceHelper;
 /**
  * Base activity for activities that need to show a playback control fragment when media is playing.
  */
-public abstract class BaseActivity extends ActionBarCastActivity implements MediaBrowserProvider {
+public abstract class BaseActivity extends ActionBarCastActivity implements MediaBrowserFragment.MediaBrowserListener {
 
     private static final String TAG = LogHelper.makeLogTag(BaseActivity.class);
 
@@ -100,12 +101,14 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
     }
 
     @Override
-    public void onMediaItemSelected(MediaBrowser.MediaItem item) {
+    public void onMediaItemSelected(MediaBrowser.MediaItem item, View sharedElement) {
         LogHelper.d(TAG, "onMediaItemSelected, mediaId=" + item.getMediaId());
         if (item.isPlayable()) {
             getMediaController().getTransportControls().playFromMediaId(item.getMediaId(), null);
         } else if (item.isBrowsable()) {
-            navigateToBrowser(item.getMediaId());
+            //todo randomize
+            sharedElement.setTransitionName("image");
+            navigateToBrowser(item.getMediaId(), sharedElement);
         } else {
             LogHelper.w(TAG, "Ignoring MediaItem that is neither browsable nor playable: ",
                     "mediaId=", item.getMediaId());
@@ -219,5 +222,5 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
 
     protected abstract void initializeFromParams(Bundle savedInstanceState, Intent intent);
 
-    protected abstract void navigateToBrowser(String mediaId);
+    protected abstract void navigateToBrowser(String mediaId, View sharedElement);
 }

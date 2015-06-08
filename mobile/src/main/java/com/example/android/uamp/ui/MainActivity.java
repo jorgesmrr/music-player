@@ -15,6 +15,7 @@
  */
 package com.example.android.uamp.ui;
 
+import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.SparseArray;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.uamp.R;
@@ -69,7 +71,7 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_player);
         mViewPager = (ViewPager) findViewById(R.id.container);
 
-        initializeToolbar();
+        initializeToolbar(false);
         initializeFromParams(savedInstanceState, getIntent());
 
         // Only check if a full screen player is needed on the first time:
@@ -107,11 +109,11 @@ public class MainActivity extends BaseActivity {
             LogHelper.d(TAG, "Starting from voice search query=",
                     mVoiceSearchParams.getString(SearchManager.QUERY));
         }
-        navigateToBrowser(null);
+        navigateToBrowser(null, null);
     }
 
     @Override
-    protected void navigateToBrowser(String mediaId) {
+    protected void navigateToBrowser(String mediaId, View sharedElement) {
         LogHelper.d(TAG, "navigateToBrowser, mediaId=" + mediaId);
 
         if (mAdapter == null) {
@@ -136,7 +138,9 @@ public class MainActivity extends BaseActivity {
                     mViewPager.setCurrentItem(3);
                     break;
                 default:
-                    startActivity(new Intent(this, MediaContainerActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId));
+                    Intent intent = new Intent(this, MediaContainerActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
+                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
+                    startActivity(intent, options.toBundle());
             }
     }
 
@@ -156,6 +160,11 @@ public class MainActivity extends BaseActivity {
             if (fragment != null)
                 ((MediaBrowserFragment) fragment).onConnected();
         }
+    }
+
+    @Override
+    public void setMediaTitle(CharSequence title) {
+        // No need to show the media title
     }
 
     private static class LibraryAdapter extends FragmentPagerAdapter {

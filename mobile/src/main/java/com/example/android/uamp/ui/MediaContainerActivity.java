@@ -1,7 +1,10 @@
 package com.example.android.uamp.ui;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
@@ -17,6 +20,7 @@ public class MediaContainerActivity extends BaseActivity {
     public static final String BROWSE_FRAG_TAG = "browse_frag";
 
     private String mMediaId;
+    private TextView mTitleView;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -31,7 +35,9 @@ public class MediaContainerActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media);
 
-        initializeToolbar();
+        mTitleView = (TextView) findViewById(R.id.title);
+
+        initializeToolbar(true);
         initializeFromParams(savedInstanceState, getIntent());
     }
 
@@ -60,16 +66,24 @@ public class MediaContainerActivity extends BaseActivity {
         } else {
             mMediaId = getMediaId();
         }
-        navigateToBrowser(mMediaId);
+        navigateToBrowser(mMediaId, null);
     }
 
     @Override
-    protected void navigateToBrowser(String mediaId) {
+    protected void navigateToBrowser(String mediaId, View sharedElement) {
         if (mediaId.equals(mMediaId))
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, MediaBrowserFragment.newInstance(mediaId), BROWSE_FRAG_TAG)
                     .commit();
-        else
-            startActivity(new Intent(this, MediaContainerActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId));
+        else {
+            Intent intent = new Intent(this, MediaContainerActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
+            startActivity(intent, options.toBundle());
+        }
+    }
+
+    @Override
+    public void setMediaTitle(CharSequence title) {
+        mTitleView.setText(title);
     }
 }

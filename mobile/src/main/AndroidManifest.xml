@@ -67,7 +67,8 @@
         <!-- Media activity for phone UI -->
         <activity
             android:name=".ui.MediaContainerActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:theme="@style/UAmpAppTheme.Transluscent">
         </activity>
 
         <!-- Proxy activity that opens either the NowPlaying TV or the mobile UI, depending on
