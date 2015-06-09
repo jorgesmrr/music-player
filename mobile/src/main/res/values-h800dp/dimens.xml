@@ -15,6 +15,6 @@
   limitations under the License.
   -->
 <resources>
-    <!-- media browser listview -->
-    <dimen name="media_item_height">96dp</dimen>
+    <!-- list -->
+    <dimen name="list_item_height">96dp</dimen>
 </resources>

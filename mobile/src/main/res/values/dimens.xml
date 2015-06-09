@@ -20,22 +20,26 @@
     <dimen name="margin_screen">16dp</dimen>
     <dimen name="margin_h_list">0dp</dimen>
 
+    <dimen name="touchable">48dp</dimen>
+
+    <dimen name="icon_size">48dp</dimen>
+    <dimen name="icon_padding">12dp</dimen>
+
     <!-- error infobar -->
     <dimen name="error_horizontal_padding">4dp</dimen>
     <dimen name="error_vertical_padding">16dp</dimen>
 
     <!-- playback controls -->
-    <dimen name="playback_controls_albumart_horizontal_margin">8dp</dimen>
-    <dimen name="playback_controls_albumart_size">64dp</dimen>
-    <dimen name="playback_controls_padding">8dp</dimen>
+    <dimen name="playback_controls_height">64dp</dimen>
 
     <!-- cards -->
     <dimen name="margin_card">4dp</dimen>
 
-    <!-- media browser list -->
-    <dimen name="media_item_height">72dp</dimen>
-    <dimen name="media_item_icon_margin_start">12dp</dimen>
-    <dimen name="media_item_text_margin_start">60dp</dimen>
+    <!-- list -->
+    <dimen name="list_item_height">72dp</dimen>
+    <dimen name="list_item_icon_margin_start">16dp</dimen>
+    <dimen name="list_item_text_margin_start">72dp</dimen>
+    <dimen name="list_item_icon_width">40dp</dimen>
 
     <!-- Margins for the ShowcaseView button -->
     <dimen name="button_margin">50dp</dimen>

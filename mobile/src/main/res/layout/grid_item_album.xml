@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/margin_card"
-    android:background="?selectableItemBackground">
+    android:foreground="?selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,38 +13,38 @@
         android:orientation="vertical">
 
         <com.example.android.uamp.ui.SquaredImageView
-            android:id="@+id/play_eq"
+            android:id="@+id/icon"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:src="@drawable/ic_play_arrow_black_36dp"
             android:scaleType="centerCrop"
-            app:measure_with="width"/>
+            android:src="@drawable/placeholder"
+            app:measure_with="width" />
 
         <TextView
             android:id="@+id/title"
-            tools:text="Title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_view"
-            android:layout_marginRight="@dimen/margin_view"
             android:layout_marginLeft="@dimen/margin_view"
-            android:maxLines="1"
+            android:layout_marginRight="@dimen/margin_view"
+            android:layout_marginTop="@dimen/margin_view"
             android:ellipsize="end"
+            android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorPrimary"/>
+            android:textColor="?android:attr/textColorPrimary"
+            tools:text="Title" />
 
         <TextView
-            android:id="@+id/description"
-            tools:text="Subtitle"
+            android:id="@+id/subtitle"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/margin_view"
-            android:layout_marginLeft="@dimen/margin_view"
             android:layout_marginBottom="@dimen/margin_view"
-            android:maxLines="1"
+            android:layout_marginLeft="@dimen/margin_view"
+            android:layout_marginRight="@dimen/margin_view"
             android:ellipsize="end"
+            android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorSecondary"/>
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="Subtitle" />
 
     </LinearLayout>
 

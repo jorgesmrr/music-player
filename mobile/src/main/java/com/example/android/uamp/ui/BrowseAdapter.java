@@ -74,11 +74,13 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         switch (mMediaType) {
             case MEDIA_ARTIST:
             case MEDIA_ALBUM:
-                layout = R.layout.media_grid_item;
+                layout = R.layout.grid_item_album;
                 break;
             case MEDIA_GENRE:
+                layout = R.layout.list_item_simple_icon;
+                break;
             default:
-                layout = R.layout.media_list_item;
+                layout = R.layout.list_item_song;
                 break;
         }
 
@@ -92,9 +94,6 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     case MEDIA_GENRE:
                         holder.mImageView.setImageResource(R.drawable.ic_by_genre);
                         break;
-                    case MEDIA_ARTIST:
-                    case MEDIA_ALBUM:
-                        holder.mImageView.setImageResource(R.drawable.placeholder);
                 }
                 holder.mImageView.setVisibility(View.VISIBLE);
                 break;
@@ -138,7 +137,9 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             MediaBrowser.MediaItem item = mMediaItems.get(position);
             mediaItemViewHolder.mTitleView.setText(item.getDescription().getTitle());
-            mediaItemViewHolder.mDescriptionView.setText(item.getDescription().getSubtitle());
+
+            if (mMediaType != MEDIA_GENRE)
+                mediaItemViewHolder.mSubtitleView.setText(item.getDescription().getSubtitle());
         }
     }
 
@@ -227,13 +228,15 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         ImageView mImageView;
         TextView mTitleView;
-        TextView mDescriptionView;
+        TextView mSubtitleView;
+        View mOverflowView;
 
         public MediaItemViewHolder(View itemView) {
             super(itemView);
-            mImageView = (ImageView) itemView.findViewById(R.id.play_eq);
+            mImageView = (ImageView) itemView.findViewById(R.id.icon);
             mTitleView = (TextView) itemView.findViewById(R.id.title);
-            mDescriptionView = (TextView) itemView.findViewById(R.id.description);
+            mSubtitleView = (TextView) itemView.findViewById(R.id.subtitle);
+            mOverflowView = itemView.findViewById(R.id.overflow);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -241,6 +244,14 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     mListener.onItemClick(mMediaItems.get(getAdapterPosition()), mImageView);
                 }
             });
+
+            if (mOverflowView != null)
+                mOverflowView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
         }
     }
 }
