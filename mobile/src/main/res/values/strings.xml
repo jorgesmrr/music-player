@@ -58,4 +58,10 @@
     <string name="no_search_results">No search results.</string>
     <string name="loading">Loading…</string>
     <string name="media_route_menu_title">Play on…</string>
+
+    <!-- Anim -->
+    <string name="drawable_vector_pause_left" translatable="false">M9,8 l10,0 0,32 -10,0 z</string>
+    <string name="drawable_vector_pause_right" translatable="false">M27,8 l10,0 0,32 -10,0 z</string>
+    <string name="drawable_vector_resume_left" translatable="false">M24,10 l0,0 0,28 -16,0 z</string>
+    <string name="drawable_vector_resume_right" translatable="false">M24,10 l0,0 16,28 -16,0 z</string>
 </resources>

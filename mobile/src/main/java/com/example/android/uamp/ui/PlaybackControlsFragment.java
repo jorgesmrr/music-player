@@ -207,10 +207,9 @@ public class PlaybackControlsFragment extends Fragment {
         }
 
         if (enablePlay) {
-            mPlayPause.setImageDrawable(
-                    getActivity().getDrawable(R.drawable.ic_play_arrow_black_36dp));
+            mPlayPause.setSelected(false);
         } else {
-            mPlayPause.setImageDrawable(getActivity().getDrawable(R.drawable.ic_pause_black_36dp));
+            mPlayPause.setSelected(true);
         }
 
         MediaController controller = getActivity().getMediaController();

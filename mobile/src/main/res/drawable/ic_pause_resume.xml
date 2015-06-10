@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:constantSize="true">
+
+    <item
+        android:id="@+id/action_pause_state"
+        android:drawable="@drawable/ic_pause"
+        android:state_selected="true" />
+
+    <item
+        android:id="@+id/action_resume_state"
+        android:drawable="@drawable/ic_resume" />
+
+    <transition
+        android:drawable="@drawable/ic_pause_to_ic_resume"
+        android:fromId="@id/action_pause_state"
+        android:toId="@id/action_resume_state" />
+
+    <transition
+        android:drawable="@drawable/ic_resume_to_ic_pause"
+        android:fromId="@id/action_resume_state"
+        android:toId="@id/action_pause_state" />
+
+</animated-selector>

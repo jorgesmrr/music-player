@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/art"
-            android:background="?colorPrimary"
+            android:background="?colorPrimaryDark"
             android:orientation="vertical"
             android:paddingBottom="@dimen/margin_screen"
             android:paddingLeft="@dimen/margin_screen"
@@ -65,7 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/top_anim_height"
             android:layout_above="@+id/bar"
-            android:background="?colorPrimary"
+            android:background="?colorPrimaryDark"
             android:visibility="invisible" />
 
     </RelativeLayout>

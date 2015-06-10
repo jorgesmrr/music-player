@@ -56,6 +56,9 @@ public class MediaContainerActivity extends BaseActivity {
         mIsHeaderFillShown = false;
 
         initializeToolbar(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("");
+
         mMinHeaderTranslation = getStatusBarHeight();
 
         // Find views
