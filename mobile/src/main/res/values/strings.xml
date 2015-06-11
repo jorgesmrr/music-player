@@ -19,17 +19,12 @@
     <string name="app_name">Universal Music Player</string>
     <string name="favorite">Favorite</string>
     <string name="error_no_metadata">Unable to retrieve metadata.</string>
-    <string name="browse_genres">Genres</string>
-    <string name="browse_genre_subtitle">Songs by genre</string>
     <string name="browse_artists">Artists</string>
     <string name="browse_artists_subtitle">Songs by artist</string>
-    <string name="browse_albums">Albums</string>
+    <string name="albums">Albums</string>
     <string name="browse_albums_subtitle">Songs by album</string>
-    <string name="browse_songs">Songs</string>
+    <string name="songs">Songs</string>
     <string name="browse_songs_subtitle">All songs</string>
-    <string name="browse_musics_by_genre_subtitle">%1$s songs</string>
-    <string name="browse_musics_by_album_subtitle">%1$s songs</string>
-    <string name="browse_musics_by_artist_subtitle">%1$s songs</string>
     <string name="random_queue_title">Random music</string>
     <string name="error_no_connection">Cannot connect to server. Please, check your Internet connectivity.</string>
     <string name="error_loading_media">Error Loading Media</string>
@@ -58,6 +53,16 @@
     <string name="no_search_results">No search results.</string>
     <string name="loading">Loading…</string>
     <string name="media_route_menu_title">Play on…</string>
+
+    <!-- Plurals -->
+    <plurals name="n_songs">
+        <item quantity="one">%d song</item>
+        <item quantity="other">%d songs</item>
+    </plurals>
+    <plurals name="n_albums">
+        <item quantity="one">%d album</item>
+        <item quantity="other">%d albums</item>
+    </plurals>
 
     <!-- Anim -->
     <string name="drawable_vector_pause_left" translatable="false">M9,8 l10,0 0,32 -10,0 z</string>

@@ -21,6 +21,8 @@ import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
 
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ALBUM;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ARTIST;
@@ -35,6 +37,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public static final int TYPE_PAUSED = 2;
     public static final int TYPE_PLAYING = 3;
     private static final int TYPE_PLACEHOLDER = 4;
+    private static final int TYPE_HEADER = 5;
 
     public static final int MEDIA_ARTIST = 1;
     public static final int MEDIA_ALBUM = 2;
@@ -47,6 +50,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private ColorStateList mColorStateNotPlaying;
     private Activity mActivity;
     private ArrayList<MediaBrowser.MediaItem> mMediaItems;
+    private final Set<Integer> mHeadersPositions;
     private OnItemClickListener mListener;
     private int mMediaType;
     private int mPlaceholderHeight;
@@ -54,6 +58,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public BrowseAdapter(Activity activity, String mediaId, int placeholderHeight, OnItemClickListener listener) {
         initializeColorStateLists(activity);
         mMediaItems = new ArrayList<>();
+        mHeadersPositions = new TreeSet<>();
         mActivity = activity;
         mListener = listener;
         if (mediaId.equals(MEDIA_ID_BY_ARTIST))
@@ -69,54 +74,56 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        int layout;
-        if (mMediaType == MEDIA_ALBUM || mMediaType == MEDIA_ARTIST)
-            layout = R.layout.grid_item_album;
-        else
-            layout = R.layout.list_item_song;
+        if (viewType == TYPE_PLACEHOLDER)
+            return new PlaceHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.view_placeholder, parent, false));
+        else if (viewType == TYPE_HEADER) {
+            return new HeaderHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.list_header, parent, false));
+        } else {
+            int layout;
+            if (mMediaType == MEDIA_ALBUM || mMediaType == MEDIA_ARTIST)
+                layout = R.layout.grid_item_album;
+            else if (mMediaType == MEDIA_ALBUMS_SONGS && viewType == TYPE_NONE)
+                layout = R.layout.list_item_album;
+            else
+                layout = R.layout.list_item_song;
 
-        View itemView = LayoutInflater.from(mActivity)
-                .inflate(layout, parent, false);
-        MediaItemViewHolder holder = new MediaItemViewHolder(itemView);
+            View itemView = LayoutInflater.from(mActivity)
+                    .inflate(layout, parent, false);
+            MediaItemViewHolder holder = new MediaItemViewHolder(itemView);
 
-        switch (viewType) {
-            case TYPE_NONE:
-                switch (mMediaType) {
-                    case MEDIA_ARTIST:
-                    case MEDIA_ALBUM:
-                        holder.mImageView.setImageResource(R.drawable.placeholder);
-                        break;
-                }
-                holder.mImageView.setVisibility(View.VISIBLE);
-                break;
-            case TYPE_PLAYABLE:
-                holder.mImageView.setImageDrawable(
-                        mActivity.getDrawable(R.drawable.ic_play_arrow_black_36dp));
-                holder.mImageView.setImageTintList(mColorStateNotPlaying);
-                holder.mImageView.setVisibility(View.VISIBLE);
-                break;
-            case TYPE_PLAYING:
-                AnimationDrawable animation = (AnimationDrawable)
-                        mActivity.getDrawable(R.drawable.ic_equalizer_white_36dp);
-                holder.mImageView.setImageDrawable(animation);
-                holder.mImageView.setImageTintList(mColorStatePlaying);
-                holder.mImageView.setVisibility(View.VISIBLE);
-                animation.start();
-                break;
-            case TYPE_PAUSED:
-                holder.mImageView.setImageDrawable(
-                        mActivity.getDrawable(R.drawable.ic_equalizer1_white_36dp));
-                holder.mImageView.setImageTintList(mColorStateNotPlaying);
-                holder.mImageView.setVisibility(View.VISIBLE);
-                break;
-            case TYPE_PLACEHOLDER:
-                return new PlaceHolder(LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.view_placeholder, parent, false));
-            default:
-                holder.mImageView.setVisibility(View.GONE);
+            switch (viewType) {
+                case TYPE_NONE:
+                    switch (mMediaType) {
+                        case MEDIA_ARTIST:
+                        case MEDIA_ALBUM:
+                        case MEDIA_ALBUMS_SONGS:
+                            holder.mImageView.setImageResource(R.drawable.placeholder);
+                            break;
+                    }
+                    break;
+                case TYPE_PLAYABLE:
+                    holder.mImageView.setImageDrawable(
+                            mActivity.getDrawable(R.drawable.ic_play_arrow_black_36dp));
+                    holder.mImageView.setImageTintList(mColorStateNotPlaying);
+                    break;
+                case TYPE_PLAYING:
+                    AnimationDrawable animation = (AnimationDrawable)
+                            mActivity.getDrawable(R.drawable.ic_equalizer_white_36dp);
+                    holder.mImageView.setImageDrawable(animation);
+                    holder.mImageView.setImageTintList(mColorStatePlaying);
+                    animation.start();
+                    break;
+                case TYPE_PAUSED:
+                    holder.mImageView.setImageDrawable(
+                            mActivity.getDrawable(R.drawable.ic_equalizer1_white_36dp));
+                    holder.mImageView.setImageTintList(mColorStateNotPlaying);
+                    break;
+            }
+
+            return holder;
         }
-
-        return holder;
     }
 
     @Override
@@ -124,33 +131,47 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (holder instanceof MediaItemViewHolder) {
             MediaItemViewHolder mediaItemViewHolder = (MediaItemViewHolder) holder;
 
-            if (mPlaceholderHeight > 0)
-                position--;
-
-            MediaBrowser.MediaItem item = mMediaItems.get(position);
+            MediaBrowser.MediaItem item = mMediaItems.get(getMediaItemIndex(position));
             mediaItemViewHolder.mTitleView.setText(item.getDescription().getTitle());
+            mediaItemViewHolder.mSubtitleView.setText(item.getDescription().getSubtitle());
+        } else if (holder instanceof HeaderHolder) {
+            String text;
+            if (mMediaItems.get(getMediaItemIndex(position + 1)).isPlayable())
+                text = holder.itemView.getContext().getString(R.string.songs);
+            else
+                text = holder.itemView.getContext().getString(R.string.albums);
+
+            ((TextView) ((HeaderHolder) holder).itemView.findViewById(R.id.text)).setText(text);
         }
     }
 
     @Override
     public int getItemCount() {
-        int count = 0;
+        int mediaItemsCount = mMediaItems.size();
+        if (mediaItemsCount == 0)
+            return 0;
+
+        int count = mediaItemsCount;
         if (mPlaceholderHeight > 0)
             count++;
-        // if(mMediaType != MEDIA_ALBUMS_SONGS)
-            count += mMediaItems.size();
+        if (mMediaType == MEDIA_ALBUMS_SONGS && !mMediaItems.isEmpty()) {
+            count++;
+            if (mMediaItems.get(0).isPlayable()
+                    != mMediaItems.get(mediaItemsCount - 1).isPlayable())
+                count++;
+        }
         return count;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (mPlaceholderHeight > 0) {
-            if (position == 0)
-                return TYPE_PLACEHOLDER;
-            position--;
-        }
+        if (mPlaceholderHeight > 0 && position == 0)
+            return TYPE_PLACEHOLDER;
 
-        MediaBrowser.MediaItem item = mMediaItems.get(position);
+        if (mHeadersPositions.contains(position))
+            return TYPE_HEADER;
+
+        MediaBrowser.MediaItem item = mMediaItems.get(getMediaItemIndex(position));
         int state = TYPE_NONE;
         if (item.isPlayable()) {
             state = TYPE_PLAYABLE;
@@ -180,6 +201,19 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 R.color.media_item_icon_playing));
     }
 
+    private int getMediaItemIndex(int position) {
+        int index = position;
+        if (mPlaceholderHeight > 0)
+            index--;
+        if (mMediaType == MEDIA_ALBUMS_SONGS) {
+            for (Integer headerPosition : mHeadersPositions)
+                if (headerPosition >= position)
+                    break;
+                else index--;
+        }
+        return index;
+    }
+
     public RecyclerView.LayoutManager getSuitableLayoutManager(Activity activity) {
         switch (mMediaType) {
             case MEDIA_ARTIST:
@@ -191,12 +225,24 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     public void add(MediaBrowser.MediaItem mediaItem) {
-        mMediaItems.add(mediaItem);
-        notifyItemInserted(mMediaItems.size() - 1);
+        int currentSize = mMediaItems.size();
+        if (mMediaType == MEDIA_ALBUMS_SONGS) {
+            if (mMediaItems.isEmpty() || mMediaItems.get(currentSize - 1).isPlayable()
+                    != mediaItem.isPlayable()) {
+                if (mPlaceholderHeight > 0)
+                    mHeadersPositions.add(currentSize + mHeadersPositions.size() + 1);
+                else
+                    mHeadersPositions.add(currentSize + mHeadersPositions.size());
+            }
+            mMediaItems.add(mediaItem);
+        } else {
+            mMediaItems.add(mediaItem);
+        }
     }
 
     public void clear() {
         mMediaItems.clear();
+        mHeadersPositions.clear();
         notifyDataSetChanged();
     }
 
@@ -212,6 +258,13 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) itemView.getLayoutParams();
             params.height = mPlaceholderHeight;
             itemView.setLayoutParams(params);
+        }
+    }
+
+    protected class HeaderHolder extends RecyclerView.ViewHolder {
+
+        public HeaderHolder(final View itemView) {
+            super(itemView);
         }
     }
 
@@ -232,7 +285,8 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mListener.onItemClick(mMediaItems.get(getAdapterPosition()), mImageView);
+                    int index = getMediaItemIndex(getAdapterPosition());
+                    mListener.onItemClick(mMediaItems.get(index), mImageView);
                 }
             });
 

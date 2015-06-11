@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/list_item_height"
@@ -9,13 +10,9 @@
         android:id="@+id/icon"
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
-        android:padding="@dimen/icon_padding"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/list_item_icon_margin_start"
-        android:src="@drawable/ic_play_arrow_black_36dp"
-        android:tint="@color/media_item_icon_not_playing"
-        android:tintMode="src_in" />
+        android:layout_marginStart="@dimen/list_item_icon_margin_start" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +20,6 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/list_item_text_margin_start"
-        android:layout_toStartOf="@+id/duration"
         android:orientation="vertical">
 
         <TextView
@@ -47,29 +43,5 @@
             tools:text="Subtitle" />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/duration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/margin_view"
-        android:layout_toStartOf="@+id/overflow"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:text="03:25"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:attr/textColorSecondary"
-        tools:text="Title" />
-
-    <ImageView
-        android:id="@+id/overflow"
-        android:layout_width="@dimen/icon_size"
-        android:layout_height="@dimen/icon_size"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:background="?selectableItemBackgroundBorderless"
-        android:padding="@dimen/icon_padding"
-        android:src="@drawable/ic_more_vert_grey600_24dp" />
 
 </RelativeLayout>

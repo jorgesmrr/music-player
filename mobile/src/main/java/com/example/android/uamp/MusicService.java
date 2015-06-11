@@ -333,7 +333,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         LogHelper.d(TAG, "OnLoadChildren: parentMediaId=", parentMediaId);
 
         List<MediaBrowser.MediaItem> mediaItems = new ArrayList<>();
-
+        //todo mudar icones
         if (MEDIA_ID_ROOT.equals(parentMediaId)) {
             LogHelper.d(TAG, "OnLoadChildren.ROOT");
             mediaItems.add(new MediaBrowser.MediaItem(
@@ -348,7 +348,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             mediaItems.add(new MediaBrowser.MediaItem(
                     new MediaDescription.Builder()
                             .setMediaId(MEDIA_ID_BY_ALBUM)
-                            .setTitle(getString(R.string.browse_albums))
+                            .setTitle(getString(R.string.albums))
                             .setIconUri(Uri.parse("android.resource://" +
                                     "com.example.android.uamp/drawable/ic_by_genre"))
                             .setSubtitle(getString(R.string.browse_albums_subtitle))
@@ -357,7 +357,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             mediaItems.add(new MediaBrowser.MediaItem(
                     new MediaDescription.Builder()
                             .setMediaId(MEDIA_ID_MUSICS_ALL)
-                            .setTitle(getString(R.string.browse_songs))
+                            .setTitle(getString(R.string.songs))
                             .setIconUri(Uri.parse("android.resource://" +
                                     "com.example.android.uamp/drawable/ic_by_genre"))
                             .setSubtitle(getString(R.string.browse_songs_subtitle))
@@ -367,11 +367,17 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         } else if (MEDIA_ID_BY_ARTIST.equals(parentMediaId)) {
             LogHelper.d(TAG, "OnLoadChildren.ARTISTS");
             for (String artist : mMusicProvider.getArtists()) {
+                int songsCount = mMusicProvider.getMusicsByArtist(artist).size();
+                int albumsCount = mMusicProvider.getMusicsByArtist(artist).size();
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
                                 .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ARTIST, artist))
                                 .setTitle(artist)
-                                .setSubtitle(getString(R.string.browse_musics_by_artist_subtitle, artist))
+                                .setSubtitle(getResources().getQuantityString(R.plurals.n_albums,
+                                        albumsCount, albumsCount)
+                                        + " | " +
+                                        getResources().getQuantityString(R.plurals.n_songs,
+                                                songsCount, songsCount))
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
                 mediaItems.add(item);
@@ -380,11 +386,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         } else if (MEDIA_ID_BY_ALBUM.equals(parentMediaId)) {
             LogHelper.d(TAG, "OnLoadChildren.ALBUMS");
             for (String albumId : mMusicProvider.getAlbums()) {
+                int songsCount = mMusicProvider.getMusicsByAlbum(albumId).size();
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
                                 .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId))
                                 .setTitle(mMusicProvider.getAlbum(albumId).getTitle())
-                                .setSubtitle(getString(R.string.browse_musics_by_album_subtitle, albumId))
+                                .setSubtitle(getResources().getQuantityString(R.plurals.n_songs, songsCount, songsCount))
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
                 mediaItems.add(item);
@@ -411,11 +418,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             LogHelper.d(TAG, "OnLoadChildren.ALBUMS_BY_ARTIST  artist=", artist);
             // Add artist's albums to this category
             for (String albumId : mMusicProvider.getAlbumsByArtist(artist)) {
+                int songsCount = mMusicProvider.getMusicsByAlbum(albumId).size();
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
                                 .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId))
                                 .setTitle(mMusicProvider.getAlbum(albumId).getTitle())
-                                .setSubtitle(getString(R.string.browse_musics_by_album_subtitle, albumId))
+                                .setSubtitle(getResources().getQuantityString(R.plurals.n_songs, songsCount, songsCount))
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
                 mediaItems.add(item);
@@ -507,8 +515,8 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             // selected from.
             mPlayingQueue = QueueHelper.getPlayingQueue(mediaId, mMusicProvider);
             mSession.setQueue(mPlayingQueue);
-            String queueTitle = getString(R.string.browse_musics_by_genre_subtitle,
-                    MediaIDHelper.extractBrowseCategoryValueFromMediaID(mediaId));
+            String queueTitle = "Test"; /*todo getString(R.string.browse_musics_by_genre_subtitle,
+                    MediaIDHelper.extractBrowseCategoryValueFromMediaID(mediaId));*/
             mSession.setQueueTitle(queueTitle);
 
             if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {

@@ -172,8 +172,8 @@ public class MainActivity extends BaseActivity {
             super(fm);
             mTitles = new ArrayList<>();
             mTitles.add(context.getString(R.string.browse_artists));
-            mTitles.add(context.getString(R.string.browse_albums));
-            mTitles.add(context.getString(R.string.browse_songs));
+            mTitles.add(context.getString(R.string.albums));
+            mTitles.add(context.getString(R.string.songs));
             mRegisteredFragments = new SparseArray<>(4);
         }
 

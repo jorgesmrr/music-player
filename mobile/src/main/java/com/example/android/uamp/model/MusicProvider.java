@@ -113,7 +113,7 @@ public class MusicProvider {
     /**
      * Get music tracks of the given album
      */
-    public Iterable<MediaMetadata> getMusicsByAlbum(String album) {
+    public List<MediaMetadata> getMusicsByAlbum(String album) {
         if (mCurrentState != State.INITIALIZED || !mMusicListByAlbum.containsKey(album)) {
             return Collections.emptyList();
         }
@@ -123,7 +123,7 @@ public class MusicProvider {
     /**
      * Get music tracks of the given artist
      */
-    public Iterable<MediaMetadata> getMusicsByArtist(String artist) {
+    public List<MediaMetadata> getMusicsByArtist(String artist) {
         if (mCurrentState != State.INITIALIZED || !mMusicListByArtist.containsKey(artist)) {
             return Collections.emptyList();
         }
@@ -133,7 +133,7 @@ public class MusicProvider {
     /**
      * Get albums of the given artist
      */
-    public Iterable<String> getAlbumsByArtist(String artist) {
+    public List<String> getAlbumsByArtist(String artist) {
         if (mCurrentState != State.INITIALIZED || !mAlbumListByArtist.containsKey(artist)) {
             return Collections.emptyList();
         }
