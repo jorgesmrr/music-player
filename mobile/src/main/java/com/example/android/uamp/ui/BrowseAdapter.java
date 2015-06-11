@@ -22,6 +22,9 @@ import com.example.android.uamp.utils.MediaIDHelper;
 
 import java.util.ArrayList;
 
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ALBUM;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ARTIST;
+
 /**
  * An adapter for showing the list of browsed MediaItems
  * Created by Jorge on 07/06/2015.
@@ -33,10 +36,10 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public static final int TYPE_PLAYING = 3;
     private static final int TYPE_PLACEHOLDER = 4;
 
-    public static final int MEDIA_GENRE = 0;
     public static final int MEDIA_ARTIST = 1;
     public static final int MEDIA_ALBUM = 2;
     public static final int MEDIA_SONG = 3;
+    public static final int MEDIA_ALBUMS_SONGS = 4;
 
     private static final String TAG = LogHelper.makeLogTag(BrowseAdapter.class);
 
@@ -49,40 +52,28 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private int mPlaceholderHeight;
 
     public BrowseAdapter(Activity activity, String mediaId, int placeholderHeight, OnItemClickListener listener) {
-        initialize(activity, mediaId, listener);
-        mPlaceholderHeight = placeholderHeight;
-    }
-
-    private void initialize(Activity activity, String mediaId, OnItemClickListener listener) {
         initializeColorStateLists(activity);
         mMediaItems = new ArrayList<>();
         mActivity = activity;
         mListener = listener;
-        if (mediaId.equals(MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE))
-            mMediaType = MEDIA_GENRE;
-        else if (mediaId.equals(MediaIDHelper.MEDIA_ID_ALBUMS_BY_ARTIST))
+        if (mediaId.equals(MEDIA_ID_BY_ARTIST))
             mMediaType = MEDIA_ARTIST;
-        else if (mediaId.equals(MediaIDHelper.MEDIA_ID_MUSICS_BY_ALBUM) || mediaId.startsWith(MediaIDHelper.MEDIA_ID_ALBUMS_BY_ARTIST))
+        else if (mediaId.startsWith(MEDIA_ID_BY_ARTIST))
+            mMediaType = MEDIA_ALBUMS_SONGS;
+        else if (mediaId.equals(MEDIA_ID_BY_ALBUM))
             mMediaType = MEDIA_ALBUM;
         else
             mMediaType = MEDIA_SONG;
+        mPlaceholderHeight = placeholderHeight;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layout;
-        switch (mMediaType) {
-            case MEDIA_ARTIST:
-            case MEDIA_ALBUM:
-                layout = R.layout.grid_item_album;
-                break;
-            case MEDIA_GENRE:
-                layout = R.layout.list_item_simple_icon;
-                break;
-            default:
-                layout = R.layout.list_item_song;
-                break;
-        }
+        if (mMediaType == MEDIA_ALBUM || mMediaType == MEDIA_ARTIST)
+            layout = R.layout.grid_item_album;
+        else
+            layout = R.layout.list_item_song;
 
         View itemView = LayoutInflater.from(mActivity)
                 .inflate(layout, parent, false);
@@ -91,8 +82,9 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         switch (viewType) {
             case TYPE_NONE:
                 switch (mMediaType) {
-                    case MEDIA_GENRE:
-                        holder.mImageView.setImageResource(R.drawable.ic_by_genre);
+                    case MEDIA_ARTIST:
+                    case MEDIA_ALBUM:
+                        holder.mImageView.setImageResource(R.drawable.placeholder);
                         break;
                 }
                 holder.mImageView.setVisibility(View.VISIBLE);
@@ -137,17 +129,17 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             MediaBrowser.MediaItem item = mMediaItems.get(position);
             mediaItemViewHolder.mTitleView.setText(item.getDescription().getTitle());
-
-            if (mMediaType != MEDIA_GENRE)
-                mediaItemViewHolder.mSubtitleView.setText(item.getDescription().getSubtitle());
         }
     }
 
     @Override
     public int getItemCount() {
+        int count = 0;
         if (mPlaceholderHeight > 0)
-            return mMediaItems.size() + 1;
-        else return mMediaItems.size();
+            count++;
+        // if(mMediaType != MEDIA_ALBUMS_SONGS)
+            count += mMediaItems.size();
+        return count;
     }
 
     @Override
@@ -193,7 +185,6 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             case MEDIA_ARTIST:
             case MEDIA_ALBUM:
                 return new GridLayoutManager(activity, activity.getResources().getInteger(R.integer.columns));
-            case MEDIA_GENRE:
             default:
                 return new LinearLayoutManager(activity);
         }

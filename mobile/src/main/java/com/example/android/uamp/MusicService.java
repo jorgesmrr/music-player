@@ -50,10 +50,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ALBUM;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ARTIST;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_ALL;
-import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_ALBUM;
-import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_ALBUMS_BY_ARTIST;
-import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_ROOT;
 import static com.example.android.uamp.utils.MediaIDHelper.createBrowseCategoryMediaID;
 
@@ -339,16 +338,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             LogHelper.d(TAG, "OnLoadChildren.ROOT");
             mediaItems.add(new MediaBrowser.MediaItem(
                     new MediaDescription.Builder()
-                            .setMediaId(MEDIA_ID_MUSICS_BY_GENRE)
-                            .setTitle(getString(R.string.browse_genres))
-                            .setIconUri(Uri.parse("android.resource://" +
-                                    "com.example.android.uamp/drawable/ic_by_genre"))
-                            .setSubtitle(getString(R.string.browse_genre_subtitle))
-                            .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
-            ));
-            mediaItems.add(new MediaBrowser.MediaItem(
-                    new MediaDescription.Builder()
-                            .setMediaId(MEDIA_ID_ALBUMS_BY_ARTIST)
+                            .setMediaId(MEDIA_ID_BY_ARTIST)
                             .setTitle(getString(R.string.browse_artists))
                             .setIconUri(Uri.parse("android.resource://" +
                                     "com.example.android.uamp/drawable/ic_by_genre"))
@@ -357,7 +347,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             ));
             mediaItems.add(new MediaBrowser.MediaItem(
                     new MediaDescription.Builder()
-                            .setMediaId(MEDIA_ID_MUSICS_BY_ALBUM)
+                            .setMediaId(MEDIA_ID_BY_ALBUM)
                             .setTitle(getString(R.string.browse_albums))
                             .setIconUri(Uri.parse("android.resource://" +
                                     "com.example.android.uamp/drawable/ic_by_genre"))
@@ -374,25 +364,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                             .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
             ));
 
-        } else if (MEDIA_ID_MUSICS_BY_GENRE.equals(parentMediaId)) {
-            LogHelper.d(TAG, "OnLoadChildren.GENRES");
-            for (String genre : mMusicProvider.getGenres()) {
-                MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
-                        new MediaDescription.Builder()
-                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_MUSICS_BY_GENRE, genre))
-                                .setTitle(genre)
-                                .setSubtitle(getString(R.string.browse_musics_by_genre_subtitle, genre))
-                                .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
-                );
-                mediaItems.add(item);
-            }
-
-        } else if (MEDIA_ID_ALBUMS_BY_ARTIST.equals(parentMediaId)) {
+        } else if (MEDIA_ID_BY_ARTIST.equals(parentMediaId)) {
             LogHelper.d(TAG, "OnLoadChildren.ARTISTS");
             for (String artist : mMusicProvider.getArtists()) {
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
-                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_ALBUMS_BY_ARTIST, artist))
+                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ARTIST, artist))
                                 .setTitle(artist)
                                 .setSubtitle(getString(R.string.browse_musics_by_artist_subtitle, artist))
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
@@ -400,12 +377,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 mediaItems.add(item);
             }
 
-        } else if (MEDIA_ID_MUSICS_BY_ALBUM.equals(parentMediaId)) {
+        } else if (MEDIA_ID_BY_ALBUM.equals(parentMediaId)) {
             LogHelper.d(TAG, "OnLoadChildren.ALBUMS");
             for (String albumId : mMusicProvider.getAlbums()) {
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
-                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_MUSICS_BY_ALBUM, albumId))
+                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId))
                                 .setTitle(mMusicProvider.getAlbum(albumId).getTitle())
                                 .setSubtitle(getString(R.string.browse_musics_by_album_subtitle, albumId))
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
@@ -429,16 +406,28 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                         trackCopy.getDescription(), MediaItem.FLAG_PLAYABLE);
                 mediaItems.add(bItem);
             }
-        } else if (parentMediaId.startsWith(MEDIA_ID_MUSICS_BY_GENRE)) {
-            String genre = MediaIDHelper.getHierarchy(parentMediaId)[1];
-            LogHelper.d(TAG, "OnLoadChildren.SONGS_BY_GENRE  genre=", genre);
-            for (MediaMetadata track : mMusicProvider.getMusicsByGenre(genre)) {
+        } else if (parentMediaId.startsWith(MEDIA_ID_BY_ARTIST)) {
+            String artist = MediaIDHelper.getHierarchy(parentMediaId)[1];
+            LogHelper.d(TAG, "OnLoadChildren.ALBUMS_BY_ARTIST  artist=", artist);
+            // Add artist's albums to this category
+            for (String albumId : mMusicProvider.getAlbumsByArtist(artist)) {
+                MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
+                        new MediaDescription.Builder()
+                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId))
+                                .setTitle(mMusicProvider.getAlbum(albumId).getTitle())
+                                .setSubtitle(getString(R.string.browse_musics_by_album_subtitle, albumId))
+                                .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
+                );
+                mediaItems.add(item);
+            }
+            // Add artist's songs to this category
+            for (MediaMetadata track : mMusicProvider.getMusicsByArtist(artist)) {
                 // Since mediaMetadata fields are immutable, we need to create a copy, so we
                 // can set a hierarchy-aware mediaID. We will need to know the media hierarchy
                 // when we get a onPlayFromMusicID call, so we can create the proper queue based
                 // on where the music was selected from (by artist, by genre, random, etc)
                 String hierarchyAwareMediaID = MediaIDHelper.createMediaID(
-                        track.getDescription().getMediaId(), MEDIA_ID_MUSICS_BY_GENRE, genre);
+                        track.getDescription().getMediaId(), MEDIA_ID_BY_ARTIST, artist);
                 MediaMetadata trackCopy = new MediaMetadata.Builder(track)
                         .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
                         .build();
@@ -446,20 +435,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                         trackCopy.getDescription(), MediaItem.FLAG_PLAYABLE);
                 mediaItems.add(bItem);
             }
-        } else if (parentMediaId.startsWith(MEDIA_ID_ALBUMS_BY_ARTIST)) {
-            String artist = MediaIDHelper.getHierarchy(parentMediaId)[1];
-            LogHelper.d(TAG, "OnLoadChildren.ALBUMS_BY_ARTIST  artist=", artist);
-            for (String albumId : mMusicProvider.getAlbumsByArtist(artist)) {
-                MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
-                        new MediaDescription.Builder()
-                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_MUSICS_BY_ALBUM, albumId))
-                                .setTitle(mMusicProvider.getAlbum(albumId).getTitle())
-                                .setSubtitle(getString(R.string.browse_musics_by_album_subtitle, albumId))
-                                .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
-                );
-                mediaItems.add(item);
-            }
-        } else if (parentMediaId.startsWith(MEDIA_ID_MUSICS_BY_ALBUM)) {
+        } else if (parentMediaId.startsWith(MEDIA_ID_BY_ALBUM)) {
             String album = MediaIDHelper.getHierarchy(parentMediaId)[1];
             LogHelper.d(TAG, "OnLoadChildren.SONGS_BY_ALBUM  album=", album);
             for (MediaMetadata track : mMusicProvider.getMusicsByAlbum(album)) {
@@ -468,7 +444,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 // when we get a onPlayFromMusicID call, so we can create the proper queue based
                 // on where the music was selected from (by artist, by genre, random, etc)
                 String hierarchyAwareMediaID = MediaIDHelper.createMediaID(
-                        track.getDescription().getMediaId(), MEDIA_ID_MUSICS_BY_ALBUM, album);
+                        track.getDescription().getMediaId(), MEDIA_ID_BY_ALBUM, album);
                 MediaMetadata trackCopy = new MediaMetadata.Builder(track)
                         .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
                         .build();

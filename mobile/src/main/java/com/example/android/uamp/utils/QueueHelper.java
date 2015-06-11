@@ -26,10 +26,8 @@ import com.example.android.uamp.model.MusicProvider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_ALL;
-import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_SEARCH;
 
 /**
@@ -65,9 +63,7 @@ public class QueueHelper {
             String categoryValue = hierarchy[1];
             LogHelper.d(TAG, "Creating playing queue for ", categoryType, ",  ", categoryValue);
 
-            if (categoryType.equals(MEDIA_ID_MUSICS_BY_GENRE)) {
-                tracks = musicProvider.getMusicsByGenre(categoryValue);
-            } else if (categoryType.equals(MEDIA_ID_MUSICS_BY_SEARCH)) {
+            if (categoryType.equals(MEDIA_ID_MUSICS_BY_SEARCH)) {
                 tracks = musicProvider.searchMusicBySongTitle(categoryValue);
             }
 
@@ -102,8 +98,6 @@ public class QueueHelper {
         Iterable<MediaMetadata> result = null;
         if (params.isAlbumFocus) {
             result = musicProvider.searchMusicByAlbum(params.album);
-        } else if (params.isGenreFocus) {
-            result = musicProvider.getMusicsByGenre(params.genre);
         } else if (params.isArtistFocus) {
             result = musicProvider.searchMusicByArtist(params.artist);
         } else if (params.isSongFocus) {
@@ -183,14 +177,14 @@ public class QueueHelper {
     public static List<MediaSession.QueueItem> getRandomQueue(MusicProvider musicProvider) {
         List<MediaMetadata> result = new ArrayList<>();
 
-        for (String genre : musicProvider.getGenres()) {
+        /*todo for (String genre : musicProvider.getGenres()) {
             Iterable<MediaMetadata> tracks = musicProvider.getMusicsByGenre(genre);
             for (MediaMetadata track : tracks) {
                 if (ThreadLocalRandom.current().nextBoolean()) {
                     result.add(track);
                 }
             }
-        }
+        }*/
         LogHelper.d(TAG, "getRandomQueue: result.size=", result.size());
 
         Collections.shuffle(result);

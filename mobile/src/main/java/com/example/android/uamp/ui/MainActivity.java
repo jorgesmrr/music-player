@@ -125,17 +125,14 @@ public class MainActivity extends BaseActivity {
 
         if (mediaId != null)
             switch (mediaId) {
-                case MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE:
+                case MediaIDHelper.MEDIA_ID_BY_ARTIST:
                     mViewPager.setCurrentItem(0);
                     break;
-                case MediaIDHelper.MEDIA_ID_ALBUMS_BY_ARTIST:
+                case MediaIDHelper.MEDIA_ID_BY_ALBUM:
                     mViewPager.setCurrentItem(1);
                     break;
-                case MediaIDHelper.MEDIA_ID_MUSICS_BY_ALBUM:
-                    mViewPager.setCurrentItem(2);
-                    break;
                 case MediaIDHelper.MEDIA_ID_MUSICS_ALL:
-                    mViewPager.setCurrentItem(3);
+                    mViewPager.setCurrentItem(2);
                     break;
                 default:
                     Intent intent = new Intent(this, MediaContainerActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
@@ -174,7 +171,6 @@ public class MainActivity extends BaseActivity {
         public LibraryAdapter(FragmentManager fm, Context context) {
             super(fm);
             mTitles = new ArrayList<>();
-            mTitles.add(context.getString(R.string.browse_genres));
             mTitles.add(context.getString(R.string.browse_artists));
             mTitles.add(context.getString(R.string.browse_albums));
             mTitles.add(context.getString(R.string.browse_songs));
@@ -186,15 +182,12 @@ public class MainActivity extends BaseActivity {
             String mediaId;
             switch (position) {
                 case 0:
-                    mediaId = MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE;
+                    mediaId = MediaIDHelper.MEDIA_ID_BY_ARTIST;
                     break;
                 case 1:
-                    mediaId = MediaIDHelper.MEDIA_ID_ALBUMS_BY_ARTIST;
+                    mediaId = MediaIDHelper.MEDIA_ID_BY_ALBUM;
                     break;
                 case 2:
-                    mediaId = MediaIDHelper.MEDIA_ID_MUSICS_BY_ALBUM;
-                    break;
-                case 3:
                     mediaId = MediaIDHelper.MEDIA_ID_MUSICS_ALL;
                     break;
                 default:
@@ -206,7 +199,7 @@ public class MainActivity extends BaseActivity {
 
         @Override
         public int getCount() {
-            return 4;
+            return 3;
         }
 
         @Override

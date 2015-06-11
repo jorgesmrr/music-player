@@ -20,7 +20,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.media.MediaMetadata;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 
@@ -35,35 +34,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Utility class to get a list of MusicTrack's based on a server-side JSON
- * configuration.
+ * Utility class to get a list of MusicTrack's based on MediaStore queries.
  */
 public class MusicProvider {
 
     private static final String TAG = LogHelper.makeLogTag(MusicProvider.class);
 
-    private static final String CATALOG_URL =
-            "http://storage.googleapis.com/automotive-media/music.json";
-
     public static final String CUSTOM_METADATA_TRACK_SOURCE = "__SOURCE__";
 
-    private static final String JSON_MUSIC = "music";
-    private static final String JSON_TITLE = "title";
-    private static final String JSON_ALBUM = "album";
-    private static final String JSON_ARTIST = "artist";
-    private static final String JSON_GENRE = "genre";
-    private static final String JSON_SOURCE = "source";
-    private static final String JSON_IMAGE = "image";
-    private static final String JSON_TRACK_NUMBER = "trackNumber";
-    private static final String JSON_TOTAL_TRACK_COUNT = "totalTrackCount";
-    private static final String JSON_DURATION = "duration";
-
     // Categorized caches for music track data:
-    private ConcurrentMap<String, List<MediaMetadata>> mMusicListByGenre;
-    private ConcurrentMap<String, List<MediaMetadata>> mMusicListByAlbum;
-    private ConcurrentMap<String, List<String>> mAlbumListByArtist;
-    private final ConcurrentMap<String, MutableMediaMetadata> mMusicListById;
-    private ConcurrentMap<String, Album> mAlbumListById;
+    private ConcurrentMap<String, List<MediaMetadata>> mMusicListByAlbum; // <albumId, music>
+    private ConcurrentMap<String, List<MediaMetadata>> mMusicListByArtist; // <artistId, music>
+    private final ConcurrentMap<String, MutableMediaMetadata> mMusicListById; // <musicId, music>
+    private ConcurrentMap<String, List<String>> mAlbumListByArtist; // <artistId, albumId>
+    private ConcurrentMap<String, Album> mAlbumListById; // <albumId, album>
 
     private final Set<String> mFavoriteTracks;
 
@@ -78,7 +62,6 @@ public class MusicProvider {
     }
 
     public MusicProvider() {
-        mMusicListByGenre = new ConcurrentHashMap<>();
         mMusicListByAlbum = new ConcurrentHashMap<>();
         mAlbumListByArtist = new ConcurrentHashMap<>();
         mMusicListById = new ConcurrentHashMap<>();
@@ -86,7 +69,7 @@ public class MusicProvider {
         mFavoriteTracks = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     }
 
-    public Album getAlbum(String id){
+    public Album getAlbum(String id) {
         return mAlbumListById.get(id);
     }
 
@@ -98,21 +81,9 @@ public class MusicProvider {
             return Collections.emptyList();
         }
         List<MediaMetadata> musics = new ArrayList<>();
-        for(MutableMediaMetadata m : mMusicListById.values())
+        for (MutableMediaMetadata m : mMusicListById.values())
             musics.add(m.metadata);
         return musics;
-    }
-
-    /**
-     * Get an iterator over the list of genres
-     *
-     * @return genres
-     */
-    public Iterable<String> getGenres() {
-        if (mCurrentState != State.INITIALIZED) {
-            return Collections.emptyList();
-        }
-        return mMusicListByGenre.keySet();
     }
 
     /**
@@ -128,7 +99,7 @@ public class MusicProvider {
     }
 
     /**
-     * Get an iterator over the list of albums
+     * Get an iterator over the list of artists
      *
      * @return genres
      */
@@ -140,16 +111,6 @@ public class MusicProvider {
     }
 
     /**
-     * Get music tracks of the given genre
-     */
-    public Iterable<MediaMetadata> getMusicsByGenre(String genre) {
-        if (mCurrentState != State.INITIALIZED || !mMusicListByGenre.containsKey(genre)) {
-            return Collections.emptyList();
-        }
-        return mMusicListByGenre.get(genre);
-    }
-
-    /**
      * Get music tracks of the given album
      */
     public Iterable<MediaMetadata> getMusicsByAlbum(String album) {
@@ -157,6 +118,16 @@ public class MusicProvider {
             return Collections.emptyList();
         }
         return mMusicListByAlbum.get(album);
+    }
+
+    /**
+     * Get music tracks of the given artist
+     */
+    public Iterable<MediaMetadata> getMusicsByArtist(String artist) {
+        if (mCurrentState != State.INITIALIZED || !mMusicListByArtist.containsKey(artist)) {
+            return Collections.emptyList();
+        }
+        return mMusicListByArtist.get(artist);
     }
 
     /**
@@ -229,10 +200,11 @@ public class MusicProvider {
 
         track.metadata = metadata;
 
+        /* todo precisa atualizar as listas?
         // if genre has changed, we need to rebuild the list by genre
         if (!oldGenre.equals(newGenre)) {
             buildListsByGenre(context.getContentResolver());
-        }
+        }*/
     }
 
     public void setFavorite(String musicId, boolean favorite) {
@@ -280,58 +252,6 @@ public class MusicProvider {
         }.execute();
     }
 
-    private synchronized void buildListsByGenre(ContentResolver contentResolver) {
-        ConcurrentMap<String, List<MediaMetadata>> newMusicListByGenre = new ConcurrentHashMap<>();
-
-        Cursor genresCursor = contentResolver.query(
-                MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
-
-        if (genresCursor.moveToFirst()) {
-            int idColumn = genresCursor.getColumnIndex(MediaStore.Audio.Genres._ID);
-            int nameColumn = genresCursor.getColumnIndex(MediaStore.Audio.Genres.NAME);
-
-            do {
-                String genreId = genresCursor.getString(idColumn);
-                String genreName = genresCursor.getString(nameColumn);
-
-                Uri membersUri = Uri.parse(
-                        String.valueOf(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI)
-                                + "/" + genreId
-                                + "/" + MediaStore.Audio.Genres.Members.CONTENT_DIRECTORY);
-                Cursor membersCursor = contentResolver.query(
-                        membersUri,
-                        null,
-                        MediaStore.Audio.Genres.Members.IS_MUSIC + " != ?",
-                        new String[]{"0"},
-                        null);
-
-                if (membersCursor.moveToFirst()) {
-                    int musicIdColumn = genresCursor.getColumnIndex(MediaStore.Audio.Media._ID);
-
-                    do {
-                        List<MediaMetadata> list = newMusicListByGenre.get(genreName);
-                        if (list == null) {
-                            list = new ArrayList<>();
-                            newMusicListByGenre.put(genreName, list);
-                        }
-                        MediaMetadata music = getMusic(membersCursor.getString(musicIdColumn));
-                        if (music != null)
-                            list.add(music);
-                    } while (membersCursor.moveToNext());
-                }
-                membersCursor.close();
-
-            } while (genresCursor.moveToNext());
-        }
-        genresCursor.close();
-
-        mMusicListByGenre = newMusicListByGenre;
-    }
-
     private synchronized void retrieveMedia(Context context) {
         try {
             if (mCurrentState == State.NON_INITIALIZED) {
@@ -353,7 +273,9 @@ public class MusicProvider {
                     int albumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
                     int albumIdColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
                     int durationColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
+                    int trackNumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TRACK);
 
+                    ConcurrentHashMap<String, List<MediaMetadata>> newMusicListByArtist = new ConcurrentHashMap<>();
                     ConcurrentHashMap<String, List<MediaMetadata>> newMusicListByAlbum = new ConcurrentHashMap<>();
                     ConcurrentHashMap<String, List<String>> newAlbumListByArtist = new ConcurrentHashMap<>();
 
@@ -372,24 +294,31 @@ public class MusicProvider {
                                         //todo .putString(MediaMetadata.METADATA_KEY_GENRE, "genero teste")
                                         //todo .putString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI, cursor.getString(idColumn))
                                 .putString(MediaMetadata.METADATA_KEY_TITLE, musicCursor.getString(titleColumn))
-                                        //todo .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, 1)
+                                .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, musicCursor.getInt(trackNumColumn))
                                         //todo .putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, 2)
                                 .build();
                         mMusicListById.put(musicId, new MutableMediaMetadata(musicId, item));
 
-
-                        List<MediaMetadata> songsList = newMusicListByAlbum.get(albumId);
-                        if (songsList == null) {
-                            songsList = new ArrayList<>();
-                            newMusicListByAlbum.put(albumId, songsList);
+                        // Add this song to the respective album
+                        List<MediaMetadata> songsListByArtist = newMusicListByArtist.get(artist);
+                        if (songsListByArtist == null) {
+                            songsListByArtist = new ArrayList<>();
+                            newMusicListByArtist.put(artist, songsListByArtist);
                         }
-                        songsList.add(item);
+                        songsListByArtist.add(item);
+
+                        // Add this song to the respective album
+                        List<MediaMetadata> songsListByAlbum = newMusicListByAlbum.get(albumId);
+                        if (songsListByAlbum == null) {
+                            songsListByAlbum = new ArrayList<>();
+                            newMusicListByAlbum.put(albumId, songsListByAlbum);
+                        }
+                        songsListByAlbum.add(item);
 
                         if (!mAlbumListById.containsKey(albumId))
                             mAlbumListById.put(albumId, new Album(album));
 
-
-
+                        // Add this song's album to the respective artist
                         List<String> albumsList = newAlbumListByArtist.get(artist);
                         if (albumsList == null) {
                             albumsList = new ArrayList<>();
@@ -399,10 +328,10 @@ public class MusicProvider {
 
                     } while (musicCursor.moveToNext());
 
+                    // Update cache lists
+                    mMusicListByArtist = newMusicListByArtist;
                     mMusicListByAlbum = newMusicListByAlbum;
                     mAlbumListByArtist = newAlbumListByArtist;
-
-                    buildListsByGenre(contentResolver);
                 }
                 musicCursor.close();
 
