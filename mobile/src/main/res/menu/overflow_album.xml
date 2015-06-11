@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/go_artist"
+        android:title="@string/go_artist" />
+    <item
+        android:id="@+id/add_queue"
+        android:title="@string/add_queue" />
+    <item
+        android:id="@+id/shuffle_all"
+        android:title="@string/shuffle_all" />
+</menu>

@@ -64,4 +64,10 @@
     <string name="drawable_vector_pause_right" translatable="false">M27,8 l10,0 0,32 -10,0 z</string>
     <string name="drawable_vector_resume_left" translatable="false">M24,10 l0,0 0,28 -16,0 z</string>
     <string name="drawable_vector_resume_right" translatable="false">M24,10 l0,0 16,28 -16,0 z</string>
+    <string name="go_artist">Go to artist</string>
+    <string name="add_queue">Add to queue</string>
+    <string name="go_album">Go to album</string>
+    <string name="delete">Delete</string>
+    <string name="shuffle_all">Shuffle_all</string>
+    <string name="remove_queue">Remove from queue</string>
 </resources>
