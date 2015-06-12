@@ -91,7 +91,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin_view"
-            android:src="@drawable/ic_pause_resume" />
+            android:src="@drawable/ic_pause_resume"
+            app:borderWidth="0dp"/>
 
         <ImageView
             android:id="@+id/next"

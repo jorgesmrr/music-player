@@ -18,7 +18,6 @@ package com.example.android.uamp.ui;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
@@ -31,6 +30,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -67,10 +68,8 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
     private SeekBar mSeekbar;
     private TextView mTitle;
     private TextView mSubtitle;
-    private View mControllers;
-    private Drawable mPauseDrawable;
-    private Drawable mPlayDrawable;
     private ImageView mArt;
+
 
     private String mCurrentArtUrl;
     private Handler mHandler = new Handler();
@@ -128,8 +127,6 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         getSupportActionBar().setTitle("");
 
         mArt = (ImageView) findViewById(R.id.art);
-        mPauseDrawable = getDrawable(R.drawable.uamp_ic_pause_white_48dp);
-        mPlayDrawable = getDrawable(R.drawable.uamp_ic_play_arrow_white_48dp);
         mPlayPause = (FloatingActionButton) findViewById(R.id.play_pause);
         mSkipNext = (ImageView) findViewById(R.id.next);
         mSkipPrev = (ImageView) findViewById(R.id.prev);
@@ -137,7 +134,6 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         mSeekbar = (SeekBar) findViewById(R.id.seekBar);
         mTitle = (TextView) findViewById(R.id.title);
         mSubtitle = (TextView) findViewById(R.id.subtitle);
-        mControllers = findViewById(R.id.controllers);
 
         mSkipNext.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -221,8 +217,24 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
                 new ComponentName(this, MusicService.class), mConnectionCallback, null);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.player, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item != null && item.getItemId() == R.id.show_queue) {
+            startActivity(new Intent(this, QueueActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void connectToSession(MediaSession.Token token) {
-        MediaController mediaController = new MediaController(FullScreenPlayerActivity.this, token);
+        MediaController mediaController = new MediaController(this, token);
         if (mediaController.getMetadata() == null) {
             finish();
             return;
@@ -393,4 +405,6 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         }
         mSeekbar.setProgress((int) currentPosition);
     }
+
+
 }

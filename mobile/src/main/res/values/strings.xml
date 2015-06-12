@@ -79,4 +79,5 @@
     <string name="cast_to">Cast to...</string>
     <string name="remove_ads">Remove ads</string>
     <string name="about">About</string>
+    <string name="show_queue">Show queue</string>
 </resources>

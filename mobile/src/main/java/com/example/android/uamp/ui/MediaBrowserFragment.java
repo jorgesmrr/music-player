@@ -139,7 +139,7 @@ public class MediaBrowserFragment extends Fragment {
             }
         });
 
-        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.list_view);
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.list);
         recyclerView.setLayoutManager(mBrowserAdapter.getSuitableLayoutManager(getActivity()));
         recyclerView.setAdapter(mBrowserAdapter);
         if (mOnScrollListener != null)

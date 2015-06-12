@@ -15,7 +15,6 @@
  */
 package com.example.android.uamp.ui;
 
-import android.app.FragmentManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -56,8 +55,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
 
     private boolean mToolbarInitialized;
     private int mStatusBarHeight;
-
-    private int mItemToOpenWhenDrawerCloses = -1;
 
     private VideoCastConsumerImpl mCastConsumer = new VideoCastConsumerImpl() {
 
@@ -136,7 +133,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.cast, menu);
+        getMenuInflater().inflate(R.menu.cast_player_menu, menu);
         mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         return true;
     }
@@ -148,18 +145,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Return to the previous fragment stack
-        FragmentManager fragmentManager = getFragmentManager();
-        if (fragmentManager.getBackStackEntryCount() > 0) {
-            fragmentManager.popBackStack();
-        } else {
-            // Lastly, it will rely on the system behavior for back
-            super.onBackPressed();
-        }
     }
 
     @Override
