@@ -3,14 +3,9 @@ package com.example.android.uamp.ui;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.TypedValue;
+import android.support.design.widget.FloatingActionButton;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.uamp.R;
@@ -21,25 +16,15 @@ import com.example.android.uamp.utils.MediaIDHelper;
  * Displays a fragment with the music tracks for the given media ID
  * Created by Jorge on 07/06/2015.
  */
-public class MediaContainerActivity extends BaseActivity {
+public abstract class MediaContainerActivity extends BaseActivity {
 
     private static final String TAG = LogHelper.makeLogTag(MediaContainerActivity.class);
     public static final String SAVED_MEDIA_ID = "media_id";
     public static final String BROWSE_FRAG_TAG = "browse_frag";
 
     private String mMediaId;
-    private TextView mTitleView;
-
-    private int mHeaderHeight;
-    private int mActionBarHeight;
-
-    // Header stuff
-    private int mMinHeaderTranslation;
-    private boolean mIsHeaderFillShown;
-    private ImageView mHeaderImageView;
-    private View mHeaderView;
-    private View mHeaderFill;
-    private View mTopShadow;
+    protected TextView mTitleView;
+    protected FloatingActionButton mFab;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -49,61 +34,13 @@ public class MediaContainerActivity extends BaseActivity {
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_media);
-
-        // Color to fill the gap between status bar and title bar
-        mIsHeaderFillShown = false;
-
+    protected void initializeViews(){
         initializeToolbar(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
 
-        mMinHeaderTranslation = getStatusBarHeight();
-
-        // Find views
-        mHeaderView = findViewById(R.id.header);
-        mHeaderFill = mHeaderView.findViewById(R.id.header_fill);
-        mHeaderImageView = (ImageView) mHeaderView.findViewById(R.id.art);
-        final View bar = findViewById(R.id.bar);
-        mTitleView = (TextView) bar.findViewById(R.id.title);
-
-        mTopShadow = findViewById(R.id.shadow);
-        mMinHeaderTranslation -= getResources().getDimensionPixelSize(R.dimen.margin_screen);
-        if (mIsHeaderFillShown)
-            mHeaderFill.setVisibility(View.VISIBLE);
-        else
-            mHeaderFill.setVisibility(View.INVISIBLE);
-
-        TypedValue mTypedValue = new TypedValue();
-        getTheme()
-                .resolveAttribute(android.R.attr.actionBarSize, mTypedValue, true);
-        mActionBarHeight = TypedValue.complexToDimensionPixelSize(
-                mTypedValue.data, getResources().getDisplayMetrics());
-        mMinHeaderTranslation += mActionBarHeight;
-
-        bar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                bar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-                mMinHeaderTranslation += bar.getHeight();
-            }
-        });
-
-        mHeaderView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                mHeaderView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-                mHeaderHeight = mHeaderView.getHeight();
-                mMinHeaderTranslation -= mHeaderHeight;
-
-                initializeFromParams(savedInstanceState, getIntent());
-            }
-        });
+        mTitleView = (TextView) findViewById(R.id.title);
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
     }
 
     @Override
@@ -145,9 +82,7 @@ public class MediaContainerActivity extends BaseActivity {
     @Override
     protected void navigateToBrowser(String mediaId, View sharedElement) {
         if (mediaId.equals(mMediaId))
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, MediaBrowserFragment.newInstance(mediaId, mOnScrollListener, mHeaderHeight), BROWSE_FRAG_TAG)
-                    .commit();
+            openFragment(mediaId);
         else {
             Intent intent = new Intent(this, MediaContainerActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
@@ -160,52 +95,5 @@ public class MediaContainerActivity extends BaseActivity {
         mTitleView.setText(title);
     }
 
-    private final RecyclerView.OnScrollListener mOnScrollListener = new RecyclerView.OnScrollListener() {
-
-        private int getScrollY(RecyclerView recyclerView) throws IllegalStateException {
-            View c = recyclerView.getChildAt(0);
-
-            //Se a lista estiver vazia
-            if (c == null)
-                return 0;
-
-            int firstVisiblePosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-
-            int top = c.getTop();
-
-            int headerHeight = 0;
-            if (firstVisiblePosition >= 1)
-                headerHeight = mHeaderHeight;
-
-            //Quando o mHeader ainda nao saiu da tela, apenas move a altura do primeiro item
-            // menos a distancia entre ele e o topo. Quando o mHeader some, move so a sua altura
-            return firstVisiblePosition * c.getHeight() - top + headerHeight;
-        }
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            if (mMinHeaderTranslation > 0)
-                return;
-
-            float translationY = Math.max(-getScrollY(recyclerView), mMinHeaderTranslation);
-
-            mHeaderView.setTranslationY(translationY);
-            mTopShadow.setTranslationY(-translationY);
-            mHeaderImageView.setTranslationY(-translationY + translationY / 3);
-
-            if (mHeaderFill != null) {
-                if ((int) translationY <= mMinHeaderTranslation + mActionBarHeight / 2) {
-                    if (!mIsHeaderFillShown) {
-                        mHeaderFill.setVisibility(View.VISIBLE);
-                        mHeaderFill.startAnimation(AnimationUtils.loadAnimation(MediaContainerActivity.this, R.anim.show_header_bar));
-                        mIsHeaderFillShown = true;
-                    }
-                } else if (mIsHeaderFillShown) {
-                    mHeaderFill.setVisibility(View.INVISIBLE);
-                    mHeaderFill.startAnimation(AnimationUtils.loadAnimation(MediaContainerActivity.this, R.anim.hide_header_bar));
-                    mIsHeaderFillShown = false;
-                }
-            }
-        }
-    };
+    protected abstract void openFragment(String mediaId);
 }

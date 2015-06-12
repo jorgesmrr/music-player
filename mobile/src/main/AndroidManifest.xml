@@ -64,9 +64,11 @@
         </activity>
 
         <!-- Media activity for phone UI -->
+        <activity android:name=".ui.ArtistActivity"
+            android:theme="@style/UAmpAppTheme.Transluscent" />
+
         <activity
-            android:name=".ui.MediaContainerActivity"
-            android:label="@string/app_name"
+            android:name=".ui.AlbumActivity"
             android:theme="@style/UAmpAppTheme.Transluscent" />
 
         <!-- Activity for display queue -->

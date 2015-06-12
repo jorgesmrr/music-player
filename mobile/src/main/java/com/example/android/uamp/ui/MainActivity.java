@@ -143,9 +143,14 @@ public class MainActivity extends BaseActivity {
                     mViewPager.setCurrentItem(2);
                     break;
                 default:
-                    Intent intent = new Intent(this, MediaContainerActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
-                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
-                    startActivity(intent, options.toBundle());
+                    if (mediaId.startsWith(MediaIDHelper.MEDIA_ID_BY_ALBUM)) {
+                        Intent intent = new Intent(this, AlbumActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
+                        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
+                        startActivity(intent, options.toBundle());
+                    } else {
+                        Intent intent = new Intent(this, ArtistActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
+                        startActivity(intent);
+                    }
             }
     }
 

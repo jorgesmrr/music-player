@@ -40,8 +40,8 @@
             android:background="?colorPrimaryDark"
             android:orientation="vertical"
             android:paddingBottom="@dimen/margin_screen"
-            android:paddingLeft="@dimen/margin_screen"
-            android:paddingRight="@dimen/margin_screen"
+            android:paddingEnd="@dimen/margin_screen"
+            android:paddingStart="@dimen/list_item_text_margin_start"
             android:paddingTop="@dimen/margin_screen">
 
             <TextView
@@ -72,6 +72,17 @@
     </RelativeLayout>
 
     <include layout="@layout/include_toolbar" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:layout_marginStart="@dimen/margin_screen"
+        android:layout_marginTop="@dimen/fab_negative_margin"
+        android:src="@drawable/ic_shuffle_grey600_24dp"
+        app:borderWidth="0dp"
+        app:fabSize="mini" />
 
     <FrameLayout
         android:layout_width="match_parent"

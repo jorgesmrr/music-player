@@ -9,10 +9,10 @@
         android:id="@+id/icon"
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
-        android:padding="@dimen/icon_padding"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/list_item_icon_margin_start"
+        android:padding="@dimen/icon_padding"
         android:src="@drawable/ic_play_arrow_black_36dp"
         android:tint="@color/media_item_icon_not_playing"
         android:tintMode="src_in" />

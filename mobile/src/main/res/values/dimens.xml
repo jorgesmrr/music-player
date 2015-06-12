@@ -22,8 +22,10 @@
 
     <dimen name="touchable">48dp</dimen>
 
-    <dimen name="icon_size">48dp</dimen>
+    <dimen name="icon_size">40dp</dimen>
     <dimen name="icon_padding">12dp</dimen>
+
+    <dimen name="fab_negative_margin">-20dp</dimen>
 
     <!-- error infobar -->
     <dimen name="error_horizontal_padding">4dp</dimen>
