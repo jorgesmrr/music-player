@@ -32,7 +32,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.QueueItemHol
     @Override
     public QueueItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_song, parent, false);
+                .inflate(R.layout.list_item_two_lines_overflow, parent, false);
         QueueItemHolder holder = new QueueItemHolder(itemView);
 
         if (viewType == TYPE_CURRENT) {

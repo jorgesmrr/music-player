@@ -83,12 +83,12 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     .inflate(R.layout.list_header, parent, false));
         } else {
             int layout;
-            if (mMediaType == MEDIA_ALBUM || mMediaType == MEDIA_ARTIST)
+            if (mMediaType == MEDIA_ALBUM)
                 layout = R.layout.grid_item_album;
             else if (mMediaType == MEDIA_ALBUMS_SONGS && viewType == TYPE_NONE)
                 layout = R.layout.list_item_album;
             else
-                layout = R.layout.list_item_song;
+                layout = R.layout.list_item_two_lines_overflow;
 
             View itemView = LayoutInflater.from(mActivity)
                     .inflate(layout, parent, false);
@@ -98,6 +98,9 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 case TYPE_NONE:
                     switch (mMediaType) {
                         case MEDIA_ARTIST:
+                            holder.mImageView.setImageResource(R.drawable.ic_by_genre);
+                            holder.mOverflowView.setVisibility(View.GONE);
+                            break;
                         case MEDIA_ALBUM:
                         case MEDIA_ALBUMS_SONGS:
                             holder.mImageView.setImageResource(R.drawable.placeholder);
@@ -219,7 +222,6 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public RecyclerView.LayoutManager getSuitableLayoutManager(Activity activity) {
         switch (mMediaType) {
-            case MEDIA_ARTIST:
             case MEDIA_ALBUM:
                 return new GridLayoutManager(activity, activity.getResources().getInteger(R.integer.columns));
             default:

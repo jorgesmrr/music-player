@@ -306,7 +306,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             // Use result.detach to allow calling result.sendResult from another thread:
             result.detach();
 
-            mMusicProvider.retrieveMediaAsync(MusicService.this, new MusicProvider.Callback() {
+            mMusicProvider.retrieveMediaAsync(getContentResolver(), new MusicProvider.Callback() {
                 @Override
                 public void onMusicCatalogReady(boolean success) {
                     if (success) {
@@ -608,7 +608,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
 
             // Voice searches may occur before the media catalog has been
             // prepared. We only handle the search after the musicProvider is ready.
-            mMusicProvider.retrieveMediaAsync(MusicService.this, new MusicProvider.Callback() {
+            mMusicProvider.retrieveMediaAsync(getContentResolver(), new MusicProvider.Callback() {
                 @Override
                 public void onMusicCatalogReady(boolean success) {
                     mPlayingQueue = QueueHelper.getPlayingQueueFromSearch(query, extras,

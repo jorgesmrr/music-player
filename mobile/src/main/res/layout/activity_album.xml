@@ -80,7 +80,7 @@
         android:layout_below="@id/header"
         android:layout_marginStart="@dimen/margin_screen"
         android:layout_marginTop="@dimen/fab_negative_margin"
-        android:src="@drawable/ic_shuffle_grey600_24dp"
+        android:src="@drawable/ic_shuffle_white_24dp"
         app:borderWidth="0dp"
         app:fabSize="mini" />
 

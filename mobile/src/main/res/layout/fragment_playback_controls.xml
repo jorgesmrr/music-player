@@ -63,6 +63,7 @@
         android:layout_centerVertical="true"
         android:background="?android:selectableItemBackgroundBorderless"
         android:padding="@dimen/icon_padding"
+        android:layout_marginEnd="@dimen/margin_screen"
         android:src="@drawable/ic_pause_resume"
         android:tint="@android:color/black"
         android:tintMode="src_in" />

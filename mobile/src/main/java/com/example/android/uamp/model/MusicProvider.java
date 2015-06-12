@@ -227,7 +227,7 @@ public class MusicProvider {
      * Get the list of music tracks from a server and caches the track information
      * for future reference, keying tracks by musicId and grouping by genre.
      */
-    public void retrieveMediaAsync(final Context context, final Callback callback) {
+    public void retrieveMediaAsync(final ContentResolver contentResolver, final Callback callback) {
         LogHelper.d(TAG, "retrieveMediaAsync called");
         if (mCurrentState == State.INITIALIZED) {
             // Nothing to do, execute callback immediately
@@ -239,7 +239,7 @@ public class MusicProvider {
         new AsyncTask<Void, Void, State>() {
             @Override
             protected State doInBackground(Void... params) {
-                retrieveMedia(context);
+                retrieveMedia(contentResolver);
                 return mCurrentState;
             }
 
@@ -252,49 +252,77 @@ public class MusicProvider {
         }.execute();
     }
 
-    private synchronized void retrieveMedia(Context context) {
+    private synchronized void buildAlbumListById(ContentResolver contentResolver) {
+        mAlbumListById.clear();
+
+        Cursor cursor = contentResolver.query(
+                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+
+        // todo só adicionar álbuns das músicas
+        if (cursor.moveToFirst()) {
+            int idColumn = cursor.getColumnIndex(MediaStore.Audio.Albums._ID);
+            int titleColumn = cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM);
+            int artistColumn = cursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST);
+            int artColumn = cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
+            do {
+                String id = cursor.getString(idColumn);
+                String title = cursor.getString(titleColumn);
+                String artist = cursor.getString(artistColumn);
+                String artwork = cursor.getString(artColumn);
+                mAlbumListById.put(id, new Album(id, title, artist, artwork));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+    }
+
+    private synchronized void retrieveMedia(ContentResolver contentResolver) {
         try {
             if (mCurrentState == State.NON_INITIALIZED) {
                 mCurrentState = State.INITIALIZING;
 
-                ContentResolver contentResolver = context.getContentResolver();
-                Cursor musicCursor = contentResolver.query(
+                mMusicListById.clear();
+
+                Cursor cursor = contentResolver.query(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         null,
                         MediaStore.Audio.Media.IS_MUSIC + " != ?",
                         new String[]{"0"},
                         null);
 
-                if (musicCursor.moveToFirst()) {
-                    int idColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media._ID);
-                    int titleColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-                    int artistColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-                    int sourceColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-                    int albumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
-                    int albumIdColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
-                    int durationColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
-                    int trackNumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TRACK);
+                if (cursor.moveToFirst()) {
+                    int idColumn = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
+                    int titleColumn = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
+                    int artistColumn = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
+                    int sourceColumn = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+                    int albumColumn = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
+                    int albumIdColumn = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
+                    int durationColumn = cursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
+                    int trackNumColumn = cursor.getColumnIndex(MediaStore.Audio.Media.TRACK);
 
                     ConcurrentHashMap<String, List<MediaMetadata>> newMusicListByArtist = new ConcurrentHashMap<>();
                     ConcurrentHashMap<String, List<MediaMetadata>> newMusicListByAlbum = new ConcurrentHashMap<>();
                     ConcurrentHashMap<String, List<String>> newAlbumListByArtist = new ConcurrentHashMap<>();
 
                     do {
-                        String musicId = musicCursor.getString(idColumn);
-                        String artist = musicCursor.getString(artistColumn);
-                        String album = musicCursor.getString(albumColumn);
-                        String albumId = musicCursor.getString(albumIdColumn);
+                        String musicId = cursor.getString(idColumn);
+                        String artist = cursor.getString(artistColumn);
+                        String album = cursor.getString(albumColumn);
+                        String albumId = cursor.getString(albumIdColumn);
 
                         MediaMetadata item = new MediaMetadata.Builder()
                                 .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, musicId)
-                                .putString(CUSTOM_METADATA_TRACK_SOURCE, musicCursor.getString(sourceColumn))
+                                .putString(CUSTOM_METADATA_TRACK_SOURCE, cursor.getString(sourceColumn))
                                 .putString(MediaMetadata.METADATA_KEY_ALBUM, album)
                                 .putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
-                                .putLong(MediaMetadata.METADATA_KEY_DURATION, musicCursor.getLong(durationColumn))
+                                .putLong(MediaMetadata.METADATA_KEY_DURATION, cursor.getLong(durationColumn))
                                         //todo .putString(MediaMetadata.METADATA_KEY_GENRE, "genero teste")
                                         //todo .putString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI, cursor.getString(idColumn))
-                                .putString(MediaMetadata.METADATA_KEY_TITLE, musicCursor.getString(titleColumn))
-                                .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, musicCursor.getInt(trackNumColumn))
+                                .putString(MediaMetadata.METADATA_KEY_TITLE, cursor.getString(titleColumn))
+                                .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, cursor.getInt(trackNumColumn))
                                         //todo .putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, 2)
                                 .build();
                         mMusicListById.put(musicId, new MutableMediaMetadata(musicId, item));
@@ -315,9 +343,6 @@ public class MusicProvider {
                         }
                         songsListByAlbum.add(item);
 
-                        if (!mAlbumListById.containsKey(albumId))
-                            mAlbumListById.put(albumId, new Album(album));
-
                         // Add this song's album to the respective artist
                         List<String> albumsList = newAlbumListByArtist.get(artist);
                         if (albumsList == null) {
@@ -326,14 +351,17 @@ public class MusicProvider {
                         }
                         albumsList.add(albumId);
 
-                    } while (musicCursor.moveToNext());
+                    } while (cursor.moveToNext());
 
                     // Update cache lists
                     mMusicListByArtist = newMusicListByArtist;
                     mMusicListByAlbum = newMusicListByAlbum;
                     mAlbumListByArtist = newAlbumListByArtist;
                 }
-                musicCursor.close();
+                cursor.close();
+
+                // Retrieve albums
+                buildAlbumListById(contentResolver);
 
                 mCurrentState = State.INITIALIZED;
             }
