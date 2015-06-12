@@ -26,6 +26,7 @@ import com.example.android.uamp.model.MusicProvider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_ALL;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_SEARCH;
@@ -177,14 +178,10 @@ public class QueueHelper {
     public static List<MediaSession.QueueItem> getRandomQueue(MusicProvider musicProvider) {
         List<MediaMetadata> result = new ArrayList<>();
 
-        /*todo for (String genre : musicProvider.getGenres()) {
-            Iterable<MediaMetadata> tracks = musicProvider.getMusicsByGenre(genre);
-            for (MediaMetadata track : tracks) {
-                if (ThreadLocalRandom.current().nextBoolean()) {
-                    result.add(track);
-                }
-            }
-        }*/
+        for (MediaMetadata track : musicProvider.getMusics())
+            if (ThreadLocalRandom.current().nextBoolean())
+                result.add(track);
+
         LogHelper.d(TAG, "getRandomQueue: result.size=", result.size());
 
         Collections.shuffle(result);

@@ -4,6 +4,9 @@
         android:id="@+id/add_queue"
         android:title="@string/add_queue" />
     <item
+        android:id="@+id/play_next"
+        android:title="@string/play_next" />
+    <item
         android:id="@+id/go_artist"
         android:title="@string/go_artist" />
     <item

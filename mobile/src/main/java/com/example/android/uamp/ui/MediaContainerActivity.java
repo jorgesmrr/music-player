@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
+import com.example.android.uamp.utils.MediaIDHelper;
 
 /**
  * Displays a fragment with the music tracks for the given media ID
@@ -102,6 +104,14 @@ public class MediaContainerActivity extends BaseActivity {
                 initializeFromParams(savedInstanceState, getIntent());
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        if (mMediaId.startsWith(MediaIDHelper.MEDIA_ID_BY_ALBUM))
+            getMenuInflater().inflate(R.menu.album, menu);
+        return true;
     }
 
     @Override

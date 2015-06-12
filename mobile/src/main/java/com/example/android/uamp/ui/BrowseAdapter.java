@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.android.uamp.R;
@@ -285,8 +286,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    int index = getMediaItemIndex(getAdapterPosition());
-                    mListener.onItemClick(mMediaItems.get(index), mImageView);
+                    mListener.onItemClick(mMediaItems.get(getMediaItemIndex(getAdapterPosition())), mImageView);
                 }
             });
 
@@ -294,7 +294,21 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 mOverflowView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        PopupMenu popupMenu = new PopupMenu(mActivity, mOverflowView);
+                        switch (mMediaType) {
+                            case MEDIA_ALBUM:
+                                popupMenu.inflate(R.menu.overflow_album);
+                                break;
+                            case MEDIA_SONG:
+                                popupMenu.inflate(R.menu.overflow_song);
+                                break;
+                            case MEDIA_ALBUMS_SONGS:
+                                if (mMediaItems.get(getMediaItemIndex(getAdapterPosition())).isPlayable())
+                                    popupMenu.inflate(R.menu.overflow_song);
+                                else
+                                    popupMenu.inflate(R.menu.overflow_album);
+                        }
+                        popupMenu.show();
                     }
                 });
         }

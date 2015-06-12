@@ -27,6 +27,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.SparseArray;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -78,6 +79,13 @@ public class MainActivity extends BaseActivity {
         if (savedInstanceState == null) {
             startFullScreenActivityIfNeeded(getIntent());
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
     }
 
     @Override
