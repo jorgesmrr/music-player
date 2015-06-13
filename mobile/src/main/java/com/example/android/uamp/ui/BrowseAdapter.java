@@ -109,7 +109,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     break;
                 case TYPE_PLAYABLE:
                     holder.mImageView.setImageDrawable(
-                            mActivity.getDrawable(R.drawable.ic_play_arrow_black_36dp));
+                            mActivity.getDrawable(R.drawable.ic_play_arrow_white_24dp));
                     holder.mImageView.setImageTintList(mColorStateNotPlaying);
                     if (mMediaType == MEDIA_ALBUMS_SONGS)
                         holder.mSubtitleView.setVisibility(View.GONE);

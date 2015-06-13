@@ -27,5 +27,6 @@ public class ArtistActivity extends MediaContainerActivity {
     @Override
     public void setMediaDescription(MediaDescription description) {
         mTitleView.setText(description.getTitle());
+        mSubtitleView.setText(description.getSubtitle());
     }
 }

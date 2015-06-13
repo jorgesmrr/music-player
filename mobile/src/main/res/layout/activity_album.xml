@@ -14,7 +14,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="2dp">
+        android:elevation="@dimen/elevation_toolbar">
 
         <com.example.android.uamp.ui.SquaredImageView
             android:id="@+id/art"
@@ -80,6 +80,7 @@
         android:layout_below="@id/header"
         android:layout_marginStart="@dimen/margin_screen"
         android:layout_marginTop="@dimen/fab_negative_margin"
+        android:elevation="@dimen/elevation_fab"
         android:src="@drawable/ic_shuffle_white_24dp"
         app:borderWidth="0dp"
         app:fabSize="mini" />

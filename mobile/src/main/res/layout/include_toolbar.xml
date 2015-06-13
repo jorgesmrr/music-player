@@ -7,7 +7,7 @@
     android:layout_alignParentStart="true"
     android:layout_alignParentTop="true"
     android:background="@null"
-    android:elevation="4dp"
+    android:elevation="@dimen/elevation_toolbar"
     android:minHeight="?attr/actionBarSize"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:contentInsetStart="72dp"

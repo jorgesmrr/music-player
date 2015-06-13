@@ -12,7 +12,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:background="?colorPrimaryDark"
-        android:elevation="4dp"
+        android:elevation="@dimen/elevation_toolbar"
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:contentInsetStart="72dp"
@@ -54,6 +54,7 @@
         android:elevation="5dp"
         android:src="@drawable/ic_shuffle_white_24dp"
         app:borderWidth="0dp"
+        app:elevation="@dimen/elevation_fab"
         app:fabSize="mini" />
 
     <FrameLayout

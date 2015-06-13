@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.android.uamp.R;
 import com.example.android.uamp.model.MusicProvider;
@@ -26,8 +25,6 @@ public class AlbumActivity extends MediaContainerActivity {
     private View mHeaderFill;
     private View mTopShadow;
 
-    private TextView mSubtitleView;
-
     private int mHeaderHeight;
     private int mActionBarHeight;
 
@@ -43,7 +40,6 @@ public class AlbumActivity extends MediaContainerActivity {
         mMinHeaderTranslation = getStatusBarHeight();
 
         // Find views
-        mSubtitleView = (TextView) findViewById(R.id.subtitle);
         mHeaderView = findViewById(R.id.header);
         mHeaderFill = mHeaderView.findViewById(R.id.header_fill);
         mHeaderImageView = (ImageView) mHeaderView.findViewById(R.id.art);

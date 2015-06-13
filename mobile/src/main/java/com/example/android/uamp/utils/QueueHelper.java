@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ALBUM;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ARTIST;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_ALL;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_SEARCH;
 
@@ -64,8 +66,16 @@ public class QueueHelper {
             String categoryValue = hierarchy[1];
             LogHelper.d(TAG, "Creating playing queue for ", categoryType, ",  ", categoryValue);
 
-            if (categoryType.equals(MEDIA_ID_MUSICS_BY_SEARCH)) {
-                tracks = musicProvider.searchMusicBySongTitle(categoryValue);
+            switch (categoryType) {
+                case MEDIA_ID_BY_ALBUM:
+                    tracks = musicProvider.getMusicsByAlbum(categoryValue);
+                    break;
+                case MEDIA_ID_BY_ARTIST:
+                    tracks = musicProvider.getMusicsByArtist(categoryValue);
+                    break;
+                case MEDIA_ID_MUSICS_BY_SEARCH:
+                    tracks = musicProvider.searchMusicBySongTitle(categoryValue);
+                    break;
             }
 
             if (tracks == null) {

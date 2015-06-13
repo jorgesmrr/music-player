@@ -23,6 +23,7 @@ public abstract class MediaContainerActivity extends BaseActivity {
 
     private String mMediaId;
     protected TextView mTitleView;
+    protected TextView mSubtitleView;
     protected FloatingActionButton mFab;
 
     @Override
@@ -39,6 +40,7 @@ public abstract class MediaContainerActivity extends BaseActivity {
         getSupportActionBar().setTitle("");
 
         mTitleView = (TextView) findViewById(R.id.title);
+        mSubtitleView = (TextView) findViewById(R.id.subtitle);
         mFab = (FloatingActionButton) findViewById(R.id.fab);
     }
 

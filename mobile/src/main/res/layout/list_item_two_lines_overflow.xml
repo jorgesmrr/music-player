@@ -13,7 +13,6 @@
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/list_item_icon_margin_start"
         android:padding="@dimen/icon_padding"
-        android:src="@drawable/ic_play_arrow_black_36dp"
         android:tint="@color/media_item_icon_not_playing"
         android:tintMode="src_in" />
 

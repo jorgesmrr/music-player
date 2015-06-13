@@ -52,4 +52,8 @@
 
     <!-- Animation -->
     <dimen name="top_anim_height">84dp</dimen>
+
+    <!-- Elevation -->
+    <dimen name="elevation_fab">5dp</dimen>
+    <dimen name="elevation_toolbar">4dp</dimen>
 </resources>
