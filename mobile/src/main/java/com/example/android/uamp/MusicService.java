@@ -34,6 +34,7 @@ import android.os.SystemClock;
 import android.service.media.MediaBrowserService;
 import android.support.v7.media.MediaRouter;
 
+import com.example.android.uamp.model.Album;
 import com.example.android.uamp.model.MusicProvider;
 import com.example.android.uamp.ui.NowPlayingActivity;
 import com.example.android.uamp.utils.CarHelper;
@@ -387,11 +388,16 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             LogHelper.d(TAG, "OnLoadChildren.ALBUMS");
             for (String albumId : mMusicProvider.getAlbums()) {
                 int songsCount = mMusicProvider.getMusicsByAlbum(albumId).size();
+                Album album = mMusicProvider.getAlbum(albumId);
+                Bundle extras = new Bundle();
+                extras.putString(MusicProvider.ALBUM_EXTRA_ARTWORK, album.getArtwork());
+                extras.putString(MusicProvider.ALBUM_EXTRA_ARTIST, album.getArtist());
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
                                 .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId))
-                                .setTitle(mMusicProvider.getAlbum(albumId).getTitle())
+                                .setTitle(album.getTitle())
                                 .setSubtitle(getResources().getQuantityString(R.plurals.n_songs, songsCount, songsCount))
+                                .setExtras(extras)
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
                 mediaItems.add(item);
@@ -419,11 +425,16 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             // Add artist's albums to this category
             for (String albumId : mMusicProvider.getAlbumsByArtist(artist)) {
                 int songsCount = mMusicProvider.getMusicsByAlbum(albumId).size();
+                Album album = mMusicProvider.getAlbum(albumId);
+                Bundle extras = new Bundle();
+                extras.putString(MusicProvider.ALBUM_EXTRA_ARTWORK, album.getArtwork());
+                extras.putString(MusicProvider.ALBUM_EXTRA_ARTIST, album.getArtist());
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
                                 .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId))
-                                .setTitle(mMusicProvider.getAlbum(albumId).getTitle())
+                                .setTitle(album.getTitle())
                                 .setSubtitle(getResources().getQuantityString(R.plurals.n_songs, songsCount, songsCount))
+                                .setExtras(extras)
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
                 mediaItems.add(item);

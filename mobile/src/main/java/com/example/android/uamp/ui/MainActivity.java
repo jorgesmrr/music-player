@@ -15,10 +15,10 @@
  */
 package com.example.android.uamp.ui;
 
-import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaDescription;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
@@ -143,14 +143,7 @@ public class MainActivity extends BaseActivity {
                     mViewPager.setCurrentItem(2);
                     break;
                 default:
-                    if (mediaId.startsWith(MediaIDHelper.MEDIA_ID_BY_ALBUM)) {
-                        Intent intent = new Intent(this, AlbumActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
-                        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
-                        startActivity(intent, options.toBundle());
-                    } else {
-                        Intent intent = new Intent(this, ArtistActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
-                        startActivity(intent);
-                    }
+                    super.navigateToBrowser(mediaId, sharedElement);
             }
     }
 
@@ -173,7 +166,7 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public void setMediaTitle(CharSequence title) {
+    public void setMediaDescription(MediaDescription description) {
         // No need to show the media title
     }
 

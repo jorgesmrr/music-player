@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.media.MediaMetadata;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import com.example.android.uamp.utils.LogHelper;
 
@@ -41,6 +42,9 @@ public class MusicProvider {
     private static final String TAG = LogHelper.makeLogTag(MusicProvider.class);
 
     public static final String CUSTOM_METADATA_TRACK_SOURCE = "__SOURCE__";
+
+    public static final String ALBUM_EXTRA_ARTIST = "artist";
+    public static final String ALBUM_EXTRA_ARTWORK = "artwork";
 
     // Categorized caches for music track data:
     private ConcurrentMap<String, List<MediaMetadata>> mMusicListByAlbum; // <albumId, music>
@@ -262,7 +266,7 @@ public class MusicProvider {
                 null,
                 null);
 
-        // todo só adicionar álbuns das músicas
+        // todo only add albums from our songs
         if (cursor.moveToFirst()) {
             int idColumn = cursor.getColumnIndex(MediaStore.Audio.Albums._ID);
             int titleColumn = cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM);

@@ -1,5 +1,6 @@
 package com.example.android.uamp.ui;
 
+import android.media.MediaDescription;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -8,8 +9,10 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.android.uamp.R;
+import com.example.android.uamp.model.MusicProvider;
 
 /**
  * Created by Jorge Augusto da Silva Moreira on 12/06/2015.
@@ -22,6 +25,8 @@ public class AlbumActivity extends MediaContainerActivity {
     private View mHeaderView;
     private View mHeaderFill;
     private View mTopShadow;
+
+    private TextView mSubtitleView;
 
     private int mHeaderHeight;
     private int mActionBarHeight;
@@ -38,6 +43,7 @@ public class AlbumActivity extends MediaContainerActivity {
         mMinHeaderTranslation = getStatusBarHeight();
 
         // Find views
+        mSubtitleView = (TextView) findViewById(R.id.subtitle);
         mHeaderView = findViewById(R.id.header);
         mHeaderFill = mHeaderView.findViewById(R.id.header_fill);
         mHeaderImageView = (ImageView) mHeaderView.findViewById(R.id.art);
@@ -135,4 +141,10 @@ public class AlbumActivity extends MediaContainerActivity {
             }
         }
     };
+
+    @Override
+    public void setMediaDescription(MediaDescription description) {
+        mTitleView.setText(description.getTitle());
+        mSubtitleView.setText(description.getExtras().getString(MusicProvider.ALBUM_EXTRA_ARTIST));
+    }
 }

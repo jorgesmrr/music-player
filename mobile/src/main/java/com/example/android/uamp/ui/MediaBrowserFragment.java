@@ -16,6 +16,7 @@
 package com.example.android.uamp.ui;
 
 import android.app.Activity;
+import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
@@ -259,8 +260,8 @@ public class MediaBrowserFragment extends Fragment {
                             LogHelper.d(TAG, "child ", item.getMediaId());
                             if (item.getMediaId().equals(mMediaId)) {
                                 if (mMediaFragmentListener != null) {
-                                    mMediaFragmentListener.setMediaTitle(
-                                            item.getDescription().getTitle());
+                                    mMediaFragmentListener.setMediaDescription(
+                                            item.getDescription());
                                 }
                                 return;
                             }
@@ -281,7 +282,7 @@ public class MediaBrowserFragment extends Fragment {
     public interface MediaBrowserListener extends MediaBrowserProvider {
         void onMediaItemSelected(MediaBrowser.MediaItem item, View sharedElement);
 
-        void setMediaTitle(CharSequence title);
+        void setMediaDescription(MediaDescription description);
     }
 
 }

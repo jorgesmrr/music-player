@@ -7,13 +7,13 @@ public class Album {
     private final String id;
     private final String title;
     private final String artist;
-    private final String art;
+    private final String artwork;
 
-    public Album(String id, String title, String artist, String art) {
+    public Album(String id, String title, String artist, String artwork) {
         this.id = id;
         this.title = title;
         this.artist = artist;
-        this.art = art;
+        this.artwork = artwork;
     }
 
     public String getTitle() {
@@ -28,7 +28,7 @@ public class Album {
         return artist;
     }
 
-    public String getArt() {
-        return art;
+    public String getArtwork() {
+        return artwork;
     }
 }

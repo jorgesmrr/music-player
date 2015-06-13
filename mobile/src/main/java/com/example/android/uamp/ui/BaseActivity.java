@@ -16,6 +16,7 @@
 package com.example.android.uamp.ui;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -30,7 +31,7 @@ import android.view.View;
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
-import com.example.android.uamp.utils.NetworkHelper;
+import com.example.android.uamp.utils.MediaIDHelper;
 import com.example.android.uamp.utils.ResourceHelper;
 
 /**
@@ -52,15 +53,15 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
         // Since our app icon has the same color as colorPrimary, our entry in the Recent Apps
         // list gets weird. We need to change either the icon or the color of the TaskDescription.
         ActivityManager.TaskDescription taskDesc = new ActivityManager.TaskDescription(
-            getTitle().toString(),
-            BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher_white),
-            ResourceHelper.getThemeColor(this, R.attr.colorPrimary, android.R.color.darker_gray));
+                getTitle().toString(),
+                BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher_white),
+                ResourceHelper.getThemeColor(this, R.attr.colorPrimary, android.R.color.darker_gray));
         setTaskDescription(taskDesc);
 
         // Connect a media browser just to get the media session token. There are other ways
         // this can be done, for example by sharing the session token directly.
         mMediaBrowser = new MediaBrowser(this,
-            new ComponentName(this, MusicService.class), mConnectionCallback, null);
+                new ComponentName(this, MusicService.class), mConnectionCallback, null);
     }
 
     @Override
@@ -69,7 +70,7 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
         LogHelper.d(TAG, "Activity onStart");
 
         mControlsFragment = (PlaybackControlsFragment) getFragmentManager()
-            .findFragmentById(R.id.fragment_playback_controls);
+                .findFragmentById(R.id.fragment_playback_controls);
         if (mControlsFragment == null) {
             throw new IllegalStateException("Mising fragment with id 'controls'. Cannot continue.");
         }
@@ -119,21 +120,19 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
 
     protected void showPlaybackControls() {
         LogHelper.d(TAG, "showPlaybackControls");
-        if (NetworkHelper.isOnline(this)) {
-            getFragmentManager().beginTransaction()
+        getFragmentManager().beginTransaction()
                 .setCustomAnimations(
-                    R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom,
-                    R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom)
+                        R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom,
+                        R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom)
                 .show(mControlsFragment)
                 .commit();
-        }
     }
 
     protected void hidePlaybackControls() {
         LogHelper.d(TAG, "hidePlaybackControls");
         getFragmentManager().beginTransaction()
-            .hide(mControlsFragment)
-            .commit();
+                .hide(mControlsFragment)
+                .commit();
     }
 
     /**
@@ -145,8 +144,8 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
     protected boolean shouldShowControls() {
         MediaController mediaController = getMediaController();
         if (mediaController == null ||
-            mediaController.getMetadata() == null ||
-            mediaController.getPlaybackState() == null) {
+                mediaController.getMetadata() == null ||
+                mediaController.getPlaybackState() == null) {
             return false;
         }
         switch (mediaController.getPlaybackState().getState()) {
@@ -168,7 +167,7 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
             showPlaybackControls();
         } else {
             LogHelper.d(TAG, "connectionCallback.onConnected: " +
-                "hiding controls because metadata is null");
+                    "hiding controls because metadata is null");
             hidePlaybackControls();
         }
 
@@ -181,46 +180,55 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
 
     // Callback that ensures that we are showing the controls
     private final MediaController.Callback mMediaControllerCallback =
-        new MediaController.Callback() {
-            @Override
-            public void onPlaybackStateChanged(PlaybackState state) {
-                if (shouldShowControls()) {
-                    showPlaybackControls();
-                } else {
-                    LogHelper.d(TAG, "mediaControllerCallback.onPlaybackStateChanged: " +
-                            "hiding controls because state is ",
-                        state == null ? "null" : state.getState());
-                    hidePlaybackControls();
+            new MediaController.Callback() {
+                @Override
+                public void onPlaybackStateChanged(PlaybackState state) {
+                    if (shouldShowControls()) {
+                        showPlaybackControls();
+                    } else {
+                        LogHelper.d(TAG, "mediaControllerCallback.onPlaybackStateChanged: " +
+                                        "hiding controls because state is ",
+                                state == null ? "null" : state.getState());
+                        hidePlaybackControls();
+                    }
                 }
-            }
 
-            @Override
-            public void onMetadataChanged(MediaMetadata metadata) {
-                if (shouldShowControls()) {
-                    showPlaybackControls();
-                } else {
-                    LogHelper.d(TAG, "mediaControllerCallback.onMetadataChanged: " +
-                        "hiding controls because metadata is null");
-                    hidePlaybackControls();
+                @Override
+                public void onMetadataChanged(MediaMetadata metadata) {
+                    if (shouldShowControls()) {
+                        showPlaybackControls();
+                    } else {
+                        LogHelper.d(TAG, "mediaControllerCallback.onMetadataChanged: " +
+                                "hiding controls because metadata is null");
+                        hidePlaybackControls();
+                    }
                 }
-            }
-        };
+            };
 
     private MediaBrowser.ConnectionCallback mConnectionCallback =
-        new MediaBrowser.ConnectionCallback() {
-            @Override
-            public void onConnected() {
-                LogHelper.d(TAG, "onConnected");
+            new MediaBrowser.ConnectionCallback() {
+                @Override
+                public void onConnected() {
+                    LogHelper.d(TAG, "onConnected");
 
-                MediaSession.Token token = mMediaBrowser.getSessionToken();
-                if (token == null) {
-                    throw new IllegalArgumentException("No Session token");
+                    MediaSession.Token token = mMediaBrowser.getSessionToken();
+                    if (token == null) {
+                        throw new IllegalArgumentException("No Session token");
+                    }
+                    connectToSession(token);
                 }
-                connectToSession(token);
-            }
-        };
+            };
 
     protected abstract void initializeFromParams(Bundle savedInstanceState, Intent intent);
 
-    protected abstract void navigateToBrowser(String mediaId, View sharedElement);
+    protected void navigateToBrowser(String mediaId, View sharedElement) {
+        if (mediaId.startsWith(MediaIDHelper.MEDIA_ID_BY_ALBUM)) {
+            Intent intent = new Intent(this, AlbumActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
+            startActivity(intent, options.toBundle());
+        } else {
+            Intent intent = new Intent(this, ArtistActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
+            startActivity(intent);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.android.uamp.ui;
 
+import android.media.MediaDescription;
 import android.os.Bundle;
 
 import com.example.android.uamp.R;
@@ -21,5 +22,10 @@ public class ArtistActivity extends MediaContainerActivity {
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.container, MediaBrowserFragment.newInstance(mediaId), BROWSE_FRAG_TAG)
                 .commit();
+    }
+
+    @Override
+    public void setMediaDescription(MediaDescription description) {
+        mTitleView.setText(description.getTitle());
     }
 }

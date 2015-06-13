@@ -1,6 +1,5 @@
 package com.example.android.uamp.ui;
 
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -34,7 +33,7 @@ public abstract class MediaContainerActivity extends BaseActivity {
         super.onSaveInstanceState(outState);
     }
 
-    protected void initializeViews(){
+    protected void initializeViews() {
         initializeToolbar(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
@@ -84,15 +83,8 @@ public abstract class MediaContainerActivity extends BaseActivity {
         if (mediaId.equals(mMediaId))
             openFragment(mediaId);
         else {
-            Intent intent = new Intent(this, MediaContainerActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
-            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
-            startActivity(intent, options.toBundle());
+            super.navigateToBrowser(mediaId, sharedElement);
         }
-    }
-
-    @Override
-    public void setMediaTitle(CharSequence title) {
-        mTitleView.setText(title);
     }
 
     protected abstract void openFragment(String mediaId);

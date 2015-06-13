@@ -23,7 +23,7 @@
     <dimen name="touchable">48dp</dimen>
 
     <dimen name="icon_size">40dp</dimen>
-    <dimen name="icon_padding">12dp</dimen>
+    <dimen name="icon_padding">8dp</dimen>
 
     <dimen name="fab_negative_margin">-20dp</dimen>
 
