@@ -27,8 +27,10 @@ public class MutableMediaMetadata {
 
     public MediaMetadata metadata;
     public final String trackId;
+    public final int albumId;
 
-    public MutableMediaMetadata(String trackId, MediaMetadata metadata) {
+    public MutableMediaMetadata(String trackId, int albumId, MediaMetadata metadata) {
+        this.albumId = albumId;
         this.metadata = metadata;
         this.trackId = trackId;
     }

@@ -18,6 +18,7 @@ package com.example.android.uamp.ui;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
@@ -32,7 +33,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.uamp.AlbumArtCache;
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
@@ -149,28 +149,9 @@ public class PlaybackControlsFragment extends Fragment {
             String artUrl = artUrlUri.toString();
             if (!TextUtils.equals(artUrl, mArtUrl)) {
                 mArtUrl = artUrl;
-                Bitmap art = metadata.getDescription().getIconBitmap();
-                AlbumArtCache cache = AlbumArtCache.getInstance();
-                if (art == null) {
-                    art = cache.getIconImage(mArtUrl);
-                }
-                if (art != null) {
+                Bitmap art = BitmapFactory.decodeFile(artUrl);
+                if (art != null)
                     mAlbumArt.setImageBitmap(art);
-                } else {
-                    cache.fetch(artUrl, new AlbumArtCache.FetchListener() {
-                                @Override
-                                public void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-                                    if (icon != null) {
-                                        LogHelper.d(TAG, "album art icon of w=", icon.getWidth(),
-                                                " h=", icon.getHeight());
-                                        if (isAdded()) {
-                                            mAlbumArt.setImageBitmap(icon);
-                                        }
-                                    }
-                                }
-                            }
-                    );
-                }
             }
         }
     }

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.MediaDescription;
+import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
@@ -11,6 +13,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -18,6 +21,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.android.uamp.R;
+import com.example.android.uamp.model.MusicProvider;
+import com.example.android.uamp.utils.FileBitmapWorkerTask;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
 
@@ -27,6 +32,7 @@ import java.util.TreeSet;
 
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ALBUM;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ARTIST;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_ALL;
 
 /**
  * An adapter for showing the list of browsed MediaItems
@@ -43,10 +49,12 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public static final int MEDIA_ARTIST = 1;
     public static final int MEDIA_ALBUM = 2;
     public static final int MEDIA_SONG = 3;
+    public static final int MEDIA_SONG_IN_ALBUM = 5;
     public static final int MEDIA_ALBUMS_SONGS = 4;
 
     private static final String TAG = LogHelper.makeLogTag(BrowseAdapter.class);
 
+    private final int mDefaultDarkVibrantColor;
     private ColorStateList mColorStatePlaying;
     private ColorStateList mColorStateNotPlaying;
     private Activity mActivity;
@@ -68,9 +76,12 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             mMediaType = MEDIA_ALBUMS_SONGS;
         else if (mediaId.equals(MEDIA_ID_BY_ALBUM))
             mMediaType = MEDIA_ALBUM;
-        else
+        else if (mediaId.equals(MEDIA_ID_MUSICS_ALL))
             mMediaType = MEDIA_SONG;
+        else
+            mMediaType = MEDIA_SONG_IN_ALBUM;
         mPlaceholderHeight = placeholderHeight;
+        mDefaultDarkVibrantColor = mActivity.getResources().getColor(R.color.default_dark_vibrant_color);
     }
 
     @Override
@@ -84,9 +95,11 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         } else {
             int layout;
             if (mMediaType == MEDIA_ALBUM)
-                layout = R.layout.grid_item_album;
+                layout = R.layout.grid_item_tile_album;
             else if (mMediaType == MEDIA_ALBUMS_SONGS && viewType == TYPE_NONE)
                 layout = R.layout.list_item_album;
+            else if (mMediaType == MEDIA_SONG_IN_ALBUM && viewType != TYPE_PLAYING && viewType != TYPE_PAUSED)
+                layout = R.layout.list_item_two_lines_overflow_number;
             else
                 layout = R.layout.list_item_two_lines_overflow;
 
@@ -103,14 +116,15 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             break;
                         case MEDIA_ALBUM:
                         case MEDIA_ALBUMS_SONGS:
-                            holder.mImageView.setImageResource(R.drawable.placeholder);
                             break;
                     }
                     break;
                 case TYPE_PLAYABLE:
-                    holder.mImageView.setImageDrawable(
-                            mActivity.getDrawable(R.drawable.ic_play_arrow_white_24dp));
-                    holder.mImageView.setImageTintList(mColorStateNotPlaying);
+                    if (mMediaType != MEDIA_SONG_IN_ALBUM) {
+                        holder.mImageView.setImageDrawable(
+                                mActivity.getDrawable(R.drawable.ic_play_arrow_white_24dp));
+                        holder.mImageView.setImageTintList(mColorStateNotPlaying);
+                    }
                     if (mMediaType == MEDIA_ALBUMS_SONGS)
                         holder.mSubtitleView.setVisibility(View.GONE);
                     break;
@@ -137,9 +151,26 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (holder instanceof MediaItemViewHolder) {
             MediaItemViewHolder mediaItemViewHolder = (MediaItemViewHolder) holder;
 
-            MediaBrowser.MediaItem item = mMediaItems.get(getMediaItemIndex(position));
-            mediaItemViewHolder.mTitleView.setText(item.getDescription().getTitle());
-            mediaItemViewHolder.mSubtitleView.setText(item.getDescription().getSubtitle());
+            MediaDescription description = mMediaItems.get(getMediaItemIndex(position)).getDescription();
+            mediaItemViewHolder.mTitleView.setText(description.getTitle());
+            mediaItemViewHolder.mSubtitleView.setText(description.getSubtitle());
+
+            if (description.getExtras() != null) {
+                if (mMediaType == MEDIA_ALBUM) {
+                    String artwork = description.getExtras().getString(MusicProvider.ALBUM_EXTRA_ARTWORK);
+                    mediaItemViewHolder.itemView.setBackgroundColor(mDefaultDarkVibrantColor);
+                    if (artwork != null)
+                        FileBitmapWorkerTask.loadBitmap(
+                                mActivity.getResources(),
+                                artwork,
+                                mediaItemViewHolder.mImageView,
+                                mMediaType == MEDIA_ALBUM ? mediaItemViewHolder.itemView : null);
+                    else {
+                        //todo mediaItemViewHolder.mImageView.setImageResource(R.drawable.placeholder);
+                    }
+                } else if (mMediaType == MEDIA_SONG_IN_ALBUM && mediaItemViewHolder.mExtraView != null)
+                    mediaItemViewHolder.mExtraView.setText(description.getExtras().getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, -1) + "");
+            }
         } else if (holder instanceof HeaderHolder) {
             String text;
             if (mMediaItems.get(getMediaItemIndex(position + 1)).isPlayable())
@@ -253,6 +284,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public interface OnItemClickListener {
         void onItemClick(MediaBrowser.MediaItem mediaItem, View sharedElement);
+        void onMenuItemClick(MenuItem item, MediaBrowser.MediaItem mediaItem);
     }
 
     protected class PlaceHolder extends RecyclerView.ViewHolder {
@@ -278,6 +310,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         ImageView mImageView;
         TextView mTitleView;
         TextView mSubtitleView;
+        TextView mExtraView;
         View mOverflowView;
 
         public MediaItemViewHolder(View itemView) {
@@ -286,6 +319,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             mTitleView = (TextView) itemView.findViewById(R.id.title);
             mSubtitleView = (TextView) itemView.findViewById(R.id.subtitle);
             mOverflowView = itemView.findViewById(R.id.overflow);
+            mExtraView = (TextView) itemView.findViewById(R.id.extra);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -299,10 +333,18 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     @Override
                     public void onClick(View v) {
                         PopupMenu popupMenu = new PopupMenu(mActivity, mOverflowView);
+                        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                mListener.onMenuItemClick(item, mMediaItems.get(getMediaItemIndex(getAdapterPosition())));
+                                return true;
+                            }
+                        });
                         switch (mMediaType) {
                             case MEDIA_ALBUM:
                                 popupMenu.inflate(R.menu.overflow_album);
                                 break;
+                            case MEDIA_SONG_IN_ALBUM:
                             case MEDIA_SONG:
                                 popupMenu.inflate(R.menu.overflow_song);
                                 break;

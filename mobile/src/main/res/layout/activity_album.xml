@@ -21,7 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/placeholder"
             android:transitionName="image"
             app:measure_with="width" />
 
@@ -37,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/art"
-            android:background="?colorPrimaryDark"
+            android:background="@color/default_dark_vibrant_color"
             android:orientation="vertical"
             android:paddingBottom="@dimen/margin_screen"
             android:paddingEnd="@dimen/margin_screen"
@@ -66,7 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/top_anim_height"
             android:layout_above="@+id/bar"
-            android:background="?colorPrimaryDark"
+            android:background="@color/default_dark_vibrant_color"
             android:visibility="invisible" />
 
     </RelativeLayout>
@@ -83,7 +82,8 @@
         android:elevation="@dimen/elevation_fab"
         android:src="@drawable/ic_shuffle_white_24dp"
         app:borderWidth="0dp"
-        app:fabSize="mini" />
+        app:fabSize="mini"
+        app:backgroundTint="@color/default_vibrant_color"/>
 
     <FrameLayout
         android:layout_width="match_parent"

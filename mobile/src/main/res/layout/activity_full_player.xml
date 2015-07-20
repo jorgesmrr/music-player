@@ -10,7 +10,6 @@
         android:layout_height="match_parent"
         android:elevation="@dimen/elevation_toolbar"
         android:scaleType="centerCrop"
-        android:src="@drawable/placeholder"
         android:transitionName="image"
         app:measure_with="width" />
 

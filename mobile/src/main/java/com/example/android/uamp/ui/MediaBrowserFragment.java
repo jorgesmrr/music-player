@@ -16,6 +16,7 @@
 package com.example.android.uamp.ui;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
@@ -25,10 +26,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
@@ -133,12 +136,42 @@ public class MediaBrowserFragment extends Fragment {
 
         mMediaId = getMediaId();
 
-        mBrowserAdapter = new BrowseAdapter(getActivity(), mMediaId, mHeaderHeight, new BrowseAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(MediaBrowser.MediaItem mediaItem, View sharedElement) {
-                mMediaFragmentListener.onMediaItemSelected(mediaItem, sharedElement);
-            }
-        });
+        mBrowserAdapter = new BrowseAdapter(
+                getActivity(),
+                mMediaId,
+                mHeaderHeight,
+                new BrowseAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(MediaBrowser.MediaItem mediaItem, View sharedElement) {
+                        mMediaFragmentListener.onMediaItemSelected(mediaItem, sharedElement);
+                    }
+
+                    @Override
+                    public void onMenuItemClick(MenuItem item, MediaBrowser.MediaItem mediaItem) {
+                        switch (item.getItemId()) {
+                            case R.id.add_queue:
+                                break;
+                            case R.id.go_album:
+                                getActivity().startService(new Intent(getActivity(), MusicService.class)
+                                        .setAction(MusicService.ACTION_CMD)
+                                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_GET_ALBUM)
+                                        .putExtra(MusicService.EXTRA_MEDIA_ID, mediaItem.getMediaId()));
+                                break;
+                            case R.id.go_artist:
+                                getActivity().startService(new Intent(getActivity(), MusicService.class)
+                                        .setAction(MusicService.ACTION_CMD)
+                                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_GET_ARTIST)
+                                        .putExtra(MusicService.EXTRA_MEDIA_ID, mediaItem.getMediaId()));
+                                break;
+                            case R.id.play_next:
+                                break;
+                            case R.id.shuffle_all:
+                                break;
+                            case R.id.delete:
+                                break;
+                        }
+                    }
+                });
 
         RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.list);
         recyclerView.setLayoutManager(mBrowserAdapter.getSuitableLayoutManager(getActivity()));

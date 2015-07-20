@@ -68,7 +68,7 @@ public class QueueHelper {
 
             switch (categoryType) {
                 case MEDIA_ID_BY_ALBUM:
-                    tracks = musicProvider.getMusicsByAlbum(categoryValue);
+                    tracks = musicProvider.getMusicsByAlbum(Integer.parseInt(categoryValue));
                     break;
                 case MEDIA_ID_BY_ARTIST:
                     tracks = musicProvider.getMusicsByArtist(categoryValue);

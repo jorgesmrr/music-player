@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="1dp"
+    android:foreground="?selectableItemBackground"
+    android:orientation="vertical">
+
+    <com.example.android.uamp.ui.SquaredImageView
+        android:id="@+id/icon"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        app:measure_with="width"
+        tools:src="@drawable/placeholder" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_view"
+        android:layout_marginRight="@dimen/margin_view"
+        android:layout_marginTop="@dimen/margin_view"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/primary_text_default_material_dark"
+        tools:text="Title" />
+
+    <TextView
+        android:id="@+id/subtitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/margin_view"
+        android:layout_marginLeft="@dimen/margin_view"
+        android:layout_marginRight="@dimen/margin_view"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/secondary_text_default_material_dark"
+        tools:text="Subtitle" />
+
+</LinearLayout>

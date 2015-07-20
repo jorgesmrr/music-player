@@ -22,7 +22,6 @@ import android.database.Cursor;
 import android.media.MediaMetadata;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import com.example.android.uamp.utils.LogHelper;
 
@@ -47,11 +46,11 @@ public class MusicProvider {
     public static final String ALBUM_EXTRA_ARTWORK = "artwork";
 
     // Categorized caches for music track data:
-    private ConcurrentMap<String, List<MediaMetadata>> mMusicListByAlbum; // <albumId, music>
+    private ConcurrentMap<Integer, List<MediaMetadata>> mMusicListByAlbum; // <albumId, music>
     private ConcurrentMap<String, List<MediaMetadata>> mMusicListByArtist; // <artistId, music>
     private final ConcurrentMap<String, MutableMediaMetadata> mMusicListById; // <musicId, music>
-    private ConcurrentMap<String, List<String>> mAlbumListByArtist; // <artistId, albumId>
-    private ConcurrentMap<String, Album> mAlbumListById; // <albumId, album>
+    private ConcurrentMap<String, List<Integer>> mAlbumListByArtist; // <artistId, albumId>
+    private ConcurrentMap<Integer, Album> mAlbumListById; // <albumId, album>
 
     private final Set<String> mFavoriteTracks;
 
@@ -73,7 +72,7 @@ public class MusicProvider {
         mFavoriteTracks = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     }
 
-    public Album getAlbum(String id) {
+    public Album getAlbum(int id) {
         return mAlbumListById.get(id);
     }
 
@@ -95,7 +94,7 @@ public class MusicProvider {
      *
      * @return genres
      */
-    public Iterable<String> getAlbums() {
+    public Iterable<Integer> getAlbums() {
         if (mCurrentState != State.INITIALIZED) {
             return Collections.emptyList();
         }
@@ -117,7 +116,7 @@ public class MusicProvider {
     /**
      * Get music tracks of the given album
      */
-    public List<MediaMetadata> getMusicsByAlbum(String album) {
+    public List<MediaMetadata> getMusicsByAlbum(int album) {
         if (mCurrentState != State.INITIALIZED || !mMusicListByAlbum.containsKey(album)) {
             return Collections.emptyList();
         }
@@ -137,7 +136,7 @@ public class MusicProvider {
     /**
      * Get albums of the given artist
      */
-    public List<String> getAlbumsByArtist(String artist) {
+    public List<Integer> getAlbumsByArtist(String artist) {
         if (mCurrentState != State.INITIALIZED || !mAlbumListByArtist.containsKey(artist)) {
             return Collections.emptyList();
         }
@@ -191,6 +190,10 @@ public class MusicProvider {
      */
     public MediaMetadata getMusic(String musicId) {
         return mMusicListById.containsKey(musicId) ? mMusicListById.get(musicId).metadata : null;
+    }
+
+    public int getAlbumIdFromMusic(String musicId) {
+        return mMusicListById.containsKey(musicId) ? mMusicListById.get(musicId).albumId : null;
     }
 
     public synchronized void updateMusic(Context context, String musicId, MediaMetadata metadata) {
@@ -273,7 +276,7 @@ public class MusicProvider {
             int artistColumn = cursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST);
             int artColumn = cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
             do {
-                String id = cursor.getString(idColumn);
+                int id = cursor.getInt(idColumn);
                 String title = cursor.getString(titleColumn);
                 String artist = cursor.getString(artistColumn);
                 String artwork = cursor.getString(artColumn);
@@ -289,6 +292,9 @@ public class MusicProvider {
                 mCurrentState = State.INITIALIZING;
 
                 mMusicListById.clear();
+
+                // Retrieve albums
+                buildAlbumListById(contentResolver);
 
                 Cursor cursor = contentResolver.query(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -308,30 +314,32 @@ public class MusicProvider {
                     int trackNumColumn = cursor.getColumnIndex(MediaStore.Audio.Media.TRACK);
 
                     ConcurrentHashMap<String, List<MediaMetadata>> newMusicListByArtist = new ConcurrentHashMap<>();
-                    ConcurrentHashMap<String, List<MediaMetadata>> newMusicListByAlbum = new ConcurrentHashMap<>();
-                    ConcurrentHashMap<String, List<String>> newAlbumListByArtist = new ConcurrentHashMap<>();
+                    ConcurrentHashMap<Integer, List<MediaMetadata>> newMusicListByAlbum = new ConcurrentHashMap<>();
+                    ConcurrentHashMap<String, List<Integer>> newAlbumListByArtist = new ConcurrentHashMap<>();
 
                     do {
                         String musicId = cursor.getString(idColumn);
                         String artist = cursor.getString(artistColumn);
                         String album = cursor.getString(albumColumn);
-                        String albumId = cursor.getString(albumIdColumn);
+                        int albumId = cursor.getInt(albumIdColumn);
 
-                        MediaMetadata item = new MediaMetadata.Builder()
+                        MediaMetadata.Builder itemBuilder = new MediaMetadata.Builder()
                                 .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, musicId)
                                 .putString(CUSTOM_METADATA_TRACK_SOURCE, cursor.getString(sourceColumn))
                                 .putString(MediaMetadata.METADATA_KEY_ALBUM, album)
                                 .putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
                                 .putLong(MediaMetadata.METADATA_KEY_DURATION, cursor.getLong(durationColumn))
-                                        //todo .putString(MediaMetadata.METADATA_KEY_GENRE, "genero teste")
-                                        //todo .putString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI, cursor.getString(idColumn))
                                 .putString(MediaMetadata.METADATA_KEY_TITLE, cursor.getString(titleColumn))
-                                .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, cursor.getInt(trackNumColumn))
-                                        //todo .putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, 2)
-                                .build();
-                        mMusicListById.put(musicId, new MutableMediaMetadata(musicId, item));
+                                .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, cursor.getInt(trackNumColumn));
 
-                        // Add this song to the respective album
+                        Album albumA = mAlbumListById.get(album);
+                        if (albumA != null)
+                            itemBuilder.putString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI, albumA.getArtwork());
+
+                        MediaMetadata item = itemBuilder.build();
+                        mMusicListById.put(musicId, new MutableMediaMetadata(musicId, albumId, item));
+
+                        // Add this song to the respective artist
                         List<MediaMetadata> songsListByArtist = newMusicListByArtist.get(artist);
                         if (songsListByArtist == null) {
                             songsListByArtist = new ArrayList<>();
@@ -348,12 +356,13 @@ public class MusicProvider {
                         songsListByAlbum.add(item);
 
                         // Add this song's album to the respective artist
-                        List<String> albumsList = newAlbumListByArtist.get(artist);
+                        List<Integer> albumsList = newAlbumListByArtist.get(artist);
                         if (albumsList == null) {
                             albumsList = new ArrayList<>();
                             newAlbumListByArtist.put(artist, albumsList);
                         }
-                        albumsList.add(albumId);
+                        if (!albumsList.contains(albumId))
+                            albumsList.add(albumId);
 
                     } while (cursor.moveToNext());
 
@@ -363,9 +372,6 @@ public class MusicProvider {
                     mAlbumListByArtist = newAlbumListByArtist;
                 }
                 cursor.close();
-
-                // Retrieve albums
-                buildAlbumListById(contentResolver);
 
                 mCurrentState = State.INITIALIZED;
             }

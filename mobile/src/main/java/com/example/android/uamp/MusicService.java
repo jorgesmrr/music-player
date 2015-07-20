@@ -32,10 +32,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.service.media.MediaBrowserService;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.media.MediaRouter;
 
 import com.example.android.uamp.model.Album;
 import com.example.android.uamp.model.MusicProvider;
+import com.example.android.uamp.ui.BaseActivity;
 import com.example.android.uamp.ui.NowPlayingActivity;
 import com.example.android.uamp.utils.CarHelper;
 import com.example.android.uamp.utils.LogHelper;
@@ -128,6 +130,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
     // A value of a CMD_NAME key that indicates that the music playback should switch
     // to local playback from cast playback.
     public static final String CMD_STOP_CASTING = "CMD_STOP_CASTING";
+    // A value of a CMD_NAME key that indicates that the album ID of a song should be returned.
+    public static final String CMD_GET_ALBUM = "CMD_GET_ALBUM";
+    // A value of a CMD_NAME key that indicates that the artist ID of a song should be returned.
+    public static final String CMD_GET_ARTIST = "CMD_GET_ARTIST";
+    // The key in the extras of the incoming Intent indicating the song's media ID
+    public static final String EXTRA_MEDIA_ID = "EXTRA_MEDIA_ID";
 
     private static final String TAG = LogHelper.makeLogTag(MusicService.class);
     // Action to thumbs up a media item
@@ -243,6 +251,17 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     }
                 } else if (CMD_STOP_CASTING.equals(command)) {
                     mCastManager.disconnect();
+                } else if (CMD_GET_ALBUM.equals(command)) {
+                    String songMediaID = MediaIDHelper.extractMusicIDFromMediaID(startIntent.getStringExtra(EXTRA_MEDIA_ID));
+                    int album = mMusicProvider.getAlbumIdFromMusic(songMediaID);
+                    String albumMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, album + "");
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, albumMediaId));
+                } else if (CMD_GET_ARTIST.equals(command)) {
+                    String songMediaID = MediaIDHelper.extractMusicIDFromMediaID(startIntent.getStringExtra(EXTRA_MEDIA_ID));
+                    MediaMetadata mediaMetadata = mMusicProvider.getMusic(songMediaID);
+                    String artistId = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+                    String artistMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ARTIST, artistId);
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, artistMediaId));
                 }
             }
         }
@@ -369,7 +388,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             LogHelper.d(TAG, "OnLoadChildren.ARTISTS");
             for (String artist : mMusicProvider.getArtists()) {
                 int songsCount = mMusicProvider.getMusicsByArtist(artist).size();
-                int albumsCount = mMusicProvider.getMusicsByArtist(artist).size();
+                int albumsCount = mMusicProvider.getAlbumsByArtist(artist).size();
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
                                 .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ARTIST, artist))
@@ -386,7 +405,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
 
         } else if (MEDIA_ID_BY_ALBUM.equals(parentMediaId)) {
             LogHelper.d(TAG, "OnLoadChildren.ALBUMS");
-            for (String albumId : mMusicProvider.getAlbums()) {
+            for (int albumId : mMusicProvider.getAlbums()) {
                 int songsCount = mMusicProvider.getMusicsByAlbum(albumId).size();
                 Album album = mMusicProvider.getAlbum(albumId);
                 Bundle extras = new Bundle();
@@ -394,7 +413,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 extras.putString(MusicProvider.ALBUM_EXTRA_ARTIST, album.getArtist());
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
-                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId))
+                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId + ""))
                                 .setTitle(album.getTitle())
                                 .setSubtitle(getResources().getQuantityString(R.plurals.n_songs, songsCount, songsCount))
                                 .setExtras(extras)
@@ -423,7 +442,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             String artist = MediaIDHelper.getHierarchy(parentMediaId)[1];
             LogHelper.d(TAG, "OnLoadChildren.ALBUMS_BY_ARTIST  artist=", artist);
             // Add artist's albums to this category
-            for (String albumId : mMusicProvider.getAlbumsByArtist(artist)) {
+            for (int albumId : mMusicProvider.getAlbumsByArtist(artist)) {
                 int songsCount = mMusicProvider.getMusicsByAlbum(albumId).size();
                 Album album = mMusicProvider.getAlbum(albumId);
                 Bundle extras = new Bundle();
@@ -431,7 +450,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 extras.putString(MusicProvider.ALBUM_EXTRA_ARTIST, album.getArtist());
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
-                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId))
+                                .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId + ""))
                                 .setTitle(album.getTitle())
                                 .setSubtitle(getResources().getQuantityString(R.plurals.n_songs, songsCount, songsCount))
                                 .setExtras(extras)
@@ -457,7 +476,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         } else if (parentMediaId.startsWith(MEDIA_ID_BY_ALBUM)) {
             String album = MediaIDHelper.getHierarchy(parentMediaId)[1];
             LogHelper.d(TAG, "OnLoadChildren.SONGS_BY_ALBUM  album=", album);
-            for (MediaMetadata track : mMusicProvider.getMusicsByAlbum(album)) {
+            for (MediaMetadata track : mMusicProvider.getMusicsByAlbum(Integer.parseInt(album))) {
                 // Since mediaMetadata fields are immutable, we need to create a copy, so we
                 // can set a hierarchy-aware mediaID. We will need to know the media hierarchy
                 // when we get a onPlayFromMusicID call, so we can create the proper queue based
@@ -467,8 +486,16 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 MediaMetadata trackCopy = new MediaMetadata.Builder(track)
                         .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
                         .build();
+                Bundle extras = new Bundle();
+                extras.putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, track.getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER));
                 MediaBrowser.MediaItem bItem = new MediaBrowser.MediaItem(
-                        trackCopy.getDescription(), MediaItem.FLAG_PLAYABLE);
+                        new MediaDescription.Builder()
+                                .setMediaId(trackCopy.getDescription().getMediaId())
+                                .setTitle(trackCopy.getDescription().getTitle())
+                                .setSubtitle(trackCopy.getDescription().getSubtitle())
+                                .setDescription(trackCopy.getDescription().getDescription())
+                                .setExtras(extras)
+                                .build(), MediaItem.FLAG_PLAYABLE);
                 mediaItems.add(bItem);
             }
         } else {

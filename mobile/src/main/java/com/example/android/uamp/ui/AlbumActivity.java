@@ -1,7 +1,11 @@
 package com.example.android.uamp.ui;
 
+import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaDescription;
 import android.os.Bundle;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
@@ -27,6 +31,7 @@ public class AlbumActivity extends MediaContainerActivity {
 
     private int mHeaderHeight;
     private int mActionBarHeight;
+    private View mHeaderBar;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -58,13 +63,13 @@ public class AlbumActivity extends MediaContainerActivity {
                 mTypedValue.data, getResources().getDisplayMetrics());
         mMinHeaderTranslation += mActionBarHeight;
 
-        final View bar = findViewById(R.id.bar);
-        bar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        mHeaderBar = findViewById(R.id.bar);
+        mHeaderBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                bar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                mHeaderBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                mMinHeaderTranslation += bar.getHeight();
+                mMinHeaderTranslation += mHeaderBar.getHeight();
             }
         });
 
@@ -142,5 +147,22 @@ public class AlbumActivity extends MediaContainerActivity {
     public void setMediaDescription(MediaDescription description) {
         mTitleView.setText(description.getTitle());
         mSubtitleView.setText(description.getExtras().getString(MusicProvider.ALBUM_EXTRA_ARTIST));
+        String artwork = description.getExtras().getString(MusicProvider.ALBUM_EXTRA_ARTWORK);
+        if (artwork != null) {
+            Bitmap art = BitmapFactory.decodeFile(artwork);
+            mHeaderImageView.setImageBitmap(art);
+            new Palette.Builder(art).generate(new Palette.PaletteAsyncListener() {
+                @Override
+                public void onGenerated(Palette palette) {
+                    int darkVibrantColor = palette.getDarkVibrantColor(getResources().getColor(R.color.default_dark_vibrant_color));
+                    mHeaderBar.setBackgroundColor(darkVibrantColor);
+                    mHeaderFill.setBackgroundColor(darkVibrantColor);
+                    ColorStateList stateList = new ColorStateList(new int[][]{new int[]{}}, new int[]{palette.getVibrantColor(getResources().getColor(R.color.default_vibrant_color))});
+                    mFab.setBackgroundTintList(stateList);
+                }
+            });
+        } else {
+            //todo mHeaderImageView.setImageResource(R.drawable.placeholder);
+        }
     }
 }

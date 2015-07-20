@@ -16,9 +16,11 @@
 package com.example.android.uamp.ui;
 
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
@@ -26,6 +28,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
 import com.example.android.uamp.MusicService;
@@ -40,9 +43,11 @@ import com.example.android.uamp.utils.ResourceHelper;
 public abstract class BaseActivity extends ActionBarCastActivity implements MediaBrowserFragment.MediaBrowserListener {
 
     private static final String TAG = LogHelper.makeLogTag(BaseActivity.class);
+    public static final String ACTION_OPEN_MEDIA_ID = "ACTION_OPEN_MEDIA_ID";
 
     private MediaBrowser mMediaBrowser;
     private PlaybackControlsFragment mControlsFragment;
+    BroadcastReceiver mBroadcastReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,6 +67,20 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
         // this can be done, for example by sharing the session token directly.
         mMediaBrowser = new MediaBrowser(this,
                 new ComponentName(this, MusicService.class), mConnectionCallback, null);
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent startIntent) {
+                if (startIntent != null) {
+                    String action = startIntent.getAction();
+                    String mediaId = startIntent.getStringExtra(MusicService.EXTRA_MEDIA_ID);
+                    if (ACTION_OPEN_MEDIA_ID.equals(action))
+                        navigateToBrowser(mediaId, null);
+                }
+            }
+        };
+
+        LocalBroadcastManager.getInstance(this).registerReceiver((mBroadcastReceiver), new IntentFilter(ACTION_OPEN_MEDIA_ID));
     }
 
     @Override
@@ -81,6 +100,12 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver((mBroadcastReceiver), new IntentFilter(ACTION_OPEN_MEDIA_ID));
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
         LogHelper.d(TAG, "onNewIntent, intent=" + intent);
         initializeFromParams(null, intent);
@@ -94,6 +119,7 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
             getMediaController().unregisterCallback(mMediaControllerCallback);
         }
         mMediaBrowser.disconnect();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
@@ -108,7 +134,7 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
             getMediaController().getTransportControls().playFromMediaId(item.getMediaId(), null);
         } else if (item.isBrowsable()) {
             //todo randomize
-            sharedElement.setTransitionName("image");
+            //todo sharedElement.setTransitionName("image");
             navigateToBrowser(item.getMediaId(), sharedElement);
         } else {
             LogHelper.w(TAG, "Ignoring MediaItem that is neither browsable nor playable: ",
@@ -224,8 +250,8 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
     protected void navigateToBrowser(String mediaId, View sharedElement) {
         if (mediaId.startsWith(MediaIDHelper.MEDIA_ID_BY_ALBUM)) {
             Intent intent = new Intent(this, AlbumActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
-            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
-            startActivity(intent, options.toBundle());
+            //todo ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
+            startActivity(intent/*todo, options.toBundle()*/);
         } else {
             Intent intent = new Intent(this, ArtistActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
             startActivity(intent);

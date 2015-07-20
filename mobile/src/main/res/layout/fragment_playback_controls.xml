@@ -11,8 +11,7 @@
         android:layout_height="@dimen/playback_controls_height"
         android:layout_alignParentStart="true"
         android:scaleType="centerCrop"
-        android:src="@drawable/placeholder"
-        tools:src="@drawable/ic_launcher" />
+        tools:src="@drawable/placeholder" />
 
     <LinearLayout
         android:id="@+id/content"

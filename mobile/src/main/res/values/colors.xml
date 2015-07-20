@@ -16,4 +16,6 @@
     <color name="background_gradient_start">#000000</color>
     <color name="background_gradient_end">#DDDDDD</color>
     <color name="default_background">#0096a6</color>
+    <color name="default_dark_vibrant_color">#424242</color>
+    <color name="default_vibrant_color">#212121</color>
 </resources>

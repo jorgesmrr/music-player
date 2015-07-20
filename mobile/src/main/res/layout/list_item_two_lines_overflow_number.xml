@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/list_item_height"
+    android:background="?selectableItemBackground">
+
+    <TextView
+        android:id="@+id/extra"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/list_item_icon_margin_start"
+        android:gravity="center_horizontal"
+        android:minEms="1"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="@dimen/abc_text_size_headline_material" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/list_item_text_margin_start"
+        android:layout_toStartOf="@+id/overflow"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?android:attr/textColorPrimary"
+            tools:text="Title" />
+
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="Subtitle" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/overflow"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:background="?selectableItemBackgroundBorderless"
+        android:padding="@dimen/icon_padding"
+        android:src="@drawable/ic_more_vert_grey600_24dp" />
+
+</RelativeLayout>
