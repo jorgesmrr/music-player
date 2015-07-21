@@ -90,7 +90,7 @@ public class PlaybackControlsFragment extends Fragment {
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), FullScreenPlayerActivity.class);
+                Intent intent = new Intent(getActivity(), PlayerActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 MediaMetadata metadata = getActivity().getMediaController().getMetadata();
                 if (metadata != null) {

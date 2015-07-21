@@ -6,4 +6,10 @@
         android:title="@string/show_queue"
         android:icon="@drawable/ic_queue_music_white_24dp"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/go_artist"
+        android:title="@string/go_artist" />
+    <item
+        android:id="@+id/go_album"
+        android:title="@string/go_album" />
 </menu>

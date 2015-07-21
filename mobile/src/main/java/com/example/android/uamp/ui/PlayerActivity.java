@@ -18,6 +18,7 @@ package com.example.android.uamp.ui;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
@@ -35,10 +36,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.example.android.uamp.AlbumArtCache;
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
@@ -56,8 +57,8 @@ import static android.view.View.VISIBLE;
  * A full screen player that shows the current playing music with a background image
  * depicting the album art. The activity also has controls to seek/pause/play the audio.
  */
-public class FullScreenPlayerActivity extends ActionBarCastActivity {
-    private static final String TAG = LogHelper.makeLogTag(FullScreenPlayerActivity.class);
+public class PlayerActivity extends ActionBarCastActivity {
+    private static final String TAG = LogHelper.makeLogTag(PlayerActivity.class);
     private static final long PROGRESS_UPDATE_INTERNAL = 1000;
     private static final long PROGRESS_UPDATE_INITIAL_INTERVAL = 100;
 
@@ -71,7 +72,6 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
     private ImageView mArt;
 
 
-    private String mCurrentArtUrl;
     private Handler mHandler = new Handler();
     private MediaBrowser mMediaBrowser;
 
@@ -121,7 +121,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_full_player);
+        setContentView(R.layout.activity_player);
         initializeToolbar(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
@@ -204,6 +204,11 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
             }
         });
 
+        View topShadow = findViewById(R.id.shadow);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) topShadow.getLayoutParams();
+        params.height += getStatusBarHeight();
+        topShadow.setLayoutParams(params);
+
         // Only update from the intent if we are not recreating from a config change:
         if (savedInstanceState == null) {
             updateFromParams(getIntent());
@@ -222,10 +227,28 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item != null && item.getItemId() == R.id.show_queue) {
-            startActivity(new Intent(this, QueueActivity.class));
-            return true;
-        }
+        if (item != null)
+            switch (item.getItemId()) {
+                case R.id.show_queue:
+                    startActivity(new Intent(this, QueueActivity.class));
+                    return true;
+                case R.id.go_album:
+                    MediaMetadata metadata = getMediaController().getMetadata();
+                    if (metadata != null)
+                        startService(new Intent(this, MusicService.class)
+                                .setAction(MusicService.ACTION_CMD)
+                                .putExtra(MusicService.CMD_NAME, MusicService.CMD_GET_ALBUM)
+                                .putExtra(MusicService.EXTRA_MEDIA_ID, metadata.getDescription().getMediaId()));
+                    return true;
+                case R.id.go_artist:
+                    metadata = getMediaController().getMetadata();
+                    if (metadata != null)
+                        startService(new Intent(this, MusicService.class)
+                                .setAction(MusicService.ACTION_CMD)
+                                .putExtra(MusicService.CMD_NAME, MusicService.CMD_GET_ARTIST)
+                                .putExtra(MusicService.EXTRA_MEDIA_ID, metadata.getDescription().getMediaId()));
+                    return true;
+            }
         return super.onOptionsItemSelected(item);
     }
 
@@ -307,30 +330,12 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
     }
 
     private void fetchImageAsync(MediaDescription description) {
-        Uri artUrlUri = description.getIconUri();
-        if (artUrlUri != null) {
-            String artUrl = artUrlUri.toString();
-            mCurrentArtUrl = artUrl;
-            AlbumArtCache cache = AlbumArtCache.getInstance();
-            Bitmap art = cache.getBigImage(artUrl);
-            if (art == null) {
-                art = description.getIconBitmap();
-            }
+        Uri artUri = description.getIconUri();
+        if (artUri != null) {
+            String path = artUri.toString();
+            Bitmap art = BitmapFactory.decodeFile(path);
             if (art != null) {
-                // if we have the art cached or from the MediaDescription, use it:
                 mArt.setImageBitmap(art);
-            } else {
-                // otherwise, fetch a high res version and update:
-                cache.fetch(artUrl, new AlbumArtCache.FetchListener() {
-                    @Override
-                    public void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-                        // sanity check, in case a new fetch request has been done while
-                        // the previous hasn't yet returned:
-                        if (artUrl.equals(mCurrentArtUrl)) {
-                            mArt.setImageBitmap(bitmap);
-                        }
-                    }
-                });
             }
         }
     }

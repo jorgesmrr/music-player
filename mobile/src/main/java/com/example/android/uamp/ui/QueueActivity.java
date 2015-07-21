@@ -1,6 +1,7 @@
 package com.example.android.uamp.ui;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
@@ -65,6 +66,35 @@ public class QueueActivity extends ActionBarCastActivity {
                 MediaController.TransportControls controls =
                         getMediaController().getTransportControls();
                 controls.skipToQueueItem(queueItem.getQueueId());
+            }
+
+            @Override
+            public void onMenuItemClick(MenuItem item, int position) {
+                MediaSession.QueueItem queueItem;
+                switch (item.getItemId()) {
+                    case R.id.go_album:
+                        queueItem = mAdapter.getQueue().get(position);
+                        startService(new Intent(QueueActivity.this, MusicService.class)
+                                .setAction(MusicService.ACTION_CMD)
+                                .putExtra(MusicService.CMD_NAME, MusicService.CMD_GET_ALBUM)
+                                .putExtra(MusicService.EXTRA_MEDIA_ID, queueItem.getDescription().getMediaId()));
+                        break;
+                    case R.id.go_artist:
+                        queueItem = mAdapter.getQueue().get(position);
+                        startService(new Intent(QueueActivity.this, MusicService.class)
+                                .setAction(MusicService.ACTION_CMD)
+                                .putExtra(MusicService.CMD_NAME, MusicService.CMD_GET_ARTIST)
+                                .putExtra(MusicService.EXTRA_MEDIA_ID, queueItem.getDescription().getMediaId()));
+                        break;
+                    case R.id.remove_queue:
+                        startService(new Intent(QueueActivity.this, MusicService.class)
+                                .setAction(MusicService.ACTION_CMD)
+                                .putExtra(MusicService.CMD_NAME, MusicService.CMD_DEL_FROM_QUEUE)
+                                .putExtra(MusicService.EXTRA_QUEUE_INDEX, position));
+                        break;
+                    case R.id.delete:
+                        break;
+                }
             }
         });
 

@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaDescription;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
@@ -160,9 +161,9 @@ public class AlbumActivity extends MediaContainerActivity {
     public void setMediaDescription(MediaDescription description) {
         mTitleView.setText(description.getTitle());
         mSubtitleView.setText(description.getExtras().getString(MusicProvider.ALBUM_EXTRA_ARTIST));
-        String artwork = description.getExtras().getString(MusicProvider.ALBUM_EXTRA_ARTWORK);
-        if (artwork != null) {
-            Bitmap art = BitmapFactory.decodeFile(artwork);
+        Uri iconUri = description.getIconUri();
+        if (iconUri != null) {
+            Bitmap art = BitmapFactory.decodeFile(iconUri.toString());
             mHeaderImageView.setImageBitmap(art);
             new Palette.Builder(art).generate(new Palette.PaletteAsyncListener() {
                 @Override

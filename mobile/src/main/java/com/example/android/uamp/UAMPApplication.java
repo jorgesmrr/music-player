@@ -17,7 +17,7 @@ package com.example.android.uamp;
 
 import android.app.Application;
 
-import com.example.android.uamp.ui.FullScreenPlayerActivity;
+import com.example.android.uamp.ui.PlayerActivity;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 
 import static com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager.FEATURE_DEBUGGING;
@@ -33,7 +33,7 @@ public class UAMPApplication extends Application {
         super.onCreate();
         String applicationId = getResources().getString(R.string.cast_application_id);
         VideoCastManager castManager = VideoCastManager.initialize(
-                getApplicationContext(), applicationId, FullScreenPlayerActivity.class, null);
+                getApplicationContext(), applicationId, PlayerActivity.class, null);
         castManager.enableFeatures(FEATURE_WIFI_RECONNECT | FEATURE_DEBUGGING);
     }
 }

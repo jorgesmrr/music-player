@@ -42,7 +42,6 @@ public class MusicProvider {
     public static final String CUSTOM_METADATA_TRACK_SOURCE = "__SOURCE__";
 
     public static final String ALBUM_EXTRA_ARTIST = "artist";
-    public static final String ALBUM_EXTRA_ARTWORK = "artwork";
 
     // Categorized caches for music track data:
     private ConcurrentMap<Integer, List<MediaMetadata>> mMusicListByAlbum; // <albumId, music>
@@ -189,7 +188,7 @@ public class MusicProvider {
     }
 
     public int getAlbumIdFromMusic(String musicId) {
-        return mMusicListById.containsKey(musicId) ? mMusicListById.get(musicId).albumId : null;
+        return mMusicListById.containsKey(musicId) ? mMusicListById.get(musicId).albumId : -1;
     }
 
     public synchronized void updateMusic(Context context, String musicId, MediaMetadata metadata) {
@@ -316,7 +315,7 @@ public class MusicProvider {
                                 .putString(MediaMetadata.METADATA_KEY_TITLE, cursor.getString(titleColumn))
                                 .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, cursor.getInt(trackNumColumn));
 
-                        Album albumA = mAlbumListById.get(album);
+                        Album albumA = mAlbumListById.get(albumId);
                         if (albumA != null)
                             itemBuilder.putString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI, albumA.getArtwork());
 

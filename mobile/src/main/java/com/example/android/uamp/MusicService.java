@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
@@ -68,38 +69,38 @@ import static com.example.android.uamp.utils.MediaIDHelper.createBrowseCategoryM
  * user interfaces that need to interact with your media session, like Android Auto. You can
  * (should) also use the same service from your app's UI, which gives a seamless playback
  * experience to the user.
- * <p>
+ * <p/>
  * To implement a MediaBrowserService, you need to:
- * <p>
+ * <p/>
  * <ul>
- * <p>
+ * <p/>
  * <li> Extend {@link android.service.media.MediaBrowserService}, implementing the media browsing
  * related methods {@link android.service.media.MediaBrowserService#onGetRoot} and
  * {@link android.service.media.MediaBrowserService#onLoadChildren};
  * <li> In onCreate, start a new {@link android.media.session.MediaSession} and notify its parent
  * with the session's token {@link android.service.media.MediaBrowserService#setSessionToken};
- * <p>
+ * <p/>
  * <li> Set a callback on the
  * {@link android.media.session.MediaSession#setCallback(android.media.session.MediaSession.Callback)}.
  * The callback will receive all the user's actions, like play, pause, etc;
- * <p>
+ * <p/>
  * <li> Handle all the actual music playing using any method your app prefers (for example,
  * {@link android.media.MediaPlayer})
- * <p>
+ * <p/>
  * <li> Update playbackState, "now playing" metadata and queue, using MediaSession proper methods
  * {@link android.media.session.MediaSession#setPlaybackState(android.media.session.PlaybackState)}
  * {@link android.media.session.MediaSession#setMetadata(android.media.MediaMetadata)} and
  * {@link android.media.session.MediaSession#setQueue(java.util.List)})
- * <p>
+ * <p/>
  * <li> Declare and export the service in AndroidManifest with an intent receiver for the action
  * android.media.browse.MediaBrowserService
- * <p>
+ * <p/>
  * </ul>
- * <p>
+ * <p/>
  * To make your app compatible with Android Auto, you also need to:
- * <p>
+ * <p/>
  * <ul>
- * <p>
+ * <p/>
  * <li> Declare a meta-data tag in AndroidManifest.xml linking to a xml resource
  * with a &lt;automotiveApp&gt; root element. For a media app, this must include
  * an &lt;uses name="media"/&gt; element as a child.
@@ -110,7 +111,7 @@ import static com.example.android.uamp.utils.MediaIDHelper.createBrowseCategoryM
  * &lt;automotiveApp&gt;
  * &lt;uses name="media"/&gt;
  * &lt;/automotiveApp&gt;
- * <p>
+ * <p/>
  * </ul>
  *
  * @see <a href="README.md">README.md</a> for more details.
@@ -137,8 +138,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
     public static final String CMD_GET_ARTIST = "CMD_GET_ARTIST";
     // A value of a CMD_NAME key that indicates that a song should be added to the queue.
     public static final String CMD_ADD_TO_QUEUE = "CMD_ADD_TO_QUEUE";
+    // A value of a CMD_NAME key that indicates that a song should be removed from the queue.
+    public static final String CMD_DEL_FROM_QUEUE = "CMD_DEL_FROM_QUEUE";
     // The key in the extras of the incoming Intent indicating the song's media ID
     public static final String EXTRA_MEDIA_ID = "EXTRA_MEDIA_ID";
+    // The key in the extras of the incoming Intent indicating the song's index in the queue
+    public static final String EXTRA_QUEUE_INDEX = "EXTRA_QUEUE_INDEX";
     // The key in the extras of the incoming Intent indicating if we should add the song as the next
     public static final String EXTRA_PLAY_NEXT = "EXTRA_PLAY_NEXT";
 
@@ -257,13 +262,23 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 } else if (CMD_STOP_CASTING.equals(command)) {
                     mCastManager.disconnect();
                 } else if (CMD_GET_ALBUM.equals(command)) {
-                    String songMediaID = MediaIDHelper.extractMusicIDFromMediaID(startIntent.getStringExtra(EXTRA_MEDIA_ID));
+                    String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
+                    String songMediaID = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                    if (songMediaID == null)
+                        songMediaID = mediaId;
                     int album = mMusicProvider.getAlbumIdFromMusic(songMediaID);
+                    if (album == -1)
+                        return START_STICKY;
                     String albumMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, album + "");
                     LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, albumMediaId));
                 } else if (CMD_GET_ARTIST.equals(command)) {
-                    String songMediaID = MediaIDHelper.extractMusicIDFromMediaID(startIntent.getStringExtra(EXTRA_MEDIA_ID));
+                    String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
+                    String songMediaID = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                    if (songMediaID == null)
+                        songMediaID = mediaId;
                     MediaMetadata mediaMetadata = mMusicProvider.getMusic(songMediaID);
+                    if (mediaMetadata == null)
+                        return START_STICKY;
                     String artistId = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
                     String artistMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ARTIST, artistId);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, artistMediaId));
@@ -274,7 +289,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
 
                     if (musicId != null) {
                         // It's a song
-                        MediaMetadata track = mMusicProvider.getMusic(mediaId);
+                        MediaMetadata track = mMusicProvider.getMusic(musicId);
 
                         // We create a hierarchy-aware mediaID, so we know what the queue is about by looking
                         // at the QueueItem media IDs.
@@ -290,16 +305,24 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                         MediaSession.QueueItem item = new MediaSession.QueueItem(
                                 trackCopy.getDescription(), mPlayingQueue.size());
                         if (playNext)
-                            mPlayingQueue.add(1, item);
+                            mPlayingQueue.add(mCurrentIndexOnQueue + 1, item);
                         else
                             mPlayingQueue.add(item);
                         mSession.setQueue(mPlayingQueue);
                     } else {
                         // It's an album or artist
                         if (playNext)
-                            mPlayingQueue.addAll(1, QueueHelper.getPlayingQueue(mediaId, mMusicProvider));
+                            mPlayingQueue.addAll(mCurrentIndexOnQueue + 1, QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mPlayingQueue.size()));
                         else
-                            mPlayingQueue.addAll(QueueHelper.getPlayingQueue(mediaId, mMusicProvider));
+                            mPlayingQueue.addAll(QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mPlayingQueue.size()));
+                        mSession.setQueue(mPlayingQueue);
+                    }
+                } else if (CMD_DEL_FROM_QUEUE.equals(command)) {
+                    int indexToRemove = startIntent.getIntExtra(EXTRA_QUEUE_INDEX, -1);
+                    if (indexToRemove >= 0) {
+                        if (indexToRemove == mCurrentIndexOnQueue)
+                            mSession.getController().getTransportControls().skipToNext();
+                        mPlayingQueue.remove(indexToRemove);
                         mSession.setQueue(mPlayingQueue);
                     }
                 }
@@ -449,13 +472,13 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 int songsCount = mMusicProvider.getMusicsByAlbum(albumId).size();
                 Album album = mMusicProvider.getAlbum(albumId);
                 Bundle extras = new Bundle();
-                extras.putString(MusicProvider.ALBUM_EXTRA_ARTWORK, album.getArtwork());
                 extras.putString(MusicProvider.ALBUM_EXTRA_ARTIST, album.getArtist());
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
                                 .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId + ""))
                                 .setTitle(album.getTitle())
                                 .setSubtitle(getResources().getQuantityString(R.plurals.n_songs, songsCount, songsCount))
+                                .setIconUri(album.getArtwork() != null ? Uri.parse(album.getArtwork()) : null)
                                 .setExtras(extras)
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
@@ -486,13 +509,13 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 int songsCount = mMusicProvider.getMusicsByAlbum(albumId).size();
                 Album album = mMusicProvider.getAlbum(albumId);
                 Bundle extras = new Bundle();
-                extras.putString(MusicProvider.ALBUM_EXTRA_ARTWORK, album.getArtwork());
                 extras.putString(MusicProvider.ALBUM_EXTRA_ARTIST, album.getArtist());
                 MediaBrowser.MediaItem item = new MediaBrowser.MediaItem(
                         new MediaDescription.Builder()
                                 .setMediaId(createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, albumId + ""))
                                 .setTitle(album.getTitle())
                                 .setSubtitle(getResources().getQuantityString(R.plurals.n_songs, songsCount, songsCount))
+                                .setIconUri(album.getArtwork() != null ? Uri.parse(album.getArtwork()) : null)
                                 .setExtras(extras)
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
@@ -791,34 +814,30 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         if (track.getDescription().getIconBitmap() == null &&
                 track.getDescription().getIconUri() != null) {
             String albumUri = track.getDescription().getIconUri().toString();
-            AlbumArtCache.getInstance().fetch(albumUri, new AlbumArtCache.FetchListener() {
-                @Override
-                public void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-                    MediaSession.QueueItem queueItem = mPlayingQueue.get(mCurrentIndexOnQueue);
-                    MediaMetadata track = mMusicProvider.getMusic(trackId);
-                    track = new MediaMetadata.Builder(track)
+            //todo cache
+            Bitmap bitmap = BitmapFactory.decodeFile(albumUri);
 
-                            // set high resolution bitmap in METADATA_KEY_ALBUM_ART. This is used, for
-                            // example, on the lockscreen background when the media session is active.
-                            .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap)
+            track = new MediaMetadata.Builder(track)
 
-                                    // set small version of the album art in the DISPLAY_ICON. This is used on
-                                    // the MediaDescription and thus it should be small to be serialized if
-                                    // necessary..
-                            .putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, icon)
+                    // set high resolution bitmap in METADATA_KEY_ALBUM_ART. This is used, for
+                    // example, on the lockscreen background when the media session is active.
+                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap)
 
-                            .build();
+                            // set small version of the album art in the DISPLAY_ICON. This is used on
+                            // the MediaDescription and thus it should be small to be serialized if
+                            // necessary..
+                    .putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, Bitmap.createScaledBitmap(bitmap, 100, 100, false))
 
-                    mMusicProvider.updateMusic(MusicService.this, trackId, track);
+                    .build();
 
-                    // If we are still playing the same music
-                    String currentPlayingId = MediaIDHelper.extractMusicIDFromMediaID(
-                            queueItem.getDescription().getMediaId());
-                    if (trackId.equals(currentPlayingId)) {
-                        mSession.setMetadata(track);
-                    }
-                }
-            });
+            mMusicProvider.updateMusic(MusicService.this, trackId, track);
+
+            // If we are still playing the same music
+            String currentPlayingId = MediaIDHelper.extractMusicIDFromMediaID(
+                    queueItem.getDescription().getMediaId());
+            if (trackId.equals(currentPlayingId)) {
+                mSession.setMetadata(track);
+            }
         }
     }
 

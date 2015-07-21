@@ -17,6 +17,7 @@ package com.example.android.uamp.ui.tv;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -34,7 +35,6 @@ import android.support.v17.leanback.widget.Presenter;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.android.uamp.AlbumArtCache;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 
@@ -82,20 +82,11 @@ public class CardPresenter extends Presenter {
             setCardImage(cardViewHolder, description.getIconBitmap());
         } else {
             // IconUri potentially has a better resolution than iconBitmap.
-            String artUrl = artUri.toString();
-            AlbumArtCache cache = AlbumArtCache.getInstance();
-            if (cache.getBigImage(artUrl) != null) {
-                // So, we use it immediately if it's cached:
-                setCardImage(cardViewHolder, cache.getBigImage(artUrl));
-            } else {
-                // Otherwise, we use iconBitmap if available while we wait for iconURI
-                setCardImage(cardViewHolder, description.getIconBitmap());
-                cache.fetch(artUrl, new AlbumArtCache.FetchListener() {
-                    @Override
-                    public void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-                        setCardImage(cardViewHolder, bitmap);
-                    }
-                });
+            String path = artUri.toString();
+            //todo cache
+            Bitmap bitmap = BitmapFactory.decodeFile(path);
+            if (bitmap != null) {
+                setCardImage(cardViewHolder, bitmap);
             }
         }
     }

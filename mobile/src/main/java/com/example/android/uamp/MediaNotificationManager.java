@@ -278,10 +278,11 @@ public class MediaNotificationManager extends BroadcastReceiver {
             // This sample assumes the iconUri will be a valid URL formatted String, but
             // it can actually be any valid Android Uri formatted String.
             // async fetch the album art icon
-            String artUrl = description.getIconUri().toString();
-            art = AlbumArtCache.getInstance().getBigImage(artUrl);
+            String path = description.getIconUri().toString();
+            //todo cache
+            art = BitmapFactory.decodeFile(path);
             if (art == null) {
-                fetchArtUrl = artUrl;
+                fetchArtUrl = path;
                 // use a placeholder art while the remote art is being downloaded
                 art = BitmapFactory.decodeResource(mService.getResources(),
                     R.drawable.ic_default_art);
@@ -315,7 +316,10 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
         setNotificationPlaybackState(notificationBuilder);
         if (fetchArtUrl != null) {
-            fetchBitmapFromURLAsync(fetchArtUrl, notificationBuilder);
+            //todo cache
+            Bitmap bitmap = BitmapFactory.decodeFile(fetchArtUrl);
+            notificationBuilder.setLargeIcon(bitmap);
+            mNotificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         }
 
         return notificationBuilder.build();
@@ -363,21 +367,5 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
         // Make sure that the notification can be dismissed by the user when we are not playing:
         builder.setOngoing(mPlaybackState.getState() == PlaybackState.STATE_PLAYING);
-    }
-
-    private void fetchBitmapFromURLAsync(final String bitmapUrl,
-                                         final Notification.Builder builder) {
-        AlbumArtCache.getInstance().fetch(bitmapUrl, new AlbumArtCache.FetchListener() {
-            @Override
-            public void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-                if (mMetadata != null && mMetadata.getDescription() != null &&
-                    artUrl.equals(mMetadata.getDescription().getIconUri().toString())) {
-                    // If the media is still the same, update the notification:
-                    LogHelper.d(TAG, "fetchBitmapFromURLAsync: set bitmap to ", artUrl);
-                    builder.setLargeIcon(bitmap);
-                    mNotificationManager.notify(NOTIFICATION_ID, builder.build());
-                }
-            }
-        });
     }
 }

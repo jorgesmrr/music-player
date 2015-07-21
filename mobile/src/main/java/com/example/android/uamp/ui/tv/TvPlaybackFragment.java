@@ -16,6 +16,7 @@
 package com.example.android.uamp.ui.tv;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
@@ -48,7 +49,6 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.text.TextUtils;
 
-import com.example.android.uamp.AlbumArtCache;
 import com.example.android.uamp.utils.LogHelper;
 
 import java.util.List;
@@ -69,7 +69,7 @@ public class TvPlaybackFragment extends android.support.v17.leanback.app.Playbac
     private SkipNextAction mSkipNextAction;
     private SkipPreviousAction mSkipPreviousAction;
     private PlaybackControlsRow mPlaybackControlsRow;
-    private List <MediaSession.QueueItem> mPlaylistQueue;
+    private List<MediaSession.QueueItem> mPlaylistQueue;
     private int mDuration;
     private Handler mHandler;
     private Runnable mRunnable;
@@ -174,7 +174,7 @@ public class TvPlaybackFragment extends android.support.v17.leanback.app.Playbac
         if (list1.size() != list2.size()) {
             return false;
         }
-        for (int i=0; i<list1.size(); i++) {
+        for (int i = 0; i < list1.size(); i++) {
             if (list1.get(i).getQueueId() != list2.get(i).getQueueId()) {
                 return false;
             }
@@ -268,23 +268,19 @@ public class TvPlaybackFragment extends android.support.v17.leanback.app.Playbac
         }
     }
 
-    private void updateAlbumArt(Uri artUri) {
-        AlbumArtCache.getInstance().fetch(artUri.toString(), new AlbumArtCache.FetchListener() {
-                    @Override
-                    public void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-                        if (bitmap != null) {
-                            Drawable artDrawable = new BitmapDrawable(
-                                    TvPlaybackFragment.this.getResources(), bitmap);
-                            Drawable bgDrawable = new BitmapDrawable(
-                                    TvPlaybackFragment.this.getResources(), bitmap);
-                            mPlaybackControlsRow.setImageDrawable(artDrawable);
-                            mBackgroundManager.setDrawable(bgDrawable);
-                            mRowsAdapter.notifyArrayItemRangeChanged(
-                                    mRowsAdapter.indexOf(mPlaybackControlsRow), 1);
-                        }
-                    }
-                }
-        );
+    private void updateAlbumArt(Uri path) {
+        //todo cache
+        Bitmap bitmap = BitmapFactory.decodeFile(path.toString());
+        if (bitmap != null) {
+            Drawable artDrawable = new BitmapDrawable(
+                    TvPlaybackFragment.this.getResources(), bitmap);
+            Drawable bgDrawable = new BitmapDrawable(
+                    TvPlaybackFragment.this.getResources(), bitmap);
+            mPlaybackControlsRow.setImageDrawable(artDrawable);
+            mBackgroundManager.setDrawable(bgDrawable);
+            mRowsAdapter.notifyArrayItemRangeChanged(
+                    mRowsAdapter.indexOf(mPlaybackControlsRow), 1);
+        }
     }
 
     protected void updateMetadata(MediaMetadata metadata) {
@@ -346,6 +342,7 @@ public class TvPlaybackFragment extends android.support.v17.leanback.app.Playbac
 
     private static final class MutableMediaMetadataHolder {
         MediaMetadata metadata;
+
         public MutableMediaMetadataHolder(MediaMetadata metadata) {
             this.metadata = metadata;
         }

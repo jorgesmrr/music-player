@@ -4,9 +4,11 @@ import android.graphics.Typeface;
 import android.media.session.MediaSession;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.android.uamp.R;
@@ -69,7 +71,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.QueueItemHol
         notifyDataSetChanged();
     }
 
-    public Iterable<MediaSession.QueueItem> getQueue() {
+    public List<MediaSession.QueueItem> getQueue() {
         return mQueue;
     }
 
@@ -99,10 +101,28 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.QueueItemHol
                     mOnItemClickListener.onItemClick(mQueue.get(getAdapterPosition()));
                 }
             });
+
+            mOverflowView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PopupMenu popupMenu = new PopupMenu(mOverflowView.getContext(), mOverflowView);
+                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            mOnItemClickListener.onMenuItemClick(item, getAdapterPosition());
+                            return true;
+                        }
+                    });
+                    popupMenu.inflate(R.menu.overflow_song_queue);
+                    popupMenu.show();
+                }
+            });
         }
     }
 
     public interface OnItemClickListener {
         void onItemClick(MediaSession.QueueItem queueItem);
+
+        void onMenuItemClick(MenuItem item, int position);
     }
 }

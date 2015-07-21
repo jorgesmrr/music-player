@@ -53,7 +53,7 @@ public class MainActivity extends BaseActivity {
 
     /**
      * Optionally used with {@link #EXTRA_START_FULLSCREEN} to carry a MediaDescription to
-     * the {@link FullScreenPlayerActivity}, speeding up the screen rendering
+     * the {@link PlayerActivity}, speeding up the screen rendering
      * while the {@link android.media.session.MediaController} is connecting.
      */
     public static final String EXTRA_CURRENT_MEDIA_DESCRIPTION =
@@ -69,7 +69,7 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         LogHelper.d(TAG, "Activity onCreate");
 
-        setContentView(R.layout.activity_player);
+        setContentView(R.layout.activity_main);
         mViewPager = (ViewPager) findViewById(R.id.container);
 
         initializeToolbar(false);
@@ -97,7 +97,7 @@ public class MainActivity extends BaseActivity {
 
     private void startFullScreenActivityIfNeeded(Intent intent) {
         if (intent != null && intent.getBooleanExtra(EXTRA_START_FULLSCREEN, false)) {
-            Intent fullScreenIntent = new Intent(this, FullScreenPlayerActivity.class)
+            Intent fullScreenIntent = new Intent(this, PlayerActivity.class)
                     .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP |
                             Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     .putExtra(EXTRA_CURRENT_MEDIA_DESCRIPTION,

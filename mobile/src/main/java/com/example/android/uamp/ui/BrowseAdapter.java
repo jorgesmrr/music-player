@@ -9,6 +9,7 @@ import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
+import android.net.Uri;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,7 +22,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.android.uamp.R;
-import com.example.android.uamp.model.MusicProvider;
 import com.example.android.uamp.utils.FileBitmapWorkerTask;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
@@ -50,7 +50,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public static final int MEDIA_ALBUM = 2;
     public static final int MEDIA_SONG = 3;
     public static final int MEDIA_SONG_IN_ALBUM = 5;
-    public static final int MEDIA_ALBUMS_SONGS = 4;
+    public static final int MEDIA_ALBUM_SONGS = 4;
 
     private static final String TAG = LogHelper.makeLogTag(BrowseAdapter.class);
 
@@ -73,7 +73,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (mediaId.equals(MEDIA_ID_BY_ARTIST))
             mMediaType = MEDIA_ARTIST;
         else if (mediaId.startsWith(MEDIA_ID_BY_ARTIST))
-            mMediaType = MEDIA_ALBUMS_SONGS;
+            mMediaType = MEDIA_ALBUM_SONGS;
         else if (mediaId.equals(MEDIA_ID_BY_ALBUM))
             mMediaType = MEDIA_ALBUM;
         else if (mediaId.equals(MEDIA_ID_MUSICS_ALL))
@@ -96,7 +96,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             int layout;
             if (mMediaType == MEDIA_ALBUM)
                 layout = R.layout.grid_item_tile_album;
-            else if (mMediaType == MEDIA_ALBUMS_SONGS && viewType == TYPE_NONE)
+            else if (mMediaType == MEDIA_ALBUM_SONGS && viewType == TYPE_NONE)
                 layout = R.layout.list_item_album;
             else if (mMediaType == MEDIA_SONG_IN_ALBUM && viewType != TYPE_PLAYING && viewType != TYPE_PAUSED)
                 layout = R.layout.list_item_two_lines_overflow_number;
@@ -115,7 +115,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             holder.mOverflowView.setVisibility(View.GONE);
                             break;
                         case MEDIA_ALBUM:
-                        case MEDIA_ALBUMS_SONGS:
+                        case MEDIA_ALBUM_SONGS:
                             break;
                     }
                     break;
@@ -125,7 +125,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                 mActivity.getDrawable(R.drawable.ic_play_arrow_white_24dp));
                         holder.mImageView.setImageTintList(mColorStateNotPlaying);
                     }
-                    if (mMediaType == MEDIA_ALBUMS_SONGS)
+                    if (mMediaType == MEDIA_ALBUM_SONGS)
                         holder.mSubtitleView.setVisibility(View.GONE);
                     break;
                 case TYPE_PLAYING:
@@ -151,26 +151,26 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (holder instanceof MediaItemViewHolder) {
             MediaItemViewHolder mediaItemViewHolder = (MediaItemViewHolder) holder;
 
-            MediaDescription description = mMediaItems.get(getMediaItemIndex(position)).getDescription();
+            MediaBrowser.MediaItem item = mMediaItems.get(getMediaItemIndex(position));
+            MediaDescription description = item.getDescription();
             mediaItemViewHolder.mTitleView.setText(description.getTitle());
             mediaItemViewHolder.mSubtitleView.setText(description.getSubtitle());
 
-            if (description.getExtras() != null) {
-                if (mMediaType == MEDIA_ALBUM) {
-                    String artwork = description.getExtras().getString(MusicProvider.ALBUM_EXTRA_ARTWORK);
+            if (!item.isPlayable() && (mMediaType == MEDIA_ALBUM || mMediaType == MEDIA_ALBUM_SONGS)) {
+                Uri iconUri = description.getIconUri();
+                if (mMediaType == MEDIA_ALBUM)
                     mediaItemViewHolder.itemView.setBackgroundColor(mDefaultDarkVibrantColor);
-                    if (artwork != null)
-                        FileBitmapWorkerTask.loadBitmap(
-                                mActivity.getResources(),
-                                artwork,
-                                mediaItemViewHolder.mImageView,
-                                mMediaType == MEDIA_ALBUM ? mediaItemViewHolder.itemView : null);
-                    else {
-                        //todo mediaItemViewHolder.mImageView.setImageResource(R.drawable.placeholder);
-                    }
-                } else if (mMediaType == MEDIA_SONG_IN_ALBUM && mediaItemViewHolder.mExtraView != null)
-                    mediaItemViewHolder.mExtraView.setText(description.getExtras().getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, -1) + "");
-            }
+                if (iconUri != null)
+                    FileBitmapWorkerTask.loadBitmap(
+                            mActivity.getResources(),
+                            iconUri.toString(),
+                            mediaItemViewHolder.mImageView,
+                            mMediaType == MEDIA_ALBUM ? mediaItemViewHolder.itemView : null);
+                else {
+                    //todo mediaItemViewHolder.mImageView.setImageResource(R.drawable.placeholder);
+                }
+            } else if (mMediaType == MEDIA_SONG_IN_ALBUM && mediaItemViewHolder.mExtraView != null && description.getExtras() != null)
+                mediaItemViewHolder.mExtraView.setText(description.getExtras().getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, -1) + "");
         } else if (holder instanceof HeaderHolder) {
             String text;
             if (mMediaItems.get(getMediaItemIndex(position + 1)).isPlayable())
@@ -191,7 +191,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         int count = mediaItemsCount;
         if (mPlaceholderHeight > 0)
             count++;
-        if (mMediaType == MEDIA_ALBUMS_SONGS && !mMediaItems.isEmpty()) {
+        if (mMediaType == MEDIA_ALBUM_SONGS && !mMediaItems.isEmpty()) {
             count++;
             if (mMediaItems.get(0).isPlayable()
                     != mMediaItems.get(mediaItemsCount - 1).isPlayable())
@@ -242,7 +242,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         int index = position;
         if (mPlaceholderHeight > 0)
             index--;
-        if (mMediaType == MEDIA_ALBUMS_SONGS) {
+        if (mMediaType == MEDIA_ALBUM_SONGS) {
             for (Integer headerPosition : mHeadersPositions)
                 if (headerPosition >= position)
                     break;
@@ -262,7 +262,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public void add(MediaBrowser.MediaItem mediaItem) {
         int currentSize = mMediaItems.size();
-        if (mMediaType == MEDIA_ALBUMS_SONGS) {
+        if (mMediaType == MEDIA_ALBUM_SONGS) {
             if (mMediaItems.isEmpty() || mMediaItems.get(currentSize - 1).isPlayable()
                     != mediaItem.isPlayable()) {
                 if (mPlaceholderHeight > 0)
@@ -284,6 +284,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public interface OnItemClickListener {
         void onItemClick(MediaBrowser.MediaItem mediaItem, View sharedElement);
+
         void onMenuItemClick(MenuItem item, MediaBrowser.MediaItem mediaItem);
     }
 
@@ -348,7 +349,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             case MEDIA_SONG:
                                 popupMenu.inflate(R.menu.overflow_song);
                                 break;
-                            case MEDIA_ALBUMS_SONGS:
+                            case MEDIA_ALBUM_SONGS:
                                 if (mMediaItems.get(getMediaItemIndex(getAdapterPosition())).isPlayable())
                                     popupMenu.inflate(R.menu.overflow_song);
                                 else

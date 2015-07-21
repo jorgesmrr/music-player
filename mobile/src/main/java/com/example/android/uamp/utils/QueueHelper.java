@@ -42,11 +42,21 @@ public class QueueHelper {
 
     public static List<MediaSession.QueueItem> getPlayingQueue(String mediaId,
                                                                MusicProvider musicProvider) {
-        return getPlayingQueue(mediaId, musicProvider, false);
+        return getPlayingQueue(mediaId, musicProvider, false, 0);
+    }
+
+    public static List<MediaSession.QueueItem> getPlayingQueue(String mediaId,
+                                                               MusicProvider musicProvider, int initialId) {
+        return getPlayingQueue(mediaId, musicProvider, false, initialId);
     }
 
     public static List<MediaSession.QueueItem> getPlayingQueue(String mediaId,
                                                                MusicProvider musicProvider, boolean shuffle) {
+        return getPlayingQueue(mediaId, musicProvider, shuffle, 0);
+    }
+
+    public static List<MediaSession.QueueItem> getPlayingQueue(String mediaId,
+                                                               MusicProvider musicProvider, boolean shuffle, int initialId) {
 
         // extract the browsing hierarchy from the media ID:
         String[] hierarchy = MediaIDHelper.getHierarchy(mediaId);
@@ -66,7 +76,7 @@ public class QueueHelper {
                 return null;
             }
 
-            return convertToQueue(tracks, hierarchy[0]);
+            return convertToQueue(tracks, initialId, hierarchy[0]);
         } else if (hierarchy.length == 2) {
             String categoryValue = hierarchy[1];
             LogHelper.d(TAG, "Creating playing queue for ", categoryType, ",  ", categoryValue);
@@ -88,10 +98,12 @@ public class QueueHelper {
                 return null;
             }
 
-            if (shuffle)
+            if (shuffle) {
+                tracks = new ArrayList<>(tracks);
                 Collections.shuffle(tracks);
+            }
 
-            return convertToQueue(tracks, hierarchy[0], hierarchy[1]);
+            return convertToQueue(tracks, initialId, hierarchy[0], hierarchy[1]);
         } else {
             LogHelper.e(TAG, "Could not build a playing queue for this mediaId: ", mediaId);
             return null;
@@ -163,9 +175,14 @@ public class QueueHelper {
     }
 
     private static List<MediaSession.QueueItem> convertToQueue(
-            Iterable<MediaMetadata> tracks, String... categories) {
+            Iterable<MediaMetadata> tracks, String... categories){
+        return convertToQueue(tracks, 0, categories);
+    }
+
+    private static List<MediaSession.QueueItem> convertToQueue(
+            Iterable<MediaMetadata> tracks, int initialIndex, String... categories) {
         List<MediaSession.QueueItem> queue = new ArrayList<>();
-        int count = 0;
+        int count = initialIndex;
         for (MediaMetadata track : tracks) {
 
             // We create a hierarchy-aware mediaID, so we know what the queue is about by looking
