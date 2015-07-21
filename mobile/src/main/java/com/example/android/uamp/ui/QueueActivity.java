@@ -10,6 +10,7 @@ import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.MenuItem;
 
 import com.example.android.uamp.MusicService;
@@ -17,14 +18,17 @@ import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
 
+import java.util.List;
+
 /**
  * Created by Jorge on 11/06/2015.
  */
-public class QueueActivity extends ActionBarCastActivity {
+public class QueueActivity extends ActionBarCastActivity implements QueueAdapter.OnStartDragListener {
     private static final String TAG = LogHelper.makeLogTag(QueueActivity.class);
 
     private MediaBrowser mMediaBrowser;
     private QueueAdapter mAdapter;
+    private ItemTouchHelper mItemTouchHelper;
 
     private MediaController.Callback mCallback = new MediaController.Callback() {
         @Override
@@ -35,6 +39,14 @@ public class QueueActivity extends ActionBarCastActivity {
 
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
+            if (metadata != null)
+                updateCurrentMediaId(metadata.getDescription().getMediaId());
+        }
+
+        @Override
+        public void onQueueChanged(List<MediaSession.QueueItem> queue) {
+            mAdapter.setQueue(queue);
+            MediaMetadata metadata = getMediaController().getMetadata();
             if (metadata != null)
                 updateCurrentMediaId(metadata.getDescription().getMediaId());
         }
@@ -60,7 +72,7 @@ public class QueueActivity extends ActionBarCastActivity {
 
         setContentView(R.layout.activity_queue);
 
-        mAdapter = new QueueAdapter(new QueueAdapter.OnItemClickListener() {
+        mAdapter = new QueueAdapter(this, this, new QueueAdapter.Listener() {
             @Override
             public void onItemClick(MediaSession.QueueItem queueItem) {
                 MediaController.TransportControls controls =
@@ -86,21 +98,29 @@ public class QueueActivity extends ActionBarCastActivity {
                                 .putExtra(MusicService.CMD_NAME, MusicService.CMD_GET_ARTIST)
                                 .putExtra(MusicService.EXTRA_MEDIA_ID, queueItem.getDescription().getMediaId()));
                         break;
-                    case R.id.remove_queue:
-                        startService(new Intent(QueueActivity.this, MusicService.class)
-                                .setAction(MusicService.ACTION_CMD)
-                                .putExtra(MusicService.CMD_NAME, MusicService.CMD_DEL_FROM_QUEUE)
-                                .putExtra(MusicService.EXTRA_QUEUE_INDEX, position));
-                        break;
-                    case R.id.delete:
-                        break;
+                    //todo
+                    /*case R.id.delete:
+                        break;*/
                 }
+            }
+
+            @Override
+            public void onItemDismiss(int position) {
+                startService(new Intent(QueueActivity.this, MusicService.class)
+                        .setAction(MusicService.ACTION_CMD)
+                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_DEL_FROM_QUEUE)
+                        .putExtra(MusicService.EXTRA_QUEUE_INDEX, position));
             }
         });
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mAdapter);
+
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mAdapter);
+        mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper.attachToRecyclerView(recyclerView);
 
         initializeToolbar(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -159,5 +179,10 @@ public class QueueActivity extends ActionBarCastActivity {
             index++;
         }
         mAdapter.setCurrentIndex(index);
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        mItemTouchHelper.startDrag(viewHolder);
     }
 }

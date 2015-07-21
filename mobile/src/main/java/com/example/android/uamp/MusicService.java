@@ -140,6 +140,8 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
     public static final String CMD_ADD_TO_QUEUE = "CMD_ADD_TO_QUEUE";
     // A value of a CMD_NAME key that indicates that a song should be removed from the queue.
     public static final String CMD_DEL_FROM_QUEUE = "CMD_DEL_FROM_QUEUE";
+    // A value of a CMD_NAME key that indicates that a song should be deleted from the device.
+    public static final String CMD_DEL_FROM_DEVICE = "CMD_DEL_FROM_DEVICE";
     // The key in the extras of the incoming Intent indicating the song's media ID
     public static final String EXTRA_MEDIA_ID = "EXTRA_MEDIA_ID";
     // The key in the extras of the incoming Intent indicating the song's index in the queue
@@ -263,20 +265,20 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     mCastManager.disconnect();
                 } else if (CMD_GET_ALBUM.equals(command)) {
                     String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
-                    String songMediaID = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-                    if (songMediaID == null)
-                        songMediaID = mediaId;
-                    int album = mMusicProvider.getAlbumIdFromMusic(songMediaID);
+                    String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                    if (musicId == null)
+                        musicId = mediaId;
+                    int album = mMusicProvider.getAlbumIdFromMusic(musicId);
                     if (album == -1)
                         return START_STICKY;
                     String albumMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, album + "");
                     LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, albumMediaId));
                 } else if (CMD_GET_ARTIST.equals(command)) {
                     String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
-                    String songMediaID = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-                    if (songMediaID == null)
-                        songMediaID = mediaId;
-                    MediaMetadata mediaMetadata = mMusicProvider.getMusic(songMediaID);
+                    String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                    if (musicId == null)
+                        musicId = mediaId;
+                    MediaMetadata mediaMetadata = mMusicProvider.getMusic(musicId);
                     if (mediaMetadata == null)
                         return START_STICKY;
                     String artistId = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
@@ -320,10 +322,23 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                 } else if (CMD_DEL_FROM_QUEUE.equals(command)) {
                     int indexToRemove = startIntent.getIntExtra(EXTRA_QUEUE_INDEX, -1);
                     if (indexToRemove >= 0) {
-                        if (indexToRemove == mCurrentIndexOnQueue)
-                            mSession.getController().getTransportControls().skipToNext();
                         mPlayingQueue.remove(indexToRemove);
                         mSession.setQueue(mPlayingQueue);
+                        if (indexToRemove == mCurrentIndexOnQueue) {
+                            if (indexToRemove < mPlayingQueue.size() - 1) {
+                                long nextId = mPlayingQueue.get(indexToRemove).getQueueId();
+                                mSession.getController().getTransportControls().skipToQueueItem(nextId);
+                            } else
+                                mSession.getController().getTransportControls().stop();
+                        }
+                    }
+                } else if (CMD_DEL_FROM_DEVICE.equals(command)) {
+                    String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
+                    if (mediaId != null) {
+                        String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                        if (musicId == null)
+                            musicId = mediaId;
+                        mMusicProvider.delete(musicId, getContentResolver());
                     }
                 }
             }

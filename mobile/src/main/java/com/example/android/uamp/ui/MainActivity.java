@@ -74,6 +74,7 @@ public class MainActivity extends BaseActivity {
 
         initializeToolbar(false);
         initializeFromParams(savedInstanceState, getIntent());
+        setTitle("");
 
         // Only check if a full screen player is needed on the first time:
         if (savedInstanceState == null) {

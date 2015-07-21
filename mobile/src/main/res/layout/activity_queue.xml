@@ -22,6 +22,5 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingLeft="@dimen/margin_h_list"
-        android:paddingRight="@dimen/margin_h_list" />
+        android:elevation="0dp"/>
 </LinearLayout>
