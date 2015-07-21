@@ -74,7 +74,9 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.QueueItemHol
     }
 
     public void setCurrentIndex(int currentIndex) {
+        int aux = mCurrentindex;
         this.mCurrentindex = currentIndex;
+        notifyItemChanged(aux);
         notifyItemChanged(currentIndex);
     }
 

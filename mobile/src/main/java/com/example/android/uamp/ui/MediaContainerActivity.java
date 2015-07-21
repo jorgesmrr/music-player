@@ -3,13 +3,13 @@ package com.example.android.uamp.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
-import com.example.android.uamp.utils.MediaIDHelper;
 
 /**
  * Displays a fragment with the music tracks for the given media ID
@@ -34,6 +34,24 @@ public abstract class MediaContainerActivity extends BaseActivity {
         super.onSaveInstanceState(outState);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.add_queue:
+                startService(new Intent(this, MusicService.class)
+                        .setAction(MusicService.ACTION_CMD)
+                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_ADD_TO_QUEUE)
+                        .putExtra(MusicService.EXTRA_MEDIA_ID, mMediaId));
+                return true;
+            case R.id.shuffle_all:
+                Bundle extras = new Bundle();
+                extras.putBoolean(MusicService.EXTRA_SHUFFLE, true);
+                getMediaController().getTransportControls().playFromMediaId(mMediaId, extras);
+                return true;
+        }
+        return false;
+    }
+
     protected void initializeViews() {
         initializeToolbar(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -42,14 +60,13 @@ public abstract class MediaContainerActivity extends BaseActivity {
         mTitleView = (TextView) findViewById(R.id.title);
         mSubtitleView = (TextView) findViewById(R.id.subtitle);
         mFab = (FloatingActionButton) findViewById(R.id.fab);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        if (mMediaId.startsWith(MediaIDHelper.MEDIA_ID_BY_ALBUM))
-            getMenuInflater().inflate(R.menu.album, menu);
-        return true;
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getMediaController().getTransportControls().playFromMediaId(mMediaId, null);
+            }
+        });
     }
 
     @Override

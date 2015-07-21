@@ -56,6 +56,7 @@ import java.util.List;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ALBUM;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ARTIST;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_MUSICS_ALL;
+import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_QUEUE;
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_ROOT;
 import static com.example.android.uamp.utils.MediaIDHelper.createBrowseCategoryMediaID;
 
@@ -67,38 +68,38 @@ import static com.example.android.uamp.utils.MediaIDHelper.createBrowseCategoryM
  * user interfaces that need to interact with your media session, like Android Auto. You can
  * (should) also use the same service from your app's UI, which gives a seamless playback
  * experience to the user.
- * <p/>
+ * <p>
  * To implement a MediaBrowserService, you need to:
- * <p/>
+ * <p>
  * <ul>
- * <p/>
+ * <p>
  * <li> Extend {@link android.service.media.MediaBrowserService}, implementing the media browsing
  * related methods {@link android.service.media.MediaBrowserService#onGetRoot} and
  * {@link android.service.media.MediaBrowserService#onLoadChildren};
  * <li> In onCreate, start a new {@link android.media.session.MediaSession} and notify its parent
  * with the session's token {@link android.service.media.MediaBrowserService#setSessionToken};
- * <p/>
+ * <p>
  * <li> Set a callback on the
  * {@link android.media.session.MediaSession#setCallback(android.media.session.MediaSession.Callback)}.
  * The callback will receive all the user's actions, like play, pause, etc;
- * <p/>
+ * <p>
  * <li> Handle all the actual music playing using any method your app prefers (for example,
  * {@link android.media.MediaPlayer})
- * <p/>
+ * <p>
  * <li> Update playbackState, "now playing" metadata and queue, using MediaSession proper methods
  * {@link android.media.session.MediaSession#setPlaybackState(android.media.session.PlaybackState)}
  * {@link android.media.session.MediaSession#setMetadata(android.media.MediaMetadata)} and
  * {@link android.media.session.MediaSession#setQueue(java.util.List)})
- * <p/>
+ * <p>
  * <li> Declare and export the service in AndroidManifest with an intent receiver for the action
  * android.media.browse.MediaBrowserService
- * <p/>
+ * <p>
  * </ul>
- * <p/>
+ * <p>
  * To make your app compatible with Android Auto, you also need to:
- * <p/>
+ * <p>
  * <ul>
- * <p/>
+ * <p>
  * <li> Declare a meta-data tag in AndroidManifest.xml linking to a xml resource
  * with a &lt;automotiveApp&gt; root element. For a media app, this must include
  * an &lt;uses name="media"/&gt; element as a child.
@@ -109,7 +110,7 @@ import static com.example.android.uamp.utils.MediaIDHelper.createBrowseCategoryM
  * &lt;automotiveApp&gt;
  * &lt;uses name="media"/&gt;
  * &lt;/automotiveApp&gt;
- * <p/>
+ * <p>
  * </ul>
  *
  * @see <a href="README.md">README.md</a> for more details.
@@ -134,12 +135,16 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
     public static final String CMD_GET_ALBUM = "CMD_GET_ALBUM";
     // A value of a CMD_NAME key that indicates that the artist ID of a song should be returned.
     public static final String CMD_GET_ARTIST = "CMD_GET_ARTIST";
+    // A value of a CMD_NAME key that indicates that a song should be added to the queue.
+    public static final String CMD_ADD_TO_QUEUE = "CMD_ADD_TO_QUEUE";
     // The key in the extras of the incoming Intent indicating the song's media ID
     public static final String EXTRA_MEDIA_ID = "EXTRA_MEDIA_ID";
+    // The key in the extras of the incoming Intent indicating if we should add the song as the next
+    public static final String EXTRA_PLAY_NEXT = "EXTRA_PLAY_NEXT";
 
     private static final String TAG = LogHelper.makeLogTag(MusicService.class);
-    // Action to thumbs up a media item
-    private static final String CUSTOM_ACTION_THUMBS_UP = "com.example.android.uamp.THUMBS_UP";
+    // The key in the extras indicating we should build a random queue
+    public static final String EXTRA_SHUFFLE = "com.example.android.uamp.SHUFFLE";
     // Delay stopSelf by using a handler.
     private static final int STOP_DELAY = 30000;
 
@@ -262,6 +267,41 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     String artistId = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
                     String artistMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ARTIST, artistId);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, artistMediaId));
+                } else if (CMD_ADD_TO_QUEUE.equals(command)) {
+                    String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
+                    boolean playNext = startIntent.getBooleanExtra(EXTRA_PLAY_NEXT, false);
+                    String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+
+                    if (musicId != null) {
+                        // It's a song
+                        MediaMetadata track = mMusicProvider.getMusic(mediaId);
+
+                        // We create a hierarchy-aware mediaID, so we know what the queue is about by looking
+                        // at the QueueItem media IDs.
+                        String hierarchyAwareMediaID = MediaIDHelper.createMediaID(
+                                track.getDescription().getMediaId(), MEDIA_ID_QUEUE);
+
+                        MediaMetadata trackCopy = new MediaMetadata.Builder(track)
+                                .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
+                                .build();
+
+                        // We don't expect queues to change after created, so we use the item index as the
+                        // queueId. Any other number unique in the queue would work.
+                        MediaSession.QueueItem item = new MediaSession.QueueItem(
+                                trackCopy.getDescription(), mPlayingQueue.size());
+                        if (playNext)
+                            mPlayingQueue.add(1, item);
+                        else
+                            mPlayingQueue.add(item);
+                        mSession.setQueue(mPlayingQueue);
+                    } else {
+                        // It's an album or artist
+                        if (playNext)
+                            mPlayingQueue.addAll(1, QueueHelper.getPlayingQueue(mediaId, mMusicProvider));
+                        else
+                            mPlayingQueue.addAll(QueueHelper.getPlayingQueue(mediaId, mMusicProvider));
+                        mSession.setQueue(mPlayingQueue);
+                    }
                 }
             }
         }
@@ -551,20 +591,29 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             // the hierarchy in MediaBrowser and the actual unique musicID. This is necessary
             // so we can build the correct playing queue, based on where the track was
             // selected from.
-            mPlayingQueue = QueueHelper.getPlayingQueue(mediaId, mMusicProvider);
+            mPlayingQueue = QueueHelper.getPlayingQueue(mediaId, mMusicProvider, extras != null && extras.getBoolean(EXTRA_SHUFFLE));
             mSession.setQueue(mPlayingQueue);
             String queueTitle = "Test"; /*todo getString(R.string.browse_musics_by_genre_subtitle,
                     MediaIDHelper.extractBrowseCategoryValueFromMediaID(mediaId));*/
             mSession.setQueueTitle(queueTitle);
 
             if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
-                // set the current index on queue from the media Id:
-                mCurrentIndexOnQueue = QueueHelper.getMusicIndexOnQueue(mPlayingQueue, mediaId);
+                String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
 
-                if (mCurrentIndexOnQueue < 0) {
-                    LogHelper.e(TAG, "playFromMediaId: media ID ", mediaId,
-                            " could not be found on queue. Ignoring.");
+                if (musicId != null) {
+                    // set the current index on queue from the media Id:
+                    mCurrentIndexOnQueue = QueueHelper.getMusicIndexOnQueue(mPlayingQueue, mediaId);
+
+                    if (mCurrentIndexOnQueue < 0) {
+                        LogHelper.e(TAG, "playFromMediaId: media ID ", mediaId,
+                                " could not be found on queue. Ignoring.");
+                    } else {
+                        // play the music
+                        handlePlayRequest();
+                    }
                 } else {
+                    // no specific song to be played; start from the first.
+                    mCurrentIndexOnQueue = 0;
                     // play the music
                     handlePlayRequest();
                 }
@@ -623,19 +672,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
 
         @Override
         public void onCustomAction(String action, Bundle extras) {
-            if (CUSTOM_ACTION_THUMBS_UP.equals(action)) {
-                LogHelper.i(TAG, "onCustomAction: favorite for current track");
-                MediaMetadata track = getCurrentPlayingMusic();
-                if (track != null) {
-                    String musicId = track.getString(MediaMetadata.METADATA_KEY_MEDIA_ID);
-                    mMusicProvider.setFavorite(musicId, !mMusicProvider.isFavorite(musicId));
-                }
-                // playback state needs to be updated because the "Favorite" icon on the
-                // custom action will change to reflect the new favorite state.
-                updatePlaybackState(null);
-            } else {
-                LogHelper.e(TAG, "Unsupported action: ", action);
-            }
+            LogHelper.e(TAG, "Unsupported action: ", action);
         }
 
         @Override
@@ -800,7 +837,6 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
                 .setActions(getAvailableActions());
 
-        setCustomAction(stateBuilder);
         int state = mPlayback.getState();
 
         // If there is an error message, send it to the playback state:
@@ -822,26 +858,6 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
 
         if (state == PlaybackState.STATE_PLAYING || state == PlaybackState.STATE_PAUSED) {
             mMediaNotificationManager.startNotification();
-        }
-    }
-
-    private void setCustomAction(PlaybackState.Builder stateBuilder) {
-        MediaMetadata currentMusic = getCurrentPlayingMusic();
-        if (currentMusic != null) {
-            // Set appropriate "Favorite" icon on Custom action:
-            String musicId = currentMusic.getString(MediaMetadata.METADATA_KEY_MEDIA_ID);
-            int favoriteIcon = R.drawable.ic_star_off;
-            if (mMusicProvider.isFavorite(musicId)) {
-                favoriteIcon = R.drawable.ic_star_on;
-            }
-            LogHelper.d(TAG, "updatePlaybackState, setting Favorite custom action of music ",
-                    musicId, " current favorite=", mMusicProvider.isFavorite(musicId));
-            Bundle customActionExtras = new Bundle();
-            WearHelper.setShowCustomActionOnWear(customActionExtras, true);
-            stateBuilder.addCustomAction(new PlaybackState.CustomAction.Builder(
-                    CUSTOM_ACTION_THUMBS_UP, getString(R.string.favorite), favoriteIcon)
-                    .setExtras(customActionExtras)
-                    .build());
         }
     }
 

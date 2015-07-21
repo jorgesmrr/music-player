@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -52,8 +51,6 @@ public class MusicProvider {
     private ConcurrentMap<String, List<Integer>> mAlbumListByArtist; // <artistId, albumId>
     private ConcurrentMap<Integer, Album> mAlbumListById; // <albumId, album>
 
-    private final Set<String> mFavoriteTracks;
-
     enum State {
         NON_INITIALIZED, INITIALIZING, INITIALIZED
     }
@@ -69,7 +66,6 @@ public class MusicProvider {
         mAlbumListByArtist = new ConcurrentHashMap<>();
         mMusicListById = new ConcurrentHashMap<>();
         mAlbumListById = new ConcurrentHashMap<>();
-        mFavoriteTracks = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     }
 
     public Album getAlbum(int id) {
@@ -79,7 +75,7 @@ public class MusicProvider {
     /**
      * Get all music tracks
      */
-    public Iterable<MediaMetadata> getMusics() {
+    public List<MediaMetadata> getMusics() {
         if (mCurrentState != State.INITIALIZED) {
             return Collections.emptyList();
         }
@@ -147,7 +143,7 @@ public class MusicProvider {
      * Very basic implementation of a search that filter music tracks with title containing
      * the given query.
      */
-    public Iterable<MediaMetadata> searchMusicBySongTitle(String query) {
+    public List<MediaMetadata> searchMusicBySongTitle(String query) {
         return searchMusic(MediaMetadata.METADATA_KEY_TITLE, query);
     }
 
@@ -167,7 +163,7 @@ public class MusicProvider {
         return searchMusic(MediaMetadata.METADATA_KEY_ARTIST, query);
     }
 
-    Iterable<MediaMetadata> searchMusic(String metadataField, String query) {
+    List<MediaMetadata> searchMusic(String metadataField, String query) {
         if (mCurrentState != State.INITIALIZED) {
             return Collections.emptyList();
         }
@@ -212,18 +208,6 @@ public class MusicProvider {
         if (!oldGenre.equals(newGenre)) {
             buildListsByGenre(context.getContentResolver());
         }*/
-    }
-
-    public void setFavorite(String musicId, boolean favorite) {
-        if (favorite) {
-            mFavoriteTracks.add(musicId);
-        } else {
-            mFavoriteTracks.remove(musicId);
-        }
-    }
-
-    public boolean isFavorite(String musicId) {
-        return mFavoriteTracks.contains(musicId);
     }
 
     public boolean isInitialized() {

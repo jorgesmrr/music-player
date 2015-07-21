@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * A Fragment that lists all the various browsable queues available
  * from a {@link android.service.media.MediaBrowserService}.
- * <p/>
+ * <p>
  * It uses a {@link MediaBrowser} to connect to the {@link com.example.android.uamp.MusicService}.
  * Once connected, the fragment subscribes to get all the children.
  * All {@link MediaBrowser.MediaItem}'s that can be browsed are shown in a ListView.
@@ -150,6 +150,10 @@ public class MediaBrowserFragment extends Fragment {
                     public void onMenuItemClick(MenuItem item, MediaBrowser.MediaItem mediaItem) {
                         switch (item.getItemId()) {
                             case R.id.add_queue:
+                                getActivity().startService(new Intent(getActivity(), MusicService.class)
+                                        .setAction(MusicService.ACTION_CMD)
+                                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_ADD_TO_QUEUE)
+                                        .putExtra(MusicService.EXTRA_MEDIA_ID, mediaItem.getMediaId()));
                                 break;
                             case R.id.go_album:
                                 getActivity().startService(new Intent(getActivity(), MusicService.class)
@@ -164,8 +168,16 @@ public class MediaBrowserFragment extends Fragment {
                                         .putExtra(MusicService.EXTRA_MEDIA_ID, mediaItem.getMediaId()));
                                 break;
                             case R.id.play_next:
+                                getActivity().startService(new Intent(getActivity(), MusicService.class)
+                                        .setAction(MusicService.ACTION_CMD)
+                                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_ADD_TO_QUEUE)
+                                        .putExtra(MusicService.EXTRA_MEDIA_ID, mediaItem.getMediaId())
+                                        .putExtra(MusicService.EXTRA_PLAY_NEXT, true));
                                 break;
                             case R.id.shuffle_all:
+                                Bundle extras = new Bundle();
+                                extras.putBoolean(MusicService.EXTRA_SHUFFLE, true);
+                                getActivity().getMediaController().getTransportControls().playFromMediaId(mediaItem.getMediaId(), extras);
                                 break;
                             case R.id.delete:
                                 break;

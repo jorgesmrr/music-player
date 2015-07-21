@@ -42,12 +42,17 @@ public class QueueHelper {
 
     public static List<MediaSession.QueueItem> getPlayingQueue(String mediaId,
                                                                MusicProvider musicProvider) {
+        return getPlayingQueue(mediaId, musicProvider, false);
+    }
+
+    public static List<MediaSession.QueueItem> getPlayingQueue(String mediaId,
+                                                               MusicProvider musicProvider, boolean shuffle) {
 
         // extract the browsing hierarchy from the media ID:
         String[] hierarchy = MediaIDHelper.getHierarchy(mediaId);
         String categoryType = hierarchy[0];
 
-        Iterable<MediaMetadata> tracks = null;
+        List<MediaMetadata> tracks = null;
 
         if (hierarchy.length == 1) {
             LogHelper.d(TAG, "Creating playing queue for all songs");
@@ -82,6 +87,9 @@ public class QueueHelper {
                 LogHelper.e(TAG, "Unrecognized category type: ", categoryType, " for media ", mediaId);
                 return null;
             }
+
+            if (shuffle)
+                Collections.shuffle(tracks);
 
             return convertToQueue(tracks, hierarchy[0], hierarchy[1]);
         } else {

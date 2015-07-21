@@ -52,7 +52,7 @@
         android:layout_marginStart="@dimen/margin_screen"
         android:layout_marginTop="@dimen/fab_negative_margin"
         android:elevation="5dp"
-        android:src="@drawable/ic_shuffle_white_24dp"
+        android:src="@drawable/ic_play_arrow_white_24dp"
         app:borderWidth="0dp"
         app:elevation="@dimen/elevation_fab"
         app:fabSize="mini" />

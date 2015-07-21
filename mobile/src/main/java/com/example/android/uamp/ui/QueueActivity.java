@@ -14,9 +14,7 @@ import android.view.MenuItem;
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
-import com.example.android.uamp.utils.QueueHelper;
-
-import java.util.List;
+import com.example.android.uamp.utils.MediaIDHelper;
 
 /**
  * Created by Jorge on 11/06/2015.
@@ -98,7 +96,7 @@ public class QueueActivity extends ActionBarCastActivity {
         }
         setMediaController(mediaController);
         mediaController.registerCallback(mCallback);
-        updateQueue(mediaController.getQueue());
+        mAdapter.setQueue(mediaController.getQueue());
         MediaMetadata metadata = mediaController.getMetadata();
         if (metadata != null)
             updateCurrentMediaId(metadata.getDescription().getMediaId());
@@ -123,11 +121,13 @@ public class QueueActivity extends ActionBarCastActivity {
         }
     }
 
-    private void updateQueue(List<MediaSession.QueueItem> queue) {
-        mAdapter.setQueue(queue);
-    }
-
     private void updateCurrentMediaId(String mediaId) {
-        mAdapter.setCurrentIndex(QueueHelper.getMusicIndexOnQueue(mAdapter.getQueue(), mediaId));
+        int index = 0;
+        for (MediaSession.QueueItem item : mAdapter.getQueue()) {
+            if (mediaId.equals(MediaIDHelper.extractMusicIDFromMediaID(item.getDescription().getMediaId())))
+                break;
+            index++;
+        }
+        mAdapter.setCurrentIndex(index);
     }
 }

@@ -9,10 +9,12 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.example.android.uamp.R;
 import com.example.android.uamp.model.MusicProvider;
@@ -84,6 +86,17 @@ public class AlbumActivity extends MediaContainerActivity {
                 initializeFromParams(savedInstanceState, getIntent());
             }
         });
+
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mTopShadow.getLayoutParams();
+        params.height += getStatusBarHeight();
+        mTopShadow.setLayoutParams(params);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.album, menu);
+        return true;
     }
 
     @Override
