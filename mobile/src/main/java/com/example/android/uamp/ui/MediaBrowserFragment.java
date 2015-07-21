@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * A Fragment that lists all the various browsable queues available
  * from a {@link android.service.media.MediaBrowserService}.
- * <p>
+ * <p/>
  * It uses a {@link MediaBrowser} to connect to the {@link com.example.android.uamp.MusicService}.
  * Once connected, the fragment subscribes to get all the children.
  * All {@link MediaBrowser.MediaItem}'s that can be browsed are shown in a ListView.
@@ -147,7 +147,8 @@ public class MediaBrowserFragment extends Fragment {
                     }
 
                     @Override
-                    public void onMenuItemClick(MenuItem item, MediaBrowser.MediaItem mediaItem) {
+                    public void onMenuItemClick(MenuItem item, int position) {
+                        MediaBrowser.MediaItem mediaItem = mBrowserAdapter.get(position);
                         switch (item.getItemId()) {
                             case R.id.add_queue:
                                 getActivity().startService(new Intent(getActivity(), MusicService.class)
@@ -179,8 +180,14 @@ public class MediaBrowserFragment extends Fragment {
                                 extras.putBoolean(MusicService.EXTRA_SHUFFLE, true);
                                 getActivity().getMediaController().getTransportControls().playFromMediaId(mediaItem.getMediaId(), extras);
                                 break;
-                            case R.id.delete:
-                                break;
+                            //todo
+                            /*case R.id.delete:
+                                getActivity().startService(new Intent(getActivity(), MusicService.class)
+                                        .setAction(MusicService.ACTION_CMD)
+                                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_DEL_FROM_DEVICE)
+                                        .putExtra(MusicService.EXTRA_MEDIA_ID, mediaItem.getMediaId()));
+                                mBrowserAdapter.remove(position);
+                               break;*/
                         }
                     }
                 });

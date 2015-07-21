@@ -209,6 +209,12 @@ public class MusicProvider {
         }*/
     }
 
+    public synchronized void delete(String musicId, ContentResolver contentResolver) {
+        //todo remover dos álbuns, artistas e playlists
+        contentResolver.delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                MediaStore.Audio.Media._ID + " =" + musicId + "", null);
+    }
+
     public boolean isInitialized() {
         return mCurrentState == State.INITIALIZED;
     }

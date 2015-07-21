@@ -276,6 +276,15 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
+    public MediaBrowser.MediaItem get(int position) {
+        return mMediaItems.get(position);
+    }
+
+    public void remove(int position) {
+        mMediaItems.remove(position);
+        notifyItemRemoved(position);
+    }
+
     public void clear() {
         mMediaItems.clear();
         mHeadersPositions.clear();
@@ -285,7 +294,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public interface OnItemClickListener {
         void onItemClick(MediaBrowser.MediaItem mediaItem, View sharedElement);
 
-        void onMenuItemClick(MenuItem item, MediaBrowser.MediaItem mediaItem);
+        void onMenuItemClick(MenuItem item, int position);
     }
 
     protected class PlaceHolder extends RecyclerView.ViewHolder {
@@ -337,7 +346,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
-                                mListener.onMenuItemClick(item, mMediaItems.get(getMediaItemIndex(getAdapterPosition())));
+                                mListener.onMenuItemClick(item, getMediaItemIndex(getAdapterPosition()));
                                 return true;
                             }
                         });
