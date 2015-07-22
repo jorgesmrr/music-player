@@ -122,7 +122,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 case TYPE_PLAYABLE:
                     if (mMediaType != MEDIA_SONG_IN_ALBUM) {
                         holder.mImageView.setImageDrawable(
-                                mActivity.getDrawable(R.drawable.ic_play_arrow_white_24dp));
+                                mActivity.getDrawable(R.drawable.ic_audiotrack_white_24dp));
                         holder.mImageView.setImageTintList(mColorStateNotPlaying);
                     }
                     if (mMediaType == MEDIA_ALBUM_SONGS)

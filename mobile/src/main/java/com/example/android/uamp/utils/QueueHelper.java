@@ -76,7 +76,10 @@ public class QueueHelper {
                 return null;
             }
 
-            return convertToQueue(tracks, initialId, hierarchy[0]);
+            List<MediaSession.QueueItem> queue = convertToQueue(tracks, initialId, hierarchy[0]);
+            if (shuffle)
+                Collections.shuffle(queue);
+            return queue;
         } else if (hierarchy.length == 2) {
             String categoryValue = hierarchy[1];
             LogHelper.d(TAG, "Creating playing queue for ", categoryType, ",  ", categoryValue);
@@ -98,12 +101,10 @@ public class QueueHelper {
                 return null;
             }
 
-            if (shuffle) {
-                tracks = new ArrayList<>(tracks);
-                Collections.shuffle(tracks);
-            }
-
-            return convertToQueue(tracks, initialId, hierarchy[0], hierarchy[1]);
+            List<MediaSession.QueueItem> queue = convertToQueue(tracks, initialId, hierarchy[0], hierarchy[1]);
+            if (shuffle)
+                Collections.shuffle(queue);
+            return queue;
         } else {
             LogHelper.e(TAG, "Could not build a playing queue for this mediaId: ", mediaId);
             return null;

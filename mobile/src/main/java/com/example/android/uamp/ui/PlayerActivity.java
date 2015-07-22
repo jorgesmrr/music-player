@@ -62,8 +62,10 @@ public class PlayerActivity extends ActionBarCastActivity {
     private static final long PROGRESS_UPDATE_INTERNAL = 1000;
     private static final long PROGRESS_UPDATE_INITIAL_INTERVAL = 100;
 
-    private ImageView mSkipPrev;
-    private ImageView mSkipNext;
+    private View mSkipPrev;
+    private View mSkipNext;
+    private ImageView mShuffle;
+    private ImageView mRepeat;
     private FloatingActionButton mPlayPause;
     private TextView mPosition;
     private SeekBar mSeekbar;
@@ -71,6 +73,8 @@ public class PlayerActivity extends ActionBarCastActivity {
     private TextView mSubtitle;
     private ImageView mArt;
 
+    private boolean mShuffling;
+    private int mRepeatMode;
 
     private Handler mHandler = new Handler();
     private MediaBrowser mMediaBrowser;
@@ -102,6 +106,11 @@ public class PlayerActivity extends ActionBarCastActivity {
                 updateDuration(metadata);
             }
         }
+
+        @Override
+        public void onExtrasChanged(Bundle extras) {
+            updateExtras(extras);
+        }
     };
 
     private MediaBrowser.ConnectionCallback mConnectionCallback =
@@ -126,10 +135,15 @@ public class PlayerActivity extends ActionBarCastActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
 
+        mRepeatMode = MusicService.REPEAT_NONE;
+        mShuffling = false;
+
         mArt = (ImageView) findViewById(R.id.art);
         mPlayPause = (FloatingActionButton) findViewById(R.id.play_pause);
-        mSkipNext = (ImageView) findViewById(R.id.next);
-        mSkipPrev = (ImageView) findViewById(R.id.prev);
+        mSkipNext = findViewById(R.id.next);
+        mSkipPrev = findViewById(R.id.prev);
+        mShuffle = (ImageView) findViewById(R.id.shuffle);
+        mRepeat = (ImageView) findViewById(R.id.repeat);
         mPosition = (TextView) findViewById(R.id.extra);
         mSeekbar = (SeekBar) findViewById(R.id.seekBar);
         mTitle = (TextView) findViewById(R.id.title);
@@ -168,6 +182,24 @@ public class PlayerActivity extends ActionBarCastActivity {
                     default:
                         LogHelper.d(TAG, "onClick with state ", state.getState());
                 }
+            }
+        });
+
+        mShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startService(new Intent(PlayerActivity.this, MusicService.class)
+                        .setAction(MusicService.ACTION_CMD)
+                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_TOGGLE_SHUFFLE));
+            }
+        });
+
+        mRepeat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startService(new Intent(PlayerActivity.this, MusicService.class)
+                        .setAction(MusicService.ACTION_CMD)
+                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_TOGGLE_REPEAT));
             }
         });
 
@@ -268,6 +300,7 @@ public class PlayerActivity extends ActionBarCastActivity {
             updateDuration(metadata);
         }
         updateProgress();
+        updateExtras(mediaController.getExtras());
         if (state != null && (state.getState() == PlaybackState.STATE_PLAYING)) {
             scheduleSeekbarUpdate();
         }
@@ -407,5 +440,34 @@ public class PlayerActivity extends ActionBarCastActivity {
         mSeekbar.setProgress((int) currentPosition);
     }
 
+    private void updateExtras(Bundle extras){
+        boolean shuffling = extras.getBoolean(MusicService.EXTRA_SHUFFLING);
+        int repeatMode = extras.getInt(MusicService.EXTRA_REPEAT_MODE, MusicService.REPEAT_NONE);
 
+        if (shuffling != mShuffling) {
+            if (shuffling)
+                mShuffle.setColorFilter(getResources().getColor(R.color.accent));
+            else
+                mShuffle.setColorFilter(getResources().getColor(R.color.grey_icon));
+            mShuffling = shuffling;
+        }
+
+        if (repeatMode != mRepeatMode) {
+            switch (repeatMode) {
+                case MusicService.REPEAT_NONE:
+                    mRepeat.setImageResource(R.drawable.ic_repeat_white_24dp);
+                    mRepeat.setColorFilter(getResources().getColor(R.color.grey_icon));
+                    break;
+                case MusicService.REPEAT_ONCE:
+                    mRepeat.setImageResource(R.drawable.ic_repeat_one_white_24dp);
+                    mRepeat.setColorFilter(getResources().getColor(R.color.accent));
+                    break;
+                case MusicService.REPEAT_ALL:
+                    mRepeat.setImageResource(R.drawable.ic_repeat_white_24dp);
+                    mRepeat.setColorFilter(getResources().getColor(R.color.accent));
+                    break;
+            }
+            mRepeatMode = repeatMode;
+        }
+    }
 }

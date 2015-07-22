@@ -49,7 +49,7 @@ public abstract class MediaContainerActivity extends BaseActivity {
                 getMediaController().getTransportControls().playFromMediaId(mMediaId, extras);
                 return true;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     protected void initializeViews() {

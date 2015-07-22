@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary">#ffff5722</color>
+    <color name="primary_dark">#ffbf360c</color>
+    <color name="accent">#ffff5722</color>
+    <color name="grey_icon">#ff757575</color>
     <color name="grey_ripple">#EEEEEE</color>
     <color name="tv_branding">#ffff5722</color>
     <color name="tv_branding_dark">#ffbf360c</color>

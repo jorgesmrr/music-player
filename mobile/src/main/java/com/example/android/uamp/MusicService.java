@@ -52,6 +52,7 @@ import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCa
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_BY_ALBUM;
@@ -120,6 +121,10 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
 
     // Extra on MediaSession that contains the Cast device name currently connected to
     public static final String EXTRA_CONNECTED_CAST = "com.example.android.uamp.CAST_NAME";
+    // Extra on MediaSession that indicates if we are shuffling
+    public static final String EXTRA_SHUFFLING = "com.example.android.uamp.EXTRA_SHUFFLING";
+    // Extra on MediaSession that indicates if we are repeating
+    public static final String EXTRA_REPEAT_MODE = "com.example.android.uamp.EXTRA_REPEAT_MODE";
     // The action of the incoming Intent indicating that it contains a command
     // to be executed (see {@link #onStartCommand})
     public static final String ACTION_CMD = "com.example.android.uamp.ACTION_CMD";
@@ -142,6 +147,10 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
     public static final String CMD_DEL_FROM_QUEUE = "CMD_DEL_FROM_QUEUE";
     // A value of a CMD_NAME key that indicates that a song should be deleted from the device.
     public static final String CMD_DEL_FROM_DEVICE = "CMD_DEL_FROM_DEVICE";
+    // A value of a CMD_NAME key that toggles shuffling.
+    public static final String CMD_TOGGLE_SHUFFLE = "CMD_TOGGLE_SHUFFLE";
+    // A value of a CMD_NAME key that toggles repeation.
+    public static final String CMD_TOGGLE_REPEAT = "CMD_TOGGLE_REPEAT";
     // The key in the extras of the incoming Intent indicating the song's media ID
     public static final String EXTRA_MEDIA_ID = "EXTRA_MEDIA_ID";
     // The key in the extras of the incoming Intent indicating the song's index in the queue
@@ -154,6 +163,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
     public static final String EXTRA_SHUFFLE = "com.example.android.uamp.SHUFFLE";
     // Delay stopSelf by using a handler.
     private static final int STOP_DELAY = 30000;
+    // Flag to not repeat.
+    public static final int REPEAT_NONE = 0;
+    // Flag to repeat the playing queue.
+    public static final int REPEAT_ALL = 1;
+    // Flag to repeat the current song.
+    public static final int REPEAT_ONCE = 2;
 
     // Music catalog manager
     private MusicProvider mMusicProvider;
@@ -233,6 +248,8 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         mSession.setSessionActivity(pi);
 
         mSessionExtras = new Bundle();
+        mSessionExtras.putBoolean(EXTRA_SHUFFLING, false);
+        mSessionExtras.putInt(EXTRA_REPEAT_MODE, REPEAT_NONE);
         CarHelper.setSlotReservationFlags(mSessionExtras, true, true, true);
         WearHelper.setSlotReservationFlags(mSessionExtras, true, true);
         WearHelper.setUseBackgroundFromTheme(mSessionExtras, true);
@@ -285,51 +302,57 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     String artistMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ARTIST, artistId);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, artistMediaId));
                 } else if (CMD_ADD_TO_QUEUE.equals(command)) {
-                    String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
-                    boolean playNext = startIntent.getBooleanExtra(EXTRA_PLAY_NEXT, false);
-                    String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                    if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
+                        String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
+                        boolean playNext = startIntent.getBooleanExtra(EXTRA_PLAY_NEXT, false);
+                        String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
 
-                    if (musicId != null) {
-                        // It's a song
-                        MediaMetadata track = mMusicProvider.getMusic(musicId);
+                        if (musicId != null) {
+                            // It's a song
+                            MediaMetadata track = mMusicProvider.getMusic(musicId);
 
-                        // We create a hierarchy-aware mediaID, so we know what the queue is about by looking
-                        // at the QueueItem media IDs.
-                        String hierarchyAwareMediaID = MediaIDHelper.createMediaID(
-                                track.getDescription().getMediaId(), MEDIA_ID_QUEUE);
+                            // We create a hierarchy-aware mediaID, so we know what the queue is about by looking
+                            // at the QueueItem media IDs.
+                            String hierarchyAwareMediaID = MediaIDHelper.createMediaID(
+                                    track.getDescription().getMediaId(), MEDIA_ID_QUEUE);
 
-                        MediaMetadata trackCopy = new MediaMetadata.Builder(track)
-                                .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
-                                .build();
+                            MediaMetadata trackCopy = new MediaMetadata.Builder(track)
+                                    .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
+                                    .build();
 
-                        // We don't expect queues to change after created, so we use the item index as the
-                        // queueId. Any other number unique in the queue would work.
-                        MediaSession.QueueItem item = new MediaSession.QueueItem(
-                                trackCopy.getDescription(), mPlayingQueue.size());
-                        if (playNext)
-                            mPlayingQueue.add(mCurrentIndexOnQueue + 1, item);
-                        else
-                            mPlayingQueue.add(item);
-                        mSession.setQueue(mPlayingQueue);
+                            // We don't expect queues to change after created, so we use the item index as the
+                            // queueId. Any other number unique in the queue would work.
+                            MediaSession.QueueItem item = new MediaSession.QueueItem(
+                                    trackCopy.getDescription(), mPlayingQueue.size());
+                            if (playNext)
+                                mPlayingQueue.add(mCurrentIndexOnQueue + 1, item);
+                            else
+                                mPlayingQueue.add(item);
+                            mSession.setQueue(mPlayingQueue);
+                        } else {
+                            // It's an album or artist
+                            if (playNext)
+                                mPlayingQueue.addAll(mCurrentIndexOnQueue + 1, QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mSessionExtras.getBoolean(EXTRA_SHUFFLING), mPlayingQueue.size()));
+                            else
+                                mPlayingQueue.addAll(QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mSessionExtras.getBoolean(EXTRA_SHUFFLING), mPlayingQueue.size()));
+                            mSession.setQueue(mPlayingQueue);
+                        }
                     } else {
-                        // It's an album or artist
-                        if (playNext)
-                            mPlayingQueue.addAll(mCurrentIndexOnQueue + 1, QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mPlayingQueue.size()));
-                        else
-                            mPlayingQueue.addAll(QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mPlayingQueue.size()));
-                        mSession.setQueue(mPlayingQueue);
+                        //todo criar nova fila
                     }
                 } else if (CMD_DEL_FROM_QUEUE.equals(command)) {
-                    int indexToRemove = startIntent.getIntExtra(EXTRA_QUEUE_INDEX, -1);
-                    if (indexToRemove >= 0) {
-                        mPlayingQueue.remove(indexToRemove);
-                        mSession.setQueue(mPlayingQueue);
-                        if (indexToRemove == mCurrentIndexOnQueue) {
-                            if (indexToRemove < mPlayingQueue.size() - 1) {
-                                long nextId = mPlayingQueue.get(indexToRemove).getQueueId();
-                                mSession.getController().getTransportControls().skipToQueueItem(nextId);
-                            } else
-                                mSession.getController().getTransportControls().stop();
+                    if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
+                        int indexToRemove = startIntent.getIntExtra(EXTRA_QUEUE_INDEX, -1);
+                        if (indexToRemove >= 0) {
+                            mPlayingQueue.remove(indexToRemove);
+                            mSession.setQueue(mPlayingQueue);
+                            if (indexToRemove == mCurrentIndexOnQueue) {
+                                if (indexToRemove < mPlayingQueue.size() - 1) {
+                                    long nextId = mPlayingQueue.get(indexToRemove).getQueueId();
+                                    mSession.getController().getTransportControls().skipToQueueItem(nextId);
+                                } else
+                                    mSession.getController().getTransportControls().stop();
+                            }
                         }
                     }
                 } else if (CMD_DEL_FROM_DEVICE.equals(command)) {
@@ -340,6 +363,48 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                             musicId = mediaId;
                         mMusicProvider.delete(musicId, getContentResolver());
                     }
+                } else if (CMD_TOGGLE_SHUFFLE.equals(command)) {
+                    if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
+                        boolean shuffling = mSessionExtras.getBoolean(EXTRA_SHUFFLING);
+                        if (shuffling) {
+                            long currentId = mPlayingQueue.get(mCurrentIndexOnQueue).getQueueId();
+                            Collections.sort(mPlayingQueue, new Comparator<MediaSession.QueueItem>() {
+                                @Override
+                                public int compare(MediaSession.QueueItem lhs, MediaSession.QueueItem rhs) {
+                                    return lhs.getQueueId() > rhs.getQueueId() ? 1 : -1;
+                                }
+                            });
+                            int queueSize = mPlayingQueue.size();
+                            for (int i = 0; i < queueSize; i++)
+                                if (currentId == mPlayingQueue.get(i).getQueueId()) {
+                                    mCurrentIndexOnQueue = i;
+                                    break;
+                                }
+                            mSession.setQueue(mPlayingQueue);
+                        } else {
+                            MediaSession.QueueItem queueItem = mPlayingQueue.get(mCurrentIndexOnQueue);
+                            List<MediaSession.QueueItem> newQueue = new ArrayList<>();
+                            int queueSize = mPlayingQueue.size();
+                            for (int i = 0; i < queueSize; i++)
+                                if (i != mCurrentIndexOnQueue)
+                                    newQueue.add(mPlayingQueue.get(i));
+                            Collections.shuffle(newQueue);
+                            newQueue.add(0, queueItem);
+                            mCurrentIndexOnQueue = 0;
+                            mPlayingQueue = newQueue;
+                            mSession.setQueue(mPlayingQueue);
+                        }
+                        mSessionExtras.putBoolean(EXTRA_SHUFFLING, !shuffling);
+                        mSession.setExtras(mSessionExtras);
+                        //todo resetar flag ao criar nova fila
+                    }
+                } else if (CMD_TOGGLE_REPEAT.equals(command)) {
+                    int repeatMode = mSessionExtras.getInt(EXTRA_REPEAT_MODE, REPEAT_NONE);
+                    if (repeatMode == REPEAT_ONCE)
+                        repeatMode = REPEAT_NONE;
+                    else repeatMode++;
+                    mSessionExtras.putInt(EXTRA_REPEAT_MODE, repeatMode);
+                    mSession.setExtras(mSessionExtras);
                 }
             }
         }
@@ -934,12 +999,22 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         // The media player finished playing the current song, so we go ahead
         // and start the next.
         if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
-            // In this sample, we restart the playing queue when it gets to the end:
-            mCurrentIndexOnQueue++;
-            if (mCurrentIndexOnQueue >= mPlayingQueue.size()) {
-                mCurrentIndexOnQueue = 0;
+            int repeatMode = mSessionExtras.getInt(EXTRA_REPEAT_MODE, REPEAT_NONE);
+            if (repeatMode == REPEAT_NONE) {
+                mCurrentIndexOnQueue++;
+                if (mCurrentIndexOnQueue >= mPlayingQueue.size())
+                    handleStopRequest(null);
+                else
+                    handlePlayRequest();
+            } else if (repeatMode == REPEAT_ONCE) {
+                mPlayback.setCurrentStreamPosition(0);
+                handlePlayRequest();
+            } else if (repeatMode == REPEAT_ALL) {
+                mCurrentIndexOnQueue++;
+                if (mCurrentIndexOnQueue >= mPlayingQueue.size())
+                    mCurrentIndexOnQueue = 0;
+                handlePlayRequest();
             }
-            handlePlayRequest();
         } else {
             // If there is nothing to play, we stop and release the resources:
             handleStopRequest(null);
