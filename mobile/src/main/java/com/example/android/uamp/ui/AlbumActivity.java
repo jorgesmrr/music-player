@@ -1,6 +1,7 @@
 package com.example.android.uamp.ui;
 
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaDescription;
@@ -31,16 +32,19 @@ public class AlbumActivity extends MediaContainerActivity {
     private View mHeaderView;
     private View mHeaderFill;
     private View mTopShadow;
+    private View mHeaderBar;
 
     private int mHeaderHeight;
     private int mActionBarHeight;
-    private View mHeaderBar;
+    private boolean mIsPortrait;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album);
         initializeViews();
+
+        mIsPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
         // Color to fill the gap between status bar and title bar
         mIsHeaderFillShown = false;
@@ -49,48 +53,52 @@ public class AlbumActivity extends MediaContainerActivity {
 
         // Find views
         mHeaderView = findViewById(R.id.header);
-        mHeaderFill = mHeaderView.findViewById(R.id.header_fill);
-        mHeaderImageView = (ImageView) mHeaderView.findViewById(R.id.art);
+        mHeaderBar = findViewById(R.id.bar);
 
         mTopShadow = findViewById(R.id.shadow);
-        mMinHeaderTranslation -= getResources().getDimensionPixelSize(R.dimen.margin_screen);
-        if (mIsHeaderFillShown)
-            mHeaderFill.setVisibility(View.VISIBLE);
-        else
-            mHeaderFill.setVisibility(View.INVISIBLE);
 
-        TypedValue mTypedValue = new TypedValue();
-        getTheme()
-                .resolveAttribute(android.R.attr.actionBarSize, mTypedValue, true);
-        mActionBarHeight = TypedValue.complexToDimensionPixelSize(
-                mTypedValue.data, getResources().getDisplayMetrics());
-        mMinHeaderTranslation += mActionBarHeight;
+        if (mIsPortrait) {
+            mHeaderFill = mHeaderView.findViewById(R.id.header_fill);
+            mHeaderImageView = (ImageView) mHeaderView.findViewById(R.id.art);
 
-        mHeaderBar = findViewById(R.id.bar);
-        mHeaderBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                mHeaderBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            mMinHeaderTranslation -= getResources().getDimensionPixelSize(R.dimen.margin_screen);
+            if (mIsHeaderFillShown)
+                mHeaderFill.setVisibility(View.VISIBLE);
+            else
+                mHeaderFill.setVisibility(View.INVISIBLE);
 
-                mMinHeaderTranslation += mHeaderBar.getHeight();
-            }
-        });
+            TypedValue mTypedValue = new TypedValue();
+            getTheme()
+                    .resolveAttribute(android.R.attr.actionBarSize, mTypedValue, true);
+            mActionBarHeight = TypedValue.complexToDimensionPixelSize(
+                    mTypedValue.data, getResources().getDisplayMetrics());
+            mMinHeaderTranslation += mActionBarHeight;
 
-        mHeaderView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                mHeaderView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mTopShadow.getLayoutParams();
+            params.height += getStatusBarHeight();
+            mTopShadow.setLayoutParams(params);
 
-                mHeaderHeight = mHeaderView.getHeight();
-                mMinHeaderTranslation -= mHeaderHeight;
+            mHeaderBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    mHeaderBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                initializeFromParams(savedInstanceState, getIntent());
-            }
-        });
+                    mMinHeaderTranslation += mHeaderBar.getHeight();
+                }
+            });
 
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mTopShadow.getLayoutParams();
-        params.height += getStatusBarHeight();
-        mTopShadow.setLayoutParams(params);
+            mHeaderView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    mHeaderView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                    mHeaderHeight = mHeaderView.getHeight();
+                    mMinHeaderTranslation -= mHeaderHeight;
+
+                    initializeFromParams(savedInstanceState, getIntent());
+                }
+            });
+        } else initializeFromParams(savedInstanceState, getIntent());
     }
 
     @Override
@@ -103,7 +111,7 @@ public class AlbumActivity extends MediaContainerActivity {
     @Override
     protected void openFragment(String mediaId) {
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, MediaBrowserFragment.newInstance(mediaId, mOnScrollListener, mHeaderHeight), BROWSE_FRAG_TAG)
+                .add(R.id.container, MediaBrowserFragment.newInstance(mediaId, mIsPortrait ? mOnScrollListener : null, mHeaderHeight), BROWSE_FRAG_TAG)
                 .commit();
     }
 
@@ -163,16 +171,20 @@ public class AlbumActivity extends MediaContainerActivity {
         mSubtitleView.setText(description.getExtras().getString(MusicProvider.ALBUM_EXTRA_ARTIST));
         Uri iconUri = description.getIconUri();
         if (iconUri != null) {
-            Bitmap art = BitmapFactory.decodeFile(iconUri.toString());
-            mHeaderImageView.setImageBitmap(art);
+            final Bitmap art = BitmapFactory.decodeFile(iconUri.toString());
             new Palette.Builder(art).generate(new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(Palette palette) {
                     int darkVibrantColor = palette.getDarkVibrantColor(getResources().getColor(R.color.default_dark_vibrant_color));
                     mHeaderBar.setBackgroundColor(darkVibrantColor);
-                    mHeaderFill.setBackgroundColor(darkVibrantColor);
                     ColorStateList stateList = new ColorStateList(new int[][]{new int[]{}}, new int[]{palette.getVibrantColor(getResources().getColor(R.color.default_vibrant_color))});
                     mFab.setBackgroundTintList(stateList);
+                    if (mIsPortrait) {
+                        mHeaderImageView.setImageBitmap(art);
+                        mHeaderFill.setBackgroundColor(darkVibrantColor);
+                    } else {
+                        getToolbar().setBackgroundColor(darkVibrantColor);
+                    }
                 }
             });
         } else {

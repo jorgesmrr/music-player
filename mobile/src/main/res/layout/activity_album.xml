@@ -8,7 +8,8 @@
     <FrameLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_above="@+id/controls_container" />
 
     <RelativeLayout
         android:id="@+id/header"
@@ -47,16 +48,13 @@
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/primary_text_default_material_dark"
-                android:textSize="@dimen/abc_text_size_headline_material" />
+                style="@style/Headline.SingleLine" />
 
             <TextView
                 android:id="@+id/subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Subtitle"
-                android:textColor="@color/secondary_text_default_material_dark"
-                android:textSize="16sp" />
+                style="@style/SubtitleInverse.SingleLine" />
 
         </LinearLayout>
 
@@ -81,11 +79,12 @@
         android:layout_marginTop="@dimen/fab_negative_margin"
         android:elevation="@dimen/elevation_fab"
         android:src="@drawable/ic_play_arrow_white_24dp"
+        app:backgroundTint="@color/default_vibrant_color"
         app:borderWidth="0dp"
-        app:fabSize="mini"
-        app:backgroundTint="@color/default_vibrant_color"/>
+        app:fabSize="mini" />
 
     <FrameLayout
+        android:id="@+id/controls_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

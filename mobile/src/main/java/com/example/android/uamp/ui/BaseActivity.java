@@ -25,6 +25,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.example.android.uamp.MusicService;
@@ -145,10 +146,10 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
                 mediaController.getPlaybackState() == null) {
             return false;
         }
+        Log.v("t",mediaController.getPlaybackState().getState()+"");
         switch (mediaController.getPlaybackState().getState()) {
             case PlaybackState.STATE_ERROR:
             case PlaybackState.STATE_NONE:
-            case PlaybackState.STATE_STOPPED:
                 return false;
             default:
                 return true;

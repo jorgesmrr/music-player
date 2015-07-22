@@ -81,4 +81,45 @@
         <item name="android:colorPrimaryDark">@color/tv_branding_dark</item>
         <item name="android:colorAccent">@color/tv_branding_accent</item>
     </style>
+
+    <style name="Headline">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/primary_text_default_material_dark</item>
+        <item name="android:textSize">@dimen/abc_text_size_headline_material</item>
+    </style>
+
+    <style name="Headline.SingleLine" parent="Headline">
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Title">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/primary_text_default_material_light</item>
+    </style>
+
+    <style name="Title.SingleLine" parent="Title">
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Subtitle">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@color/secondary_text_default_material_light</item>
+    </style>
+
+    <style name="Subtitle.SingleLine" parent="Subtitle">
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="SubtitleInverse">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@color/secondary_text_default_material_dark</item>
+    </style>
+
+    <style name="SubtitleInverse.SingleLine" parent="SubtitleInverse">
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
 </resources>

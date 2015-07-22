@@ -69,38 +69,38 @@ import static com.example.android.uamp.utils.MediaIDHelper.createBrowseCategoryM
  * user interfaces that need to interact with your media session, like Android Auto. You can
  * (should) also use the same service from your app's UI, which gives a seamless playback
  * experience to the user.
- * <p/>
+ * <p>
  * To implement a MediaBrowserService, you need to:
- * <p/>
+ * <p>
  * <ul>
- * <p/>
+ * <p>
  * <li> Extend {@link android.service.media.MediaBrowserService}, implementing the media browsing
  * related methods {@link android.service.media.MediaBrowserService#onGetRoot} and
  * {@link android.service.media.MediaBrowserService#onLoadChildren};
  * <li> In onCreate, start a new {@link android.media.session.MediaSession} and notify its parent
  * with the session's token {@link android.service.media.MediaBrowserService#setSessionToken};
- * <p/>
+ * <p>
  * <li> Set a callback on the
  * {@link android.media.session.MediaSession#setCallback(android.media.session.MediaSession.Callback)}.
  * The callback will receive all the user's actions, like play, pause, etc;
- * <p/>
+ * <p>
  * <li> Handle all the actual music playing using any method your app prefers (for example,
  * {@link android.media.MediaPlayer})
- * <p/>
+ * <p>
  * <li> Update playbackState, "now playing" metadata and queue, using MediaSession proper methods
  * {@link android.media.session.MediaSession#setPlaybackState(android.media.session.PlaybackState)}
  * {@link android.media.session.MediaSession#setMetadata(android.media.MediaMetadata)} and
  * {@link android.media.session.MediaSession#setQueue(java.util.List)})
- * <p/>
+ * <p>
  * <li> Declare and export the service in AndroidManifest with an intent receiver for the action
  * android.media.browse.MediaBrowserService
- * <p/>
+ * <p>
  * </ul>
- * <p/>
+ * <p>
  * To make your app compatible with Android Auto, you also need to:
- * <p/>
+ * <p>
  * <ul>
- * <p/>
+ * <p>
  * <li> Declare a meta-data tag in AndroidManifest.xml linking to a xml resource
  * with a &lt;automotiveApp&gt; root element. For a media app, this must include
  * an &lt;uses name="media"/&gt; element as a child.
@@ -111,7 +111,7 @@ import static com.example.android.uamp.utils.MediaIDHelper.createBrowseCategoryM
  * &lt;automotiveApp&gt;
  * &lt;uses name="media"/&gt;
  * &lt;/automotiveApp&gt;
- * <p/>
+ * <p>
  * </ul>
  *
  * @see <a href="README.md">README.md</a> for more details.
@@ -301,43 +301,55 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     String artistMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ARTIST, artistId);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, artistMediaId));
                 } else if (CMD_ADD_TO_QUEUE.equals(command)) {
-                    if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
-                        String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
-                        boolean playNext = startIntent.getBooleanExtra(EXTRA_PLAY_NEXT, false);
-                        String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                    String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
+                    boolean playNext = startIntent.getBooleanExtra(EXTRA_PLAY_NEXT, false);
+                    String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                    boolean queueInitialized = false;
 
-                        if (musicId != null) {
-                            // It's a song
-                            MediaMetadata track = mMusicProvider.getMusic(musicId);
+                    if (mPlayingQueue == null)
+                        // Creates a new queue
+                        mPlayingQueue = new ArrayList<>();
 
-                            // We create a hierarchy-aware mediaID, so we know what the queue is about by looking
-                            // at the QueueItem media IDs.
-                            String hierarchyAwareMediaID = MediaIDHelper.createMediaID(
-                                    track.getDescription().getMediaId(), MEDIA_ID_QUEUE);
+                    if (mPlayingQueue.isEmpty()) {
+                        mCurrentIndexOnQueue = 0;
+                        mSession.setQueueTitle(MediaIDHelper.extractBrowseCategoryValueFromMediaID(mediaId));
+                        queueInitialized = true;
+                    }
 
-                            MediaMetadata trackCopy = new MediaMetadata.Builder(track)
-                                    .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
-                                    .build();
+                    if (musicId != null) {
+                        // Add the song
+                        MediaMetadata track = mMusicProvider.getMusic(musicId);
 
-                            // We don't expect queues to change after created, so we use the item index as the
-                            // queueId. Any other number unique in the queue would work.
-                            MediaSession.QueueItem item = new MediaSession.QueueItem(
-                                    trackCopy.getDescription(), mPlayingQueue.size());
-                            if (playNext)
-                                mPlayingQueue.add(mCurrentIndexOnQueue + 1, item);
-                            else
-                                mPlayingQueue.add(item);
-                            mSession.setQueue(mPlayingQueue);
-                        } else {
-                            // It's an album or artist
-                            if (playNext)
-                                mPlayingQueue.addAll(mCurrentIndexOnQueue + 1, QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mSessionExtras.getBoolean(EXTRA_SHUFFLING), mPlayingQueue.size()));
-                            else
-                                mPlayingQueue.addAll(QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mSessionExtras.getBoolean(EXTRA_SHUFFLING), mPlayingQueue.size()));
-                            mSession.setQueue(mPlayingQueue);
-                        }
+                        // We create a hierarchy-aware mediaID, so we know what the queue is about by looking
+                        // at the QueueItem media IDs.
+                        String hierarchyAwareMediaID = MediaIDHelper.createMediaID(
+                                track.getDescription().getMediaId(), MEDIA_ID_QUEUE);
+
+                        MediaMetadata trackCopy = new MediaMetadata.Builder(track)
+                                .putString(MediaMetadata.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
+                                .build();
+
+                        // We don't expect queues to change after created, so we use the item index as the
+                        // queueId. Any other number unique in the queue would work.
+                        MediaSession.QueueItem item = new MediaSession.QueueItem(
+                                trackCopy.getDescription(), mPlayingQueue.size());
+                        if (playNext)
+                            mPlayingQueue.add(mCurrentIndexOnQueue + 1, item);
+                        else
+                            mPlayingQueue.add(item);
                     } else {
-                        //todo criar nova fila
+                        // Add the album or artist
+                        if (playNext)
+                            mPlayingQueue.addAll(mCurrentIndexOnQueue + 1, QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mSessionExtras.getBoolean(EXTRA_SHUFFLING), mPlayingQueue.size()));
+                        else
+                            mPlayingQueue.addAll(QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mSessionExtras.getBoolean(EXTRA_SHUFFLING), mPlayingQueue.size()));
+                    }
+
+                    // Change queue
+                    mSession.setQueue(mPlayingQueue);
+                    if (queueInitialized) {
+                        mSession.setPlaybackState(new PlaybackState.Builder(mSession.getController().getPlaybackState()).setState(PlaybackState.STATE_STOPPED, 0, 1).build());
+                        updateMetadata();
                     }
                 } else if (CMD_DEL_FROM_QUEUE.equals(command)) {
                     if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
@@ -695,9 +707,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             // selected from.
             mPlayingQueue = QueueHelper.getPlayingQueue(mediaId, mMusicProvider, extras != null && extras.getBoolean(EXTRA_SHUFFLE));
             mSession.setQueue(mPlayingQueue);
-            String queueTitle = "Test"; /*todo getString(R.string.browse_musics_by_genre_subtitle,
-                    MediaIDHelper.extractBrowseCategoryValueFromMediaID(mediaId));*/
-            mSession.setQueueTitle(queueTitle);
+            mSession.setQueueTitle(MediaIDHelper.extractBrowseCategoryValueFromMediaID(mediaId));
 
             if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
                 String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);

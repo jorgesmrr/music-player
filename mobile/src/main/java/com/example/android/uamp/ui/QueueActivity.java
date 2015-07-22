@@ -45,10 +45,7 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
 
         @Override
         public void onQueueChanged(List<MediaSession.QueueItem> queue) {
-            mAdapter.setQueue(queue);
-            MediaMetadata metadata = getMediaController().getMetadata();
-            if (metadata != null)
-                updateCurrentMediaId(metadata.getDescription().getMediaId());
+            updateQueue(queue);
         }
     };
 
@@ -124,6 +121,7 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
 
         initializeToolbar(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle(R.string.queue);
 
         mMediaBrowser = new MediaBrowser(this,
                 new ComponentName(this, MusicService.class), mConnectionCallback, null);
@@ -146,10 +144,7 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
         }
         setMediaController(mediaController);
         mediaController.registerCallback(mCallback);
-        mAdapter.setQueue(mediaController.getQueue());
-        MediaMetadata metadata = mediaController.getMetadata();
-        if (metadata != null)
-            updateCurrentMediaId(metadata.getDescription().getMediaId());
+        updateQueue(getMediaController().getQueue());
     }
 
     @Override
@@ -169,6 +164,14 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
         if (getMediaController() != null) {
             getMediaController().unregisterCallback(mCallback);
         }
+    }
+
+    private void updateQueue(List<MediaSession.QueueItem> queue){
+        MediaController mediaController = getMediaController();
+        mAdapter.setQueue(mediaController.getQueue());
+        MediaMetadata metadata = mediaController.getMetadata();
+        if (metadata != null)
+            updateCurrentMediaId(metadata.getDescription().getMediaId());
     }
 
     private void updateCurrentMediaId(String mediaId) {

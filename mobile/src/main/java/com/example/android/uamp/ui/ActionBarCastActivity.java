@@ -188,6 +188,10 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         mToolbar.setTitle(titleId);
     }
 
+    protected Toolbar getToolbar() {
+        return mToolbar;
+    }
+
     protected void initializeToolbar(boolean addPadding) {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         if (mToolbar == null) {

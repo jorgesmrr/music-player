@@ -17,6 +17,7 @@ package com.example.android.uamp.ui;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -99,6 +100,7 @@ public class PlayerActivity extends ActionBarCastActivity {
 
     private ScheduledFuture<?> mScheduleFuture;
     private PlaybackState mLastPlaybackState;
+    private boolean mIsPortrait;
 
     private MediaController.Callback mCallback = new MediaController.Callback() {
         @Override
@@ -145,6 +147,7 @@ public class PlayerActivity extends ActionBarCastActivity {
 
         mRepeatMode = MusicService.REPEAT_NONE;
         mShuffling = false;
+        mIsPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
         mVibrantColor = getResources().getColor(R.color.default_vibrant_color);
         mDarkVibrantColor = getResources().getColor(R.color.default_dark_vibrant_color);
@@ -155,10 +158,12 @@ public class PlayerActivity extends ActionBarCastActivity {
         mSkipPrev = findViewById(R.id.prev);
         mShuffle = (ImageView) findViewById(R.id.shuffle);
         mRepeat = (ImageView) findViewById(R.id.repeat);
-        mPosition = (TextView) findViewById(R.id.extra);
+        mPosition = (TextView) findViewById(R.id.position);
         mSeekbar = (SeekBar) findViewById(R.id.seekBar);
         mTitle = (TextView) findViewById(R.id.title);
         mSubtitle = (TextView) findViewById(R.id.subtitle);
+
+        mTitle.setSelected(true);
 
         mSkipNext.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,23 +239,25 @@ public class PlayerActivity extends ActionBarCastActivity {
 
         // Translates seekbar
         mBar = findViewById(R.id.bar);
-        mBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @SuppressWarnings("deprecation")
-            @Override
-            public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
-                    mBar.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                else
-                    mBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        if (mIsPortrait) {
+            mBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @SuppressWarnings("deprecation")
+                @Override
+                public void onGlobalLayout() {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
+                        mBar.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    else
+                        mBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                mSeekbar.setTranslationY(mBar.getTop() - mSeekbar.getHeight() / 2/* + getResources().getDimensionPixelSize(R.dimen.two_dp)*/);
-            }
-        });
+                    mSeekbar.setTranslationY(mBar.getTop() - mSeekbar.getHeight() / 2/* + getResources().getDimensionPixelSize(R.dimen.two_dp)*/);
+                }
+            });
 
-        View topShadow = findViewById(R.id.shadow);
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) topShadow.getLayoutParams();
-        params.height += getStatusBarHeight();
-        topShadow.setLayoutParams(params);
+            View topShadow = findViewById(R.id.shadow);
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) topShadow.getLayoutParams();
+            params.height += getStatusBarHeight();
+            topShadow.setLayoutParams(params);
+        }
 
         // Only update from the intent if we are not recreating from a config change:
         if (savedInstanceState == null) {

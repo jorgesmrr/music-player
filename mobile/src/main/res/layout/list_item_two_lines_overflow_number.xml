@@ -28,22 +28,16 @@
 
         <TextView
             android:id="@+id/title"
+            style="@style/Title.SingleLine"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorPrimary"
             tools:text="Title" />
 
         <TextView
             android:id="@+id/subtitle"
+            style="@style/Subtitle.SingleLine"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorSecondary"
             tools:text="Subtitle" />
 
     </LinearLayout>

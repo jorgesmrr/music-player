@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.example.android.uamp.R;
 import com.example.android.uamp.UAMPApplication;
+import com.example.android.uamp.utils.ColoredFileBitmapWorkerTask;
 import com.example.android.uamp.utils.FileBitmapWorkerTask;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
@@ -66,7 +67,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private int mPlaceholderHeight;
 
     public BrowseAdapter(Activity activity, String mediaId, int placeholderHeight, OnItemClickListener listener) {
-        initializeColorStateLists(activity);
+        //todo initializeColorStateLists(activity);
         mMediaItems = new ArrayList<>();
         mHeadersPositions = new TreeSet<>();
         mActivity = activity;
@@ -124,7 +125,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     if (mMediaType != MEDIA_SONG_IN_ALBUM) {
                         holder.mImageView.setImageDrawable(
                                 mActivity.getDrawable(R.drawable.ic_audiotrack_white_24dp));
-                        holder.mImageView.setImageTintList(mColorStateNotPlaying);
+                        //todo holder.mImageView.setImageTintList(mColorStateNotPlaying);
                     }
                     if (mMediaType == MEDIA_ALBUM_SONGS)
                         holder.mSubtitleView.setVisibility(View.GONE);
@@ -133,13 +134,13 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     AnimationDrawable animation = (AnimationDrawable)
                             mActivity.getDrawable(R.drawable.ic_equalizer_white_36dp);
                     holder.mImageView.setImageDrawable(animation);
-                    holder.mImageView.setImageTintList(mColorStatePlaying);
+                    //todo holder.mImageView.setImageTintList(mColorStatePlaying);
                     animation.start();
                     break;
                 case TYPE_PAUSED:
                     holder.mImageView.setImageDrawable(
                             mActivity.getDrawable(R.drawable.ic_equalizer1_white_36dp));
-                    holder.mImageView.setImageTintList(mColorStateNotPlaying);
+                    //todo holder.mImageView.setImageTintList(mColorStateNotPlaying);
                     break;
             }
 
@@ -161,14 +162,21 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 Uri iconUri = description.getIconUri();
                 if (mMediaType == MEDIA_ALBUM)
                     mediaItemViewHolder.itemView.setBackgroundColor(mDefaultDarkVibrantColor);
-                if (iconUri != null)
-                    FileBitmapWorkerTask.loadBitmap(
-                            mActivity.getResources(),
-                            iconUri.toString(),
-                            mediaItemViewHolder.mImageView,
-                            mMediaType == MEDIA_ALBUM ? mediaItemViewHolder.itemView : null,
-                            UAMPApplication.getInstance().getArtSizeSmall());
-                else {
+                if (iconUri != null) {
+                    if (mMediaType == MEDIA_ALBUM)
+                        ColoredFileBitmapWorkerTask.loadBitmap(
+                                mActivity.getResources(),
+                                iconUri.toString(),
+                                mediaItemViewHolder.mImageView,
+                                mediaItemViewHolder.itemView,
+                                UAMPApplication.getInstance().getArtSizeSmall());
+                    else
+                        FileBitmapWorkerTask.loadBitmap(
+                                mActivity.getResources(),
+                                iconUri.toString(),
+                                mediaItemViewHolder.mImageView,
+                                UAMPApplication.getInstance().getArtSizeSmall());
+                } else {
                     //todo mediaItemViewHolder.mImageView.setImageResource(R.drawable.placeholder);
                 }
             } else if (mMediaType == MEDIA_SONG_IN_ALBUM && mediaItemViewHolder.mExtraView != null && description.getExtras() != null)
