@@ -22,6 +22,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.android.uamp.R;
+import com.example.android.uamp.UAMPApplication;
 import com.example.android.uamp.utils.FileBitmapWorkerTask;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
@@ -165,7 +166,8 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             mActivity.getResources(),
                             iconUri.toString(),
                             mediaItemViewHolder.mImageView,
-                            mMediaType == MEDIA_ALBUM ? mediaItemViewHolder.itemView : null);
+                            mMediaType == MEDIA_ALBUM ? mediaItemViewHolder.itemView : null,
+                            UAMPApplication.getInstance().getArtSizeSmall());
                 else {
                     //todo mediaItemViewHolder.mImageView.setImageResource(R.drawable.placeholder);
                 }

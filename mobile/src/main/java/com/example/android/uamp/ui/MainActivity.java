@@ -18,6 +18,7 @@ package com.example.android.uamp.ui;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.media.MediaDescription;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -27,11 +28,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.uamp.R;
+import com.example.android.uamp.UAMPApplication;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
 
@@ -75,6 +78,18 @@ public class MainActivity extends BaseActivity {
         initializeToolbar(false);
         initializeFromParams(savedInstanceState, getIntent());
         setTitle("");
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int screenWidth = size.x;
+
+        // Art sizes
+        UAMPApplication appController = UAMPApplication.getInstance();
+        if (appController.getArtSizeNormal() == 0) {
+            int width = Math.min(screenWidth, size.y);
+            appController.setArtSizes((int) (width * 0.83), (int) (width * 0.38));
+        }
 
         // Only check if a full screen player is needed on the first time:
         if (savedInstanceState == null) {

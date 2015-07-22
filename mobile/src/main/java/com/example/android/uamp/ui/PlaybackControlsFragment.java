@@ -18,7 +18,6 @@ package com.example.android.uamp.ui;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
@@ -35,6 +34,8 @@ import android.widget.Toast;
 
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
+import com.example.android.uamp.UAMPApplication;
+import com.example.android.uamp.utils.BitmapHelper;
 import com.example.android.uamp.utils.LogHelper;
 
 /**
@@ -149,7 +150,7 @@ public class PlaybackControlsFragment extends Fragment {
             String artUrl = artUrlUri.toString();
             if (!TextUtils.equals(artUrl, mArtUrl)) {
                 mArtUrl = artUrl;
-                Bitmap art = BitmapFactory.decodeFile(artUrl);
+                Bitmap art = BitmapHelper.readFromDisk(mArtUrl, UAMPApplication.getArtSizeIcon());
                 if (art != null)
                     mAlbumArt.setImageBitmap(art);
             }

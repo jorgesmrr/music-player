@@ -33,6 +33,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 
 import com.example.android.uamp.ui.MainActivity;
+import com.example.android.uamp.utils.BitmapHelper;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.ResourceHelper;
 
@@ -279,8 +280,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
             // it can actually be any valid Android Uri formatted String.
             // async fetch the album art icon
             String path = description.getIconUri().toString();
-            //todo cache
-            art = BitmapFactory.decodeFile(path);
+            art = BitmapHelper.readFromDisk(path, UAMPApplication.getArtSizeIcon());
             if (art == null) {
                 fetchArtUrl = path;
                 // use a placeholder art while the remote art is being downloaded
@@ -316,8 +316,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
         setNotificationPlaybackState(notificationBuilder);
         if (fetchArtUrl != null) {
-            //todo cache
-            Bitmap bitmap = BitmapFactory.decodeFile(fetchArtUrl);
+            Bitmap bitmap = BitmapHelper.readFromDisk(fetchArtUrl, UAMPApplication.getArtSizeIcon());
             notificationBuilder.setLargeIcon(bitmap);
             mNotificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         }

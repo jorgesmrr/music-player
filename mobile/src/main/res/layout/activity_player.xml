@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/art"
-        android:background="?colorPrimaryDark"
+        android:background="@color/default_dark_vibrant_color"
         android:elevation="@dimen/elevation_toolbar"
         android:orientation="vertical"
         android:padding="@dimen/margin_screen">
@@ -92,6 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin_view"
             android:src="@drawable/ic_pause_resume"
+            app:backgroundTint="@color/default_vibrant_color"
             app:borderWidth="0dp" />
 
         <ImageView

@@ -112,7 +112,7 @@ public class AlbumActivity extends MediaContainerActivity {
         private int getScrollY(RecyclerView recyclerView) throws IllegalStateException {
             View c = recyclerView.getChildAt(0);
 
-            //Se a lista estiver vazia
+            //If list is empty
             if (c == null)
                 return 0;
 

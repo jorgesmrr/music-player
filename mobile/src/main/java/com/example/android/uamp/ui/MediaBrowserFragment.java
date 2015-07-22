@@ -180,7 +180,7 @@ public class MediaBrowserFragment extends Fragment {
                                 extras.putBoolean(MusicService.EXTRA_SHUFFLE, true);
                                 getActivity().getMediaController().getTransportControls().playFromMediaId(mediaItem.getMediaId(), extras);
                                 break;
-                            //todo
+                            //todo delete
                             /*case R.id.delete:
                                 getActivity().startService(new Intent(getActivity(), MusicService.class)
                                         .setAction(MusicService.ACTION_CMD)

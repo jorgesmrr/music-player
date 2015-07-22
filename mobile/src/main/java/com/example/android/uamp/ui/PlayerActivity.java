@@ -18,7 +18,8 @@ package com.example.android.uamp.ui;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
@@ -31,6 +32,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.graphics.Palette;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,6 +44,8 @@ import android.widget.TextView;
 
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
+import com.example.android.uamp.UAMPApplication;
+import com.example.android.uamp.utils.BitmapHelper;
 import com.example.android.uamp.utils.LogHelper;
 import com.google.android.libraries.cast.companionlibrary.utils.Utils;
 
@@ -72,9 +76,13 @@ public class PlayerActivity extends ActionBarCastActivity {
     private TextView mTitle;
     private TextView mSubtitle;
     private ImageView mArt;
+    private View mBar;
 
     private boolean mShuffling;
     private int mRepeatMode;
+
+    private int mVibrantColor;
+    private int mDarkVibrantColor;
 
     private Handler mHandler = new Handler();
     private MediaBrowser mMediaBrowser;
@@ -137,6 +145,9 @@ public class PlayerActivity extends ActionBarCastActivity {
 
         mRepeatMode = MusicService.REPEAT_NONE;
         mShuffling = false;
+
+        mVibrantColor = getResources().getColor(R.color.default_vibrant_color);
+        mDarkVibrantColor = getResources().getColor(R.color.default_dark_vibrant_color);
 
         mArt = (ImageView) findViewById(R.id.art);
         mPlayPause = (FloatingActionButton) findViewById(R.id.play_pause);
@@ -222,17 +233,17 @@ public class PlayerActivity extends ActionBarCastActivity {
         });
 
         // Translates seekbar
-        final View bar = findViewById(R.id.bar);
-        bar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        mBar = findViewById(R.id.bar);
+        mBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @SuppressWarnings("deprecation")
             @Override
             public void onGlobalLayout() {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
-                    bar.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    mBar.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 else
-                    bar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    mBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                mSeekbar.setTranslationY(bar.getTop() - mSeekbar.getHeight() / 2/* + getResources().getDimensionPixelSize(R.dimen.two_dp)*/);
+                mSeekbar.setTranslationY(mBar.getTop() - mSeekbar.getHeight() / 2/* + getResources().getDimensionPixelSize(R.dimen.two_dp)*/);
             }
         });
 
@@ -366,9 +377,31 @@ public class PlayerActivity extends ActionBarCastActivity {
         Uri artUri = description.getIconUri();
         if (artUri != null) {
             String path = artUri.toString();
-            Bitmap art = BitmapFactory.decodeFile(path);
+            final Bitmap art = BitmapHelper.readFromDisk(path, UAMPApplication.getInstance().getArtSizeNormal());
             if (art != null) {
-                mArt.setImageBitmap(art);
+                new Palette.Builder(art).generate(new Palette.PaletteAsyncListener() {
+                    @Override
+                    public void onGenerated(Palette palette) {
+                        mVibrantColor = palette.getVibrantColor(mVibrantColor);
+                        mDarkVibrantColor = palette.getDarkVibrantColor(mDarkVibrantColor);
+                        PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(mVibrantColor, PorterDuff.Mode.SRC_ATOP);
+
+                        mPlayPause.getBackground().setColorFilter(colorFilter);
+                        mBar.setBackgroundColor(mDarkVibrantColor);
+
+                        if (mShuffling)
+                            mShuffle.setColorFilter(mVibrantColor);
+                        if (mRepeatMode != MusicService.REPEAT_NONE)
+                            mRepeat.setColorFilter(mVibrantColor);
+
+                        mSeekbar.getProgressDrawable().invalidateSelf();
+                        mSeekbar.getProgressDrawable().setColorFilter(colorFilter);
+                        mSeekbar.getThumb().invalidateSelf();
+                        mSeekbar.getThumb().setColorFilter(colorFilter);
+
+                        mArt.setImageBitmap(art);
+                    }
+                });
             }
         }
     }
@@ -440,13 +473,13 @@ public class PlayerActivity extends ActionBarCastActivity {
         mSeekbar.setProgress((int) currentPosition);
     }
 
-    private void updateExtras(Bundle extras){
+    private void updateExtras(Bundle extras) {
         boolean shuffling = extras.getBoolean(MusicService.EXTRA_SHUFFLING);
         int repeatMode = extras.getInt(MusicService.EXTRA_REPEAT_MODE, MusicService.REPEAT_NONE);
 
         if (shuffling != mShuffling) {
             if (shuffling)
-                mShuffle.setColorFilter(getResources().getColor(R.color.accent));
+                mShuffle.setColorFilter(mVibrantColor);
             else
                 mShuffle.setColorFilter(getResources().getColor(R.color.grey_icon));
             mShuffling = shuffling;
@@ -460,11 +493,11 @@ public class PlayerActivity extends ActionBarCastActivity {
                     break;
                 case MusicService.REPEAT_ONCE:
                     mRepeat.setImageResource(R.drawable.ic_repeat_one_white_24dp);
-                    mRepeat.setColorFilter(getResources().getColor(R.color.accent));
+                    mRepeat.setColorFilter(mVibrantColor);
                     break;
                 case MusicService.REPEAT_ALL:
                     mRepeat.setImageResource(R.drawable.ic_repeat_white_24dp);
-                    mRepeat.setColorFilter(getResources().getColor(R.color.accent));
+                    mRepeat.setColorFilter(mVibrantColor);
                     break;
             }
             mRepeatMode = repeatMode;

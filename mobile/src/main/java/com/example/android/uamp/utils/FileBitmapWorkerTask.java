@@ -12,10 +12,6 @@ import android.widget.ImageView;
 
 import com.example.android.uamp.R;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
@@ -26,8 +22,10 @@ public class FileBitmapWorkerTask extends AsyncTask<String, Void, FileBitmapWork
     private final WeakReference<ImageView> imageViewReference;
     private final WeakReference<View> parentReference;
     private String path = null;
+    private final int height;
 
-    private FileBitmapWorkerTask(ImageView imageView, View parent) {
+    private FileBitmapWorkerTask(ImageView imageView, View parent, int height) {
+        this.height = height;
         // Use a WeakReference to ensure the ImageView can be garbage collected
         imageViewReference = new WeakReference<>(imageView);
         if (parent != null)
@@ -39,14 +37,9 @@ public class FileBitmapWorkerTask extends AsyncTask<String, Void, FileBitmapWork
     @Override
     protected TaskResult doInBackground(String... files) {
         path = files[0];
-        Bitmap bitmap = null;
-        try {
-            bitmap = decodeBitmapFromFile(new File(path), 0, 0);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Bitmap bitmap;
+        bitmap = BitmapHelper.readFromDisk(path, height);
         if (bitmap != null) {
-            //todo AppController.getInstance().getLruBitmapCache().putBitmap(path, bitmap);
             int darkVibrantColor = -1;
             if (parentReference != null)
                 darkVibrantColor = new Palette.Builder(bitmap).generate().getDarkVibrantColor(-1);
@@ -72,26 +65,6 @@ public class FileBitmapWorkerTask extends AsyncTask<String, Void, FileBitmapWork
         }
     }
 
-    private Bitmap decodeBitmapFromFile(File bitmapPath, int reqWidth, int reqHeight) throws FileNotFoundException {
-        FileInputStream is = null;
-        try {
-            is = new FileInputStream(bitmapPath);
-            Bitmap b = BitmapFactory.decodeStream(is);
-
-            if (reqHeight == 0 && reqWidth == 0)
-                return b;
-            else
-                return Bitmap.createScaledBitmap(b, reqWidth, reqHeight, true);
-        } finally {
-            try {
-                if (is != null)
-                    is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public static class AsyncDrawable extends BitmapDrawable {
         private final WeakReference<FileBitmapWorkerTask> workerTaskReference;
 
@@ -107,9 +80,9 @@ public class FileBitmapWorkerTask extends AsyncTask<String, Void, FileBitmapWork
         }
     }
 
-    public static void loadBitmap(Resources res, String bitmapPath, ImageView imageView, View parent) {
+    public static void loadBitmap(Resources res, String bitmapPath, ImageView imageView, View parent, int height) {
         if (cancelPotentialWork(bitmapPath, imageView)) {
-            final FileBitmapWorkerTask task = new FileBitmapWorkerTask(imageView, parent);
+            final FileBitmapWorkerTask task = new FileBitmapWorkerTask(imageView, parent, height);
             final AsyncDrawable asyncDrawable = //todo placeholder
                     new AsyncDrawable(res, BitmapFactory.decodeResource(res, R.drawable.ic_launcher), task);
             imageView.setImageDrawable(asyncDrawable);

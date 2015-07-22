@@ -18,7 +18,11 @@ package com.example.android.uamp.utils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.example.android.uamp.UAMPApplication;
+
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -57,7 +61,7 @@ public class BitmapHelper {
         int actualH = bmOptions.outHeight;
 
         // Determine how much to scale down the image
-        return Math.min(actualW/targetW, actualH/targetH);
+        return Math.min(actualW / targetW, actualH / targetH);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -79,5 +83,36 @@ public class BitmapHelper {
                 is.close();
             }
         }
+    }
+
+    public static Bitmap readFromDisk(String path, int height){
+        File file = new File(path);
+
+        LruBitmapCache lruBitmapCache = UAMPApplication.getInstance().getLruBitmapCache();
+        Bitmap artwork = lruBitmapCache.getBitmap(file.getAbsolutePath(), height);
+        if (artwork != null && !artwork.isRecycled()) {
+            return artwork;
+        } else if (file.exists()) {
+            BufferedInputStream is = null;
+            try {
+                is = new BufferedInputStream(new FileInputStream(file));
+                is.mark(MAX_READ_LIMIT_PER_IMG);
+                int scaleFactor = findScaleFactor(height, height, is);
+                is.reset();
+                artwork = scaleBitmap(scaleFactor, is);
+                lruBitmapCache.putBitmap(file.getAbsolutePath(), artwork, height);
+                return artwork;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (is != null)
+                        is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
     }
 }

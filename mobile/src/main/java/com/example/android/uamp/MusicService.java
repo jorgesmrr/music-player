@@ -19,8 +19,6 @@ package com.example.android.uamp;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
@@ -40,6 +38,7 @@ import com.example.android.uamp.model.Album;
 import com.example.android.uamp.model.MusicProvider;
 import com.example.android.uamp.ui.BaseActivity;
 import com.example.android.uamp.ui.NowPlayingActivity;
+import com.example.android.uamp.utils.BitmapHelper;
 import com.example.android.uamp.utils.CarHelper;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
@@ -893,20 +892,18 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         // locked screen and in other places.
         if (track.getDescription().getIconBitmap() == null &&
                 track.getDescription().getIconUri() != null) {
-            String albumUri = track.getDescription().getIconUri().toString();
-            //todo cache
-            Bitmap bitmap = BitmapFactory.decodeFile(albumUri);
+            String path = track.getDescription().getIconUri().toString();
 
             track = new MediaMetadata.Builder(track)
 
                     // set high resolution bitmap in METADATA_KEY_ALBUM_ART. This is used, for
                     // example, on the lockscreen background when the media session is active.
-                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap)
+                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, BitmapHelper.readFromDisk(path, UAMPApplication.getInstance().getArtSizeNormal()))
 
                             // set small version of the album art in the DISPLAY_ICON. This is used on
                             // the MediaDescription and thus it should be small to be serialized if
                             // necessary..
-                    .putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, Bitmap.createScaledBitmap(bitmap, 100, 100, false))
+                    .putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, BitmapHelper.readFromDisk(path, UAMPApplication.getArtSizeIcon()))
 
                     .build();
 
