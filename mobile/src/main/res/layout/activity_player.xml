@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.example.android.uamp.ui.SquaredImageView
+    <br.jm.music.ui.SquaredImageView
         android:id="@+id/art"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

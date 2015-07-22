@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:elevation="@dimen/elevation_toolbar">
 
-        <com.example.android.uamp.ui.SquaredImageView
+        <br.jm.music.ui.SquaredImageView
             android:id="@+id/art"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -93,7 +93,7 @@
 
         <fragment
             android:id="@+id/fragment_playback_controls"
-            android:name="com.example.android.uamp.ui.PlaybackControlsFragment"
+            android:name="br.jm.music.ui.PlaybackControlsFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

@@ -46,7 +46,7 @@
 
         <fragment
             android:id="@+id/fragment_playback_controls"
-            android:name="com.example.android.uamp.ui.PlaybackControlsFragment"
+            android:name="br.jm.music.ui.PlaybackControlsFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </FrameLayout>
