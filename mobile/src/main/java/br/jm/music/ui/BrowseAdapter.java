@@ -363,10 +363,9 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             }
                         });
                         switch (mMediaType) {
-                            case MEDIA_ALBUM:
-                                popupMenu.inflate(R.menu.overflow_album);
-                                break;
                             case MEDIA_SONG_IN_ALBUM:
+                                popupMenu.inflate(R.menu.overflow_song_album);
+                                break;
                             case MEDIA_SONG:
                                 popupMenu.inflate(R.menu.overflow_song);
                                 break;
@@ -374,7 +373,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                 if (mMediaItems.get(getMediaItemIndex(getAdapterPosition())).isPlayable())
                                     popupMenu.inflate(R.menu.overflow_song);
                                 else
-                                    popupMenu.inflate(R.menu.overflow_album);
+                                    popupMenu.inflate(R.menu.overflow_album_artist);
                         }
                         popupMenu.show();
                     }

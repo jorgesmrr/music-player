@@ -15,13 +15,8 @@
  */
 package br.jm.music.ui;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.media.MediaRouter;
@@ -30,15 +25,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import br.jm.music.MusicService;
-import br.jm.music.R;
-import br.jm.music.utils.LogHelper;
-import br.jm.music.utils.MediaIDHelper;
-import br.jm.music.utils.PrefUtils;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
+
+import br.jm.music.R;
+import br.jm.music.utils.LogHelper;
+import br.jm.music.utils.PrefUtils;
 
 /**
  * Abstract activity with toolbar, navigation drawer and cast support. Needs to be extended by
@@ -53,13 +47,11 @@ import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCa
 public abstract class ActionBarCastActivity extends AppCompatActivity {
 
     private static final String TAG = LogHelper.makeLogTag(ActionBarCastActivity.class);
-    public static final String ACTION_OPEN_MEDIA_ID = "ACTION_OPEN_MEDIA_ID";
     private static final int DELAY_MILLIS = 1000;
 
     private VideoCastManager mCastManager;
     private MenuItem mMediaRouteMenuItem;
     private Toolbar mToolbar;
-    private BroadcastReceiver mBroadcastReceiver;
 
     private boolean mToolbarInitialized;
     private int mStatusBarHeight;
@@ -113,20 +105,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
 
         mCastManager = VideoCastManager.getInstance();
         mCastManager.reconnectSessionIfPossible();
-
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent startIntent) {
-                if (startIntent != null) {
-                    String action = startIntent.getAction();
-                    String mediaId = startIntent.getStringExtra(MusicService.EXTRA_MEDIA_ID);
-                    if (ACTION_OPEN_MEDIA_ID.equals(action))
-                        navigateToBrowser(mediaId, null);
-                }
-            }
-        };
-
-        LocalBroadcastManager.getInstance(this).registerReceiver((mBroadcastReceiver), new IntentFilter(ACTION_OPEN_MEDIA_ID));
     }
 
     @Override
@@ -143,7 +121,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         super.onResume();
         mCastManager.addVideoCastConsumer(mCastConsumer);
         mCastManager.incrementUiCounter();
-        LocalBroadcastManager.getInstance(this).registerReceiver((mBroadcastReceiver), new IntentFilter(ACTION_OPEN_MEDIA_ID));
     }
 
     @Override
@@ -156,15 +133,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.cast_player_menu, menu);
-        mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
-        return true;
     }
 
     @Override
@@ -205,7 +173,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
                 mToolbar.setPadding(0, mStatusBarHeight, 0, 0);
             }
         }
-        mToolbar.inflateMenu(R.menu.main);
+        mToolbar.inflateMenu(R.menu.remove_ads);
         setSupportActionBar(mToolbar);
 
         mToolbarInitialized = true;
@@ -229,16 +197,5 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
 
     public int getStatusBarHeight() {
         return mStatusBarHeight;
-    }
-
-    protected void navigateToBrowser(String mediaId, View sharedElement) {
-        if (mediaId.startsWith(MediaIDHelper.MEDIA_ID_BY_ALBUM)) {
-            Intent intent = new Intent(this, AlbumActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
-            //todo ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
-            startActivity(intent/*todo, options.toBundle()*/);
-        } else {
-            Intent intent = new Intent(this, ArtistActivity.class).putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId);
-            startActivity(intent);
-        }
     }
 }

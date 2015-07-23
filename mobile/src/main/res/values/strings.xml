@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Plurals -->
+    <plurals name="n_songs">
+        <item quantity="one">%d song</item>
+        <item quantity="other">%d songs</item>
+    </plurals>
+    <plurals name="n_albums">
+        <item quantity="one">%d album</item>
+        <item quantity="other">%d albums</item>
+    </plurals>
+
+    <!-- Anim -->
+    <string name="drawable_vector_pause_left" translatable="false">M9,8 l10,0 0,32 -10,0 z</string>
+    <string name="drawable_vector_pause_right" translatable="false">M27,8 l10,0 0,32 -10,0 z</string>
+    <string name="drawable_vector_resume_left" translatable="false">M24,10 l0,0 0,28 -16,0 z</string>
+    <string name="drawable_vector_resume_right" translatable="false">M24,10 l0,0 16,28 -16,0 z</string>
+
+    <!--todo mudar-->
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-2714828414543515/2976564988</string>
 
     <string name="app_name">Music Player</string>
     <string name="error_no_metadata">Unable to retrieve metadata.</string>
@@ -18,21 +36,6 @@
     <string name="cast_application_id" translatable="false">CC1AD845</string>
     <string name="no_search_results">No search results.</string>
 
-    <!-- Plurals -->
-    <plurals name="n_songs">
-        <item quantity="one">%d song</item>
-        <item quantity="other">%d songs</item>
-    </plurals>
-    <plurals name="n_albums">
-        <item quantity="one">%d album</item>
-        <item quantity="other">%d albums</item>
-    </plurals>
-
-    <!-- Anim -->
-    <string name="drawable_vector_pause_left" translatable="false">M9,8 l10,0 0,32 -10,0 z</string>
-    <string name="drawable_vector_pause_right" translatable="false">M27,8 l10,0 0,32 -10,0 z</string>
-    <string name="drawable_vector_resume_left" translatable="false">M24,10 l0,0 0,28 -16,0 z</string>
-    <string name="drawable_vector_resume_right" translatable="false">M24,10 l0,0 16,28 -16,0 z</string>
     <string name="go_artist">Go to artist</string>
     <string name="add_queue">Add to queue</string>
     <string name="go_album">Go to album</string>

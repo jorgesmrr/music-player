@@ -16,6 +16,7 @@
 <resources>
 
     <style name="UAmpAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
         <!-- enable window content transitions -->
         <item name="android:windowContentTransitions">true</item>
 

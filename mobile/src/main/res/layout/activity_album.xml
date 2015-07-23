@@ -38,23 +38,24 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/art"
             android:background="@color/default_dark_vibrant_color"
+            android:elevation="@dimen/elevation_toolbar"
             android:orientation="vertical"
             android:paddingBottom="@dimen/margin_screen"
             android:paddingEnd="@dimen/margin_screen"
-            android:paddingStart="@dimen/list_item_text_margin_start"
+            android:paddingStart="@dimen/keyline"
             android:paddingTop="@dimen/margin_screen">
 
             <TextView
                 android:id="@+id/title"
+                style="@style/Headline.SingleLine"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Headline.SingleLine" />
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/subtitle"
+                style="@style/SubtitleInverse.SingleLine"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/SubtitleInverse.SingleLine" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 

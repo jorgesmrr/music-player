@@ -86,6 +86,8 @@ public abstract class MediaContainerActivity extends BaseActivity {
                 getMediaController().getTransportControls().playFromMediaId(mMediaId, null);
             }
         });
+
+        handleAds();
     }
 
     @Override
@@ -103,6 +105,12 @@ public abstract class MediaContainerActivity extends BaseActivity {
             return extras.getString(SAVED_MEDIA_ID);
         }
         return null;
+    }
+
+    @Override
+    protected void handleAds() {
+        if (getIntent().getExtras().getBoolean(BaseActivity.EXTRA_DISPLAY_ADS))
+            showAds();
     }
 
     @Override

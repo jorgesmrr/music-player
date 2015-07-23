@@ -10,5 +10,5 @@
     android:elevation="@dimen/elevation_toolbar"
     android:minHeight="?attr/actionBarSize"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-    app:contentInsetStart="72dp"
+    app:contentInsetStart="@dimen/keyline"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />

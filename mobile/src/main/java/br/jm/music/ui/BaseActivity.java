@@ -16,8 +16,11 @@
 package br.jm.music.ui;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
@@ -25,12 +28,19 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import br.jm.music.MusicService;
 import br.jm.music.R;
 import br.jm.music.utils.LogHelper;
+import br.jm.music.utils.MediaIDHelper;
 import br.jm.music.utils.ResourceHelper;
 
 /**
@@ -40,14 +50,21 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
 
     private static final String TAG = LogHelper.makeLogTag(BaseActivity.class);
 
+    protected static final String EXTRA_DISPLAY_ADS = "DISPLAY_ADS";
+    public static final String ACTION_OPEN_MEDIA_ID = "ACTION_OPEN_MEDIA_ID";
+
     private MediaBrowser mMediaBrowser;
     private PlaybackControlsFragment mControlsFragment;
+    private BroadcastReceiver mBroadcastReceiver;
+    private boolean mIsDisplayingAds;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         LogHelper.d(TAG, "Activity onCreate");
+
+        mIsDisplayingAds = false;
 
         // Since our app icon has the same color as colorPrimary, our entry in the Recent Apps
         // list gets weird. We need to change either the icon or the color of the TaskDescription.
@@ -61,6 +78,20 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
         // this can be done, for example by sharing the session token directly.
         mMediaBrowser = new MediaBrowser(this,
                 new ComponentName(this, MusicService.class), mConnectionCallback, null);
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent startIntent) {
+                if (startIntent != null) {
+                    String action = startIntent.getAction();
+                    String mediaId = startIntent.getStringExtra(MusicService.EXTRA_MEDIA_ID);
+                    if (ACTION_OPEN_MEDIA_ID.equals(action))
+                        navigateToBrowser(mediaId, null);
+                }
+            }
+        };
+
+        LocalBroadcastManager.getInstance(this).registerReceiver((mBroadcastReceiver), new IntentFilter(ACTION_OPEN_MEDIA_ID));
     }
 
     @Override
@@ -86,6 +117,12 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver((mBroadcastReceiver), new IntentFilter(ACTION_OPEN_MEDIA_ID));
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         LogHelper.d(TAG, "Activity onStop");
@@ -93,6 +130,23 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
             getMediaController().unregisterCallback(mMediaControllerCallback);
         }
         mMediaBrowser.disconnect();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+    }
+
+    protected void showAds() {
+        mIsDisplayingAds = true;
+        ViewGroup adContainer = (ViewGroup) findViewById(R.id.ad_container);
+        if (adContainer != null) {
+            AdView adView = (AdView) LayoutInflater.from(this).inflate(R.layout.include_ad, adContainer, false);
+            adContainer.addView(adView);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            adView.loadAd(adRequest);
+        }
+    }
+
+    protected void hideAds() {
+        mIsDisplayingAds = false;
+        ((ViewGroup) findViewById(R.id.ad_container)).removeAllViews();
     }
 
     @Override
@@ -111,6 +165,21 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
         } else {
             LogHelper.w(TAG, "Ignoring MediaItem that is neither browsable nor playable: ",
                     "mediaId=", item.getMediaId());
+        }
+    }
+
+    protected void navigateToBrowser(String mediaId, View sharedElement) {
+        if (mediaId.startsWith(MediaIDHelper.MEDIA_ID_BY_ALBUM)) {
+            Intent intent = new Intent(this, AlbumActivity.class)
+                    .putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId)
+                    .putExtra(EXTRA_DISPLAY_ADS, mIsDisplayingAds);
+            //todo ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, sharedElement, "image");
+            startActivity(intent/*todo, options.toBundle()*/);
+        } else {
+            Intent intent = new Intent(this, ArtistActivity.class)
+                    .putExtra(MediaContainerActivity.SAVED_MEDIA_ID, mediaId)
+                    .putExtra(EXTRA_DISPLAY_ADS, mIsDisplayingAds);
+            startActivity(intent);
         }
     }
 
@@ -146,7 +215,7 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
                 mediaController.getPlaybackState() == null) {
             return false;
         }
-        Log.v("t",mediaController.getPlaybackState().getState()+"");
+        Log.v("t", mediaController.getPlaybackState().getState() + "");
         switch (mediaController.getPlaybackState().getState()) {
             case PlaybackState.STATE_ERROR:
             case PlaybackState.STATE_NONE:
@@ -218,4 +287,10 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
             };
 
     protected abstract void initializeFromParams(Bundle savedInstanceState, Intent intent);
+
+    protected abstract void handleAds();
+
+    public boolean isDisplayingAds() {
+        return mIsDisplayingAds;
+    }
 }

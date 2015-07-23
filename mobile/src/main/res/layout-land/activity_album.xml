@@ -5,41 +5,32 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+    <include layout="@layout/include_toolbar" />
+
+    <LinearLayout
+        android:id="@+id/bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:background="@color/default_dark_vibrant_color"
+        android:layout_below="@+id/toolbar"
         android:elevation="@dimen/elevation_toolbar"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:contentInsetStart="72dp"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/margin_screen"
+        android:paddingLeft="@dimen/keyline"
+        android:paddingRight="@dimen/margin_screen">
 
-        <LinearLayout
-            android:id="@+id/bar"
+        <TextView
+            android:id="@+id/title"
+            style="@style/Headline.SingleLine"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="?actionBarSize"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/margin_screen">
+            android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Headline.SingleLine" />
+        <TextView
+            android:id="@+id/subtitle"
+            style="@style/SubtitleInverse.SingleLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/subtitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/SubtitleInverse.SingleLine" />
-
-        </LinearLayout>
-    </android.support.v7.widget.Toolbar>
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/container"
@@ -52,7 +43,7 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
+        android:layout_below="@id/bar"
         android:layout_marginStart="@dimen/margin_screen"
         android:layout_marginTop="@dimen/fab_negative_margin"
         android:elevation="@dimen/elevation_fab"

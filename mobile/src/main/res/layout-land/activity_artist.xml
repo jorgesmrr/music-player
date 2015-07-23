@@ -61,15 +61,8 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/ad_container"
-        android:layout_below="@+id/bar" />
-
-    <FrameLayout
-        android:id="@+id/ad_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_above="@+id/controls_container"
-        android:gravity="center_horizontal" />
+        android:layout_below="@id/toolbar" />
 
     <FrameLayout
         android:id="@+id/controls_container"

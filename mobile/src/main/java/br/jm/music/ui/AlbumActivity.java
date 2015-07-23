@@ -174,22 +174,25 @@ public class AlbumActivity extends MediaContainerActivity {
         Uri iconUri = description.getIconUri();
         if (iconUri != null) {
             final Bitmap art = BitmapFactory.decodeFile(iconUri.toString());
-            new Palette.Builder(art).generate(new Palette.PaletteAsyncListener() {
-                @Override
-                public void onGenerated(Palette palette) {
-                    int darkVibrantColor = palette.getDarkVibrantColor(getResources().getColor(R.color.default_dark_vibrant_color));
-                    mHeaderBar.setBackgroundColor(darkVibrantColor);
-                    ColorStateList stateList = new ColorStateList(new int[][]{new int[]{}}, new int[]{palette.getVibrantColor(getResources().getColor(R.color.default_vibrant_color))});
-                    mFab.setBackgroundTintList(stateList);
-                    if (mIsPortrait) {
-                        mHeaderImageView.setImageBitmap(art);
-                        mHeaderFill.setBackgroundColor(darkVibrantColor);
-                    } else {
-                        getToolbar().setBackgroundColor(darkVibrantColor);
+            if (art != null)
+                new Palette.Builder(art).generate(new Palette.PaletteAsyncListener() {
+                    @Override
+                    public void onGenerated(Palette palette) {
+                        int darkVibrantColor = palette.getDarkVibrantColor(getResources().getColor(R.color.default_dark_vibrant_color));
+                        mHeaderBar.setBackgroundColor(darkVibrantColor);
+                        ColorStateList stateList = new ColorStateList(new int[][]{new int[]{}}, new int[]{palette.getVibrantColor(getResources().getColor(R.color.default_vibrant_color))});
+                        mFab.setBackgroundTintList(stateList);
+                        if (mIsPortrait) {
+                            mHeaderImageView.setImageBitmap(art);
+                            mHeaderFill.setBackgroundColor(darkVibrantColor);
+                        } else {
+                            getToolbar().setBackgroundColor(darkVibrantColor);
+                        }
                     }
-                }
-            });
-        } else {
+                });
+            else if (mIsPortrait) mHeaderImageView.setImageBitmap(
+                    BitmapHelper.getDefault(getResources(), MusicApplication.DEF_ART_SIZE_NORMAL));
+        } else if (mIsPortrait) {
             mHeaderImageView.setImageBitmap(
                     BitmapHelper.getDefault(getResources(), MusicApplication.DEF_ART_SIZE_NORMAL));
         }

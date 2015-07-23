@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- Plurals -->
+    <plurals name="n_songs">
+        <item quantity="one">%d música</item>
+        <item quantity="other">%d músicas</item>
+    </plurals>
+    <plurals name="n_albums">
+        <item quantity="one">%d álbum</item>
+        <item quantity="other">%d álbuns</item>
+    </plurals>
+
     <string name="app_name">Músicas</string>
     <string name="about">Sobre</string>
     <string name="add_queue">Adicionar à fila</string>

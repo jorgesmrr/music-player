@@ -27,19 +27,26 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import br.jm.music.R;
-import br.jm.music.MusicApplication;
-import br.jm.music.utils.LogHelper;
-import br.jm.music.utils.MediaIDHelper;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import br.jm.music.MusicApplication;
+import br.jm.music.R;
+import br.jm.music.billing.IabHelper;
+import br.jm.music.billing.IabResult;
+import br.jm.music.billing.Inventory;
+import br.jm.music.billing.Purchase;
+import br.jm.music.utils.LogHelper;
+import br.jm.music.utils.MediaIDHelper;
+import br.jm.music.utils.StringUtils;
 
 /**
  * Main activity for the music player.
@@ -62,10 +69,37 @@ public class MainActivity extends BaseActivity {
     public static final String EXTRA_CURRENT_MEDIA_DESCRIPTION =
             "br.jm.music.CURRENT_MEDIA_DESCRIPTION";
 
+    private static final String SKU_REMOVE_ADS = "ads_removal";
+
+    private static final int PURCHASE_REQ_CODE = 10587;
+
     private Bundle mVoiceSearchParams;
 
     private LibraryAdapter mAdapter;
     private ViewPager mViewPager;
+
+    private boolean mPurchaseInprogress;
+
+    private IabHelper mHelper;
+    private IabHelper.OnIabPurchaseFinishedListener mOnIabPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
+        @Override
+        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+            if (result.isFailure()) {
+                Log.d(TAG, "Error purchasing: " + result);
+                mPurchaseInprogress = false;
+                return;
+            }
+
+            if (purchase.getSku().equals(SKU_REMOVE_ADS)) {
+                hideAds();
+
+                // Remove purchase item
+                supportInvalidateOptionsMenu();
+            }
+
+            mPurchaseInprogress = false;
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,13 +129,24 @@ public class MainActivity extends BaseActivity {
         if (savedInstanceState == null) {
             startFullScreenActivityIfNeeded(getIntent());
         }
+
+        handleAds();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.main, menu);
+        if (isDisplayingAds())
+            getMenuInflater().inflate(R.menu.remove_ads, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.remove_ads) {
+            startPurchaseFlow();
+            return true;
+        } else return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -109,6 +154,27 @@ public class MainActivity extends BaseActivity {
         super.onNewIntent(intent);
         LogHelper.d(TAG, "onNewIntent, intent=" + intent);
         startFullScreenActivityIfNeeded(intent);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (!mHelper.handleActivityResult(requestCode, resultCode, data))
+            super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mHelper != null)
+            mHelper.dispose();
+        mHelper = null;
+    }
+
+    protected void startPurchaseFlow() {
+        if (!mPurchaseInprogress) {
+            mPurchaseInprogress = true;
+            mHelper.launchPurchaseFlow(this, SKU_REMOVE_ADS, PURCHASE_REQ_CODE, mOnIabPurchaseFinishedListener);
+        }
     }
 
     private void startFullScreenActivityIfNeeded(Intent intent) {
@@ -134,6 +200,36 @@ public class MainActivity extends BaseActivity {
                     mVoiceSearchParams.getString(SearchManager.QUERY));
         }
         navigateToBrowser(null, null);
+    }
+
+    @Override
+    protected void handleAds() {
+        mPurchaseInprogress = false;
+        String base64EncodedPublicKey = "miibiJanbGKQHKWht+e3AvLAp5fzBegjVyW8nRCu8Lm5KWD3UDC1tyyPJoYDfW+FpEYPUoyfHRLXo0wzNLTi8mpxj+sIPl+mHFpINeqd3MjqP6220J2GeW1ytolnY3Wu93XXjelLKuIv/4Y6fNDoqPUXjU0e1XX8BT+uo0qPp/fQUU1mcb7O7/WWpXHJuydg+mx66w6bi5vv4mvM7MH/CGnUie4Pw27Zihxz1Zeh07IbwUhpO9AYZogUxPj44kH+xDmlm5xoh7tjI5enjoVh4MyAGak8f260qq2ybFymch67+nevI+hn7ocXqMCJ/fmirDYUu3vmmEXK0AEPADtqidaqab";
+        mHelper = new IabHelper(this, StringUtils.swapCases(base64EncodedPublicKey.substring(0, 14) + StringUtils.getReversedString() + base64EncodedPublicKey.substring(14)));
+        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+            @Override
+            public void onIabSetupFinished(IabResult result) {
+                if (!result.isSuccess()) {
+                    Log.v(TAG, "Problem setting up In-app Billing: " + result);
+                } else {
+                    mHelper.queryInventoryAsync(new IabHelper.QueryInventoryFinishedListener() {
+                        @Override
+                        public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+                            if (result.isFailure()) {
+                                Log.v(TAG, "Problem fetching inventory. Connection?");
+                                return;
+                            }
+
+                            if (!inventory.hasPurchase(SKU_REMOVE_ADS)) {
+                                showAds();
+                                supportInvalidateOptionsMenu();
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
 
     @Override
@@ -193,9 +289,9 @@ public class MainActivity extends BaseActivity {
         public LibraryAdapter(FragmentManager fm, Context context) {
             super(fm);
             mTitles = new ArrayList<>();
-            mTitles.add(context.getString(R.string.browse_artists));
-            mTitles.add(context.getString(R.string.albums));
             mTitles.add(context.getString(R.string.songs));
+            mTitles.add(context.getString(R.string.albums));
+            mTitles.add(context.getString(R.string.browse_artists));
             mRegisteredFragments = new SparseArray<>(4);
         }
 
@@ -204,13 +300,13 @@ public class MainActivity extends BaseActivity {
             String mediaId;
             switch (position) {
                 case 0:
-                    mediaId = MediaIDHelper.MEDIA_ID_BY_ARTIST;
+                    mediaId = MediaIDHelper.MEDIA_ID_MUSICS_ALL;
                     break;
                 case 1:
                     mediaId = MediaIDHelper.MEDIA_ID_BY_ALBUM;
                     break;
                 case 2:
-                    mediaId = MediaIDHelper.MEDIA_ID_MUSICS_ALL;
+                    mediaId = MediaIDHelper.MEDIA_ID_BY_ARTIST;
                     break;
                 default:
                     return null;
