@@ -2,13 +2,10 @@ package br.jm.music.utils;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.widget.ImageView;
-
-import br.jm.music.R;
 
 import java.lang.ref.WeakReference;
 
@@ -67,11 +64,11 @@ public class FileBitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
         }
     }
 
-    public static void loadBitmap(Resources res, String bitmapPath, ImageView imageView, int reqHeight) {
+    public static void loadBitmap(Resources res, String bitmapPath, ImageView imageView, int height) {
             if (cancelPotentialWork(bitmapPath, imageView)) {
-                final FileBitmapWorkerTask task = new FileBitmapWorkerTask(imageView, reqHeight);
-                final AsyncDrawable asyncDrawable = //todo placeholder
-                        new AsyncDrawable(res, BitmapFactory.decodeResource(res, R.drawable.ic_launcher), task);
+                final FileBitmapWorkerTask task = new FileBitmapWorkerTask(imageView, height);
+                final AsyncDrawable asyncDrawable =
+                        new AsyncDrawable(res, BitmapHelper.getDefault(res, height), task);
                 imageView.setImageDrawable(asyncDrawable);
                 task.execute(bitmapPath);
             }

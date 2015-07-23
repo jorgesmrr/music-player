@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#ffff5722</color>
-    <color name="primary_dark">#ffbf360c</color>
+    <color name="primary">#b01116</color>
+    <color name="primary_dark">#810d10</color>
     <color name="accent">#ffff5722</color>
     <color name="grey_icon">#ff757575</color>
     <color name="grey_ripple">#EEEEEE</color>
-    <color name="bt_accent">#00B8D4</color>
-    <color name="media_item_icon_playing">@color/bt_accent</color>
     <color name="media_item_icon_not_playing">#757575</color>
     <color name="default_dark_vibrant_color">#424242</color>
     <color name="default_vibrant_color">#212121</color>

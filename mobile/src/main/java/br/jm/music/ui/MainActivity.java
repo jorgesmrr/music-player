@@ -34,7 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import br.jm.music.R;
-import br.jm.music.UAMPApplication;
+import br.jm.music.MusicApplication;
 import br.jm.music.utils.LogHelper;
 import br.jm.music.utils.MediaIDHelper;
 
@@ -85,7 +85,7 @@ public class MainActivity extends BaseActivity {
         int screenWidth = size.x;
 
         // Art sizes
-        UAMPApplication appController = UAMPApplication.getInstance();
+        MusicApplication appController = MusicApplication.getInstance();
         if (appController.getArtSizeNormal() == 0) {
             int width = Math.min(screenWidth, size.y);
             appController.setArtSizes((int) (width * 0.83), (int) (width * 0.38));

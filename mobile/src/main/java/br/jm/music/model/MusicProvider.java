@@ -23,14 +23,14 @@ import android.media.MediaMetadata;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 
-import br.jm.music.utils.LogHelper;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import br.jm.music.utils.LogHelper;
 
 /**
  * Utility class to get a list of MusicTrack's based on MediaStore queries.
@@ -197,16 +197,7 @@ public class MusicProvider {
             return;
         }
 
-        String oldGenre = track.metadata.getString(MediaMetadata.METADATA_KEY_GENRE);
-        String newGenre = metadata.getString(MediaMetadata.METADATA_KEY_GENRE);
-
         track.metadata = metadata;
-
-        /* todo precisa atualizar as listas?
-        // if genre has changed, we need to rebuild the list by genre
-        if (!oldGenre.equals(newGenre)) {
-            buildListsByGenre(context.getContentResolver());
-        }*/
     }
 
     public synchronized void delete(String musicId, ContentResolver contentResolver) {
@@ -258,7 +249,6 @@ public class MusicProvider {
                 null,
                 null);
 
-        // todo only add albums from our songs
         if (cursor.moveToFirst()) {
             int idColumn = cursor.getColumnIndex(MediaStore.Audio.Albums._ID);
             int titleColumn = cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM);

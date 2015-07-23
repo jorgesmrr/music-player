@@ -19,11 +19,10 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import br.jm.music.R;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 
 import br.jm.music.ui.PlayerActivity;
 import br.jm.music.utils.LruBitmapCache;
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 
 import static com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager.FEATURE_DEBUGGING;
 import static com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager.FEATURE_WIFI_RECONNECT;
@@ -31,7 +30,7 @@ import static com.google.android.libraries.cast.companionlibrary.cast.BaseCastMa
 /**
  * The {@link Application} for the uAmp application.
  */
-public class UAMPApplication extends Application {
+public class MusicApplication extends Application {
 
     public static final String TAG = "AppController";
 
@@ -48,7 +47,7 @@ public class UAMPApplication extends Application {
 
     private LruBitmapCache lruBitmapCache;
 
-    private static UAMPApplication mInstance;
+    private static MusicApplication mInstance;
 
     @Override
     public void onCreate() {
@@ -65,8 +64,16 @@ public class UAMPApplication extends Application {
         mArtSizeSmall = sharedPreferences.getInt(PREF_ART_SIZE_SMALL, 0);
     }
 
-    public static synchronized UAMPApplication getInstance() {
+    public static synchronized MusicApplication getInstance() {
         return mInstance;
+    }
+
+    public static int getDefaultArtRes(int height) {
+        if (height >= DEF_ART_SIZE_NORMAL)
+            return R.drawable.default_art_normal;
+        else if (height >= DEF_ART_SIZE_SMALL)
+            return R.drawable.default_art_small;
+        else return R.drawable.default_art_icon;
     }
 
     public static int getArtSizeIcon() {

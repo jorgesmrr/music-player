@@ -26,7 +26,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import br.jm.music.R;
-import br.jm.music.UAMPApplication;
+import br.jm.music.MusicApplication;
+import br.jm.music.utils.BitmapHelper;
 import br.jm.music.utils.ColoredFileBitmapWorkerTask;
 import br.jm.music.utils.FileBitmapWorkerTask;
 import br.jm.music.utils.LogHelper;
@@ -67,7 +68,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private int mPlaceholderHeight;
 
     public BrowseAdapter(Activity activity, String mediaId, int placeholderHeight, OnItemClickListener listener) {
-        //todo initializeColorStateLists(activity);
+        initializeColorStateLists(activity);
         mMediaItems = new ArrayList<>();
         mHeadersPositions = new TreeSet<>();
         mActivity = activity;
@@ -125,7 +126,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     if (mMediaType != MEDIA_SONG_IN_ALBUM) {
                         holder.mImageView.setImageDrawable(
                                 mActivity.getDrawable(R.drawable.ic_audiotrack_white_24dp));
-                        //todo holder.mImageView.setImageTintList(mColorStateNotPlaying);
+                        holder.mImageView.setImageTintList(mColorStateNotPlaying);
                     }
                     if (mMediaType == MEDIA_ALBUM_SONGS)
                         holder.mSubtitleView.setVisibility(View.GONE);
@@ -134,13 +135,13 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     AnimationDrawable animation = (AnimationDrawable)
                             mActivity.getDrawable(R.drawable.ic_equalizer_white_36dp);
                     holder.mImageView.setImageDrawable(animation);
-                    //todo holder.mImageView.setImageTintList(mColorStatePlaying);
+                    holder.mImageView.setImageTintList(mColorStatePlaying);
                     animation.start();
                     break;
                 case TYPE_PAUSED:
                     holder.mImageView.setImageDrawable(
                             mActivity.getDrawable(R.drawable.ic_equalizer1_white_36dp));
-                    //todo holder.mImageView.setImageTintList(mColorStateNotPlaying);
+                    holder.mImageView.setImageTintList(mColorStateNotPlaying);
                     break;
             }
 
@@ -169,15 +170,16 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                 iconUri.toString(),
                                 mediaItemViewHolder.mImageView,
                                 mediaItemViewHolder.itemView,
-                                UAMPApplication.getInstance().getArtSizeSmall());
+                                MusicApplication.getInstance().getArtSizeSmall());
                     else
                         FileBitmapWorkerTask.loadBitmap(
                                 mActivity.getResources(),
                                 iconUri.toString(),
                                 mediaItemViewHolder.mImageView,
-                                UAMPApplication.getArtSizeIcon());
+                                MusicApplication.getArtSizeIcon());
                 } else {
-                    //todo mediaItemViewHolder.mImageView.setImageResource(R.drawable.placeholder);
+                    mediaItemViewHolder.mImageView.setImageBitmap(
+                            BitmapHelper.getDefault(mActivity.getResources(), MusicApplication.DEF_ART_SIZE_SMALL));
                 }
             } else if (mMediaType == MEDIA_SONG_IN_ALBUM && mediaItemViewHolder.mExtraView != null && description.getExtras() != null)
                 mediaItemViewHolder.mExtraView.setText(description.getExtras().getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, -1) + "");
@@ -245,7 +247,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         mColorStateNotPlaying = ColorStateList.valueOf(ctx.getResources().getColor(
                 R.color.media_item_icon_not_playing));
         mColorStatePlaying = ColorStateList.valueOf(ctx.getResources().getColor(
-                R.color.media_item_icon_playing));
+                R.color.accent));
     }
 
     private int getMediaItemIndex(int position) {

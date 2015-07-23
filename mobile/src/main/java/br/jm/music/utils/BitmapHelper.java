@@ -15,6 +15,7 @@
  */
 package br.jm.music.utils;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -26,7 +27,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import br.jm.music.UAMPApplication;
+import br.jm.music.MusicApplication;
+import br.jm.music.R;
 
 public class BitmapHelper {
     private static final String TAG = LogHelper.makeLogTag(BitmapHelper.class);
@@ -35,10 +37,10 @@ public class BitmapHelper {
     private static final int MAX_READ_LIMIT_PER_IMG = 1024 * 1024;
 
     public static Bitmap scaleBitmap(Bitmap src, int maxWidth, int maxHeight) {
-       double scaleFactor = Math.min(
-           ((double) maxWidth)/src.getWidth(), ((double) maxHeight)/src.getHeight());
+        double scaleFactor = Math.min(
+                ((double) maxWidth) / src.getWidth(), ((double) maxHeight) / src.getHeight());
         return Bitmap.createScaledBitmap(src,
-            (int) (src.getWidth() * scaleFactor), (int) (src.getHeight() * scaleFactor), false);
+                (int) (src.getWidth() * scaleFactor), (int) (src.getHeight() * scaleFactor), false);
     }
 
     public static Bitmap scaleBitmap(int scaleFactor, InputStream is) {
@@ -85,13 +87,30 @@ public class BitmapHelper {
         }
     }
 
-    public static Bitmap readFromDisk(String path, int height){
+    public static Bitmap getDefault(Resources res, int height) {
+        int id;
+        if (height >= MusicApplication.DEF_ART_SIZE_NORMAL)
+            id = R.drawable.default_art_normal;
+        else if (height >= MusicApplication.DEF_ART_SIZE_SMALL)
+            id = R.drawable.default_art_small;
+        else id = R.drawable.default_art_icon;
+
+        LruBitmapCache lruBitmapCache = MusicApplication.getInstance().getLruBitmapCache();
+        Bitmap bitmap = lruBitmapCache.getBitmap("default", id);
+        if (bitmap == null) {
+            bitmap = BitmapFactory.decodeResource(res, id);
+            lruBitmapCache.putBitmap("default", bitmap, id);
+        }
+        return bitmap;
+    }
+
+    public static Bitmap readFromDisk(String path, int height) {
         File file = new File(path);
 
-        LruBitmapCache lruBitmapCache = UAMPApplication.getInstance().getLruBitmapCache();
-        Bitmap artwork = lruBitmapCache.getBitmap(file.getAbsolutePath(), height);
-        if (artwork != null && !artwork.isRecycled()) {
-            return artwork;
+        LruBitmapCache lruBitmapCache = MusicApplication.getInstance().getLruBitmapCache();
+        Bitmap bitmap = lruBitmapCache.getBitmap(file.getAbsolutePath(), height);
+        if (bitmap != null && !bitmap.isRecycled()) {
+            return bitmap;
         } else if (file.exists()) {
             BufferedInputStream is = null;
             try {
@@ -99,9 +118,9 @@ public class BitmapHelper {
                 is.mark(MAX_READ_LIMIT_PER_IMG);
                 int scaleFactor = findScaleFactor(height, height, is);
                 is.reset();
-                artwork = scaleBitmap(scaleFactor, is);
-                lruBitmapCache.putBitmap(file.getAbsolutePath(), artwork, height);
-                return artwork;
+                bitmap = scaleBitmap(scaleFactor, is);
+                lruBitmapCache.putBitmap(file.getAbsolutePath(), bitmap, height);
+                return bitmap;
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {

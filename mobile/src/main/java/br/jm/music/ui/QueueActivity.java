@@ -6,19 +6,18 @@ import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.MenuItem;
 
+import java.util.List;
+
 import br.jm.music.MusicService;
 import br.jm.music.R;
 import br.jm.music.utils.LogHelper;
 import br.jm.music.utils.MediaIDHelper;
-
-import java.util.List;
 
 /**
  * Created by Jorge on 11/06/2015.
@@ -31,12 +30,6 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
     private ItemTouchHelper mItemTouchHelper;
 
     private MediaController.Callback mCallback = new MediaController.Callback() {
-        @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
-            LogHelper.d(TAG, "onPlaybackstate changed", state);
-            //todo caso precise updatePlaybackState(state);
-        }
-
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
             if (metadata != null)
@@ -95,7 +88,7 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
                                 .putExtra(MusicService.CMD_NAME, MusicService.CMD_GET_ARTIST)
                                 .putExtra(MusicService.EXTRA_MEDIA_ID, queueItem.getDescription().getMediaId()));
                         break;
-                    //todo
+                    //todo delete
                     /*case R.id.delete:
                         break;*/
                 }

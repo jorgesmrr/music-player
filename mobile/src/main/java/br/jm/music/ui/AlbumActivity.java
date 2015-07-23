@@ -18,8 +18,10 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import br.jm.music.MusicApplication;
 import br.jm.music.R;
 import br.jm.music.model.MusicProvider;
+import br.jm.music.utils.BitmapHelper;
 
 /**
  * Created by Jorge Augusto da Silva Moreira on 12/06/2015.
@@ -188,7 +190,8 @@ public class AlbumActivity extends MediaContainerActivity {
                 }
             });
         } else {
-            //todo mHeaderImageView.setImageResource(R.drawable.placeholder);
+            mHeaderImageView.setImageBitmap(
+                    BitmapHelper.getDefault(getResources(), MusicApplication.DEF_ART_SIZE_NORMAL));
         }
     }
 }

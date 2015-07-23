@@ -53,7 +53,7 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
         // list gets weird. We need to change either the icon or the color of the TaskDescription.
         ActivityManager.TaskDescription taskDesc = new ActivityManager.TaskDescription(
                 getTitle().toString(),
-                BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher_white),
+                BitmapFactory.decodeResource(getResources(), R.drawable.ic_headset_white_24dp),
                 ResourceHelper.getThemeColor(this, R.attr.colorPrimary, android.R.color.darker_gray));
         setTaskDescription(taskDesc);
 

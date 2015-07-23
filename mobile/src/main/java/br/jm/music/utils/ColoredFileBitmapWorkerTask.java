@@ -2,15 +2,12 @@ package br.jm.music.utils;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.graphics.Palette;
 import android.view.View;
 import android.widget.ImageView;
-
-import br.jm.music.R;
 
 import java.lang.ref.WeakReference;
 
@@ -83,8 +80,8 @@ public class ColoredFileBitmapWorkerTask extends AsyncTask<String, Void, Colored
     public static void loadBitmap(Resources res, String bitmapPath, ImageView imageView, View parent, int height) {
         if (cancelPotentialWork(bitmapPath, imageView)) {
             final ColoredFileBitmapWorkerTask task = new ColoredFileBitmapWorkerTask(imageView, parent, height);
-            final AsyncDrawable asyncDrawable = //todo placeholder
-                    new AsyncDrawable(res, BitmapFactory.decodeResource(res, R.drawable.ic_launcher), task);
+            final AsyncDrawable asyncDrawable =
+                    new AsyncDrawable(res, BitmapHelper.getDefault(res, height), task);
             imageView.setImageDrawable(asyncDrawable);
             task.executeOnExecutor(THREAD_POOL_EXECUTOR, bitmapPath);
         }

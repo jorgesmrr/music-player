@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 
 import br.jm.music.MusicService;
 import br.jm.music.R;
-import br.jm.music.UAMPApplication;
+import br.jm.music.MusicApplication;
 import br.jm.music.utils.BitmapHelper;
 import br.jm.music.utils.LogHelper;
 
@@ -384,7 +384,7 @@ public class PlayerActivity extends ActionBarCastActivity {
         Uri artUri = description.getIconUri();
         if (artUri != null) {
             String path = artUri.toString();
-            final Bitmap art = BitmapHelper.readFromDisk(path, UAMPApplication.getInstance().getArtSizeNormal());
+            final Bitmap art = BitmapHelper.readFromDisk(path, MusicApplication.getInstance().getArtSizeNormal());
             if (art != null) {
                 new Palette.Builder(art).generate(new Palette.PaletteAsyncListener() {
                     @Override
@@ -409,8 +409,10 @@ public class PlayerActivity extends ActionBarCastActivity {
                         mArt.setImageBitmap(art);
                     }
                 });
-            }
-        }
+            } else
+                mArt.setImageBitmap(BitmapHelper.getDefault(getResources(), MusicApplication.DEF_ART_SIZE_NORMAL));
+        } else
+            mArt.setImageBitmap(BitmapHelper.getDefault(getResources(), MusicApplication.DEF_ART_SIZE_NORMAL));
     }
 
     private void updateMediaDescription(MediaDescription description) {
@@ -430,7 +432,7 @@ public class PlayerActivity extends ActionBarCastActivity {
         LogHelper.d(TAG, "updateDuration called ");
         int duration = (int) metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
         mSeekbar.setMax(duration);
-        mPosition.setText(Utils.formatMillis(mSeekbar.getProgress()) + " | " + Utils.formatMillis(duration));
+        mPosition.setText(Utils.formatMillis(mSeekbar.getProgress()) + " / " + Utils.formatMillis(duration));
     }
 
     private void updatePlaybackState(PlaybackState state) {

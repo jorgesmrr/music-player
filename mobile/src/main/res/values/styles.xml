@@ -50,14 +50,14 @@
              - Notification icon badge tinting
              - Overview “now playing” icon tinting
          -->
-        <item name="colorPrimaryDark">#ffbf360c</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
 
         <!-- colorAccent is used in Android Auto for:
              - Spinner
              - progress bar
              - floating action button background (Play/Pause in media apps)
          -->
-        <item name="colorAccent">@color/bt_accent</item>
+        <item name="colorAccent">@color/accent</item>
     </style>
 
     <style name="WearTheme" parent="UAmpAppTheme">
@@ -65,11 +65,10 @@
              - Card background on media browse
              - Card background on 4-way media controls
          -->
-        <item name="colorPrimaryDark">#ffbf360c</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
     </style>
 
     <style name="Headline">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">@color/primary_text_default_material_dark</item>
         <item name="android:textSize">@dimen/abc_text_size_headline_material</item>
     </style>
@@ -90,7 +89,7 @@
     </style>
 
     <style name="Subtitle">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/secondary_text_default_material_light</item>
     </style>
 
@@ -100,7 +99,7 @@
     </style>
 
     <style name="SubtitleInverse">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/secondary_text_default_material_dark</item>
     </style>
 

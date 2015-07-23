@@ -34,7 +34,7 @@ import android.widget.Toast;
 
 import br.jm.music.MusicService;
 import br.jm.music.R;
-import br.jm.music.UAMPApplication;
+import br.jm.music.MusicApplication;
 import br.jm.music.utils.BitmapHelper;
 import br.jm.music.utils.LogHelper;
 
@@ -150,11 +150,14 @@ public class PlaybackControlsFragment extends Fragment {
             String artUrl = artUrlUri.toString();
             if (!TextUtils.equals(artUrl, mArtUrl)) {
                 mArtUrl = artUrl;
-                Bitmap art = BitmapHelper.readFromDisk(mArtUrl, UAMPApplication.getArtSizeIcon());
+                Bitmap art = BitmapHelper.readFromDisk(mArtUrl, MusicApplication.getArtSizeIcon());
                 if (art != null)
                     mAlbumArt.setImageBitmap(art);
+                else
+                    mAlbumArt.setImageBitmap(BitmapHelper.getDefault(getResources(), MusicApplication.DEF_ART_SIZE_ICON));
             }
-        }
+        } else
+            mAlbumArt.setImageBitmap(BitmapHelper.getDefault(getResources(), MusicApplication.DEF_ART_SIZE_ICON));
     }
 
     public void setExtraInfo(String extraInfo) {

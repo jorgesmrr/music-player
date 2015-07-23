@@ -417,6 +417,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     else repeatMode++;
                     mSessionExtras.putInt(EXTRA_REPEAT_MODE, repeatMode);
                     mSession.setExtras(mSessionExtras);
+                    //todo resetar flag ao criar nova fila
                 }
             }
         }
@@ -508,15 +509,14 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         LogHelper.d(TAG, "OnLoadChildren: parentMediaId=", parentMediaId);
 
         List<MediaBrowser.MediaItem> mediaItems = new ArrayList<>();
-        //todo mudar icones
         if (MEDIA_ID_ROOT.equals(parentMediaId)) {
             LogHelper.d(TAG, "OnLoadChildren.ROOT");
             mediaItems.add(new MediaBrowser.MediaItem(
                     new MediaDescription.Builder()
                             .setMediaId(MEDIA_ID_BY_ARTIST)
                             .setTitle(getString(R.string.browse_artists))
-                            .setIconUri(Uri.parse("android.resource://" +
-                                    "br.jm.music/drawable/ic_person_white_24dp"))
+                            /*todo .setIconUri(Uri.parse("android.resource://" +
+                                    "br.jm.music/drawable/ic_person_white_24dp"))*/
                             .setSubtitle(getString(R.string.browse_artists_subtitle))
                             .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
             ));
@@ -524,8 +524,8 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     new MediaDescription.Builder()
                             .setMediaId(MEDIA_ID_BY_ALBUM)
                             .setTitle(getString(R.string.albums))
-                            .setIconUri(Uri.parse("android.resource://" +
-                                    "br.jm.music/drawable/ic_album_white_24dp"))
+                            /*todo .setIconUri(Uri.parse("android.resource://" +
+                                    "br.jm.music/drawable/ic_album_white_24dp"))*/
                             .setSubtitle(getString(R.string.browse_albums_subtitle))
                             .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
             ));
@@ -533,8 +533,8 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     new MediaDescription.Builder()
                             .setMediaId(MEDIA_ID_MUSICS_ALL)
                             .setTitle(getString(R.string.songs))
-                            .setIconUri(Uri.parse("android.resource://" +
-                                    "br.jm.music/drawable/ic_audiotrack_white_24dp"))
+                            /*todo .setIconUri(Uri.parse("android.resource://" +
+                                    "br.jm.music/drawable/ic_audiotrack_white_24dp"))*/
                             .setSubtitle(getString(R.string.browse_songs_subtitle))
                             .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
             ));
@@ -911,12 +911,12 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
 
                     // set high resolution bitmap in METADATA_KEY_ALBUM_ART. This is used, for
                     // example, on the lockscreen background when the media session is active.
-                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, BitmapHelper.readFromDisk(path, UAMPApplication.getInstance().getArtSizeNormal()))
+                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, BitmapHelper.readFromDisk(path, MusicApplication.getInstance().getArtSizeNormal()))
 
                             // set small version of the album art in the DISPLAY_ICON. This is used on
                             // the MediaDescription and thus it should be small to be serialized if
                             // necessary..
-                    .putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, BitmapHelper.readFromDisk(path, UAMPApplication.getArtSizeIcon()))
+                    .putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, BitmapHelper.readFromDisk(path, MusicApplication.getArtSizeIcon()))
 
                     .build();
 

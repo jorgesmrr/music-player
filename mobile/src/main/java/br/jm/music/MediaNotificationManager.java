@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
@@ -280,12 +279,12 @@ public class MediaNotificationManager extends BroadcastReceiver {
             // it can actually be any valid Android Uri formatted String.
             // async fetch the album art icon
             String path = description.getIconUri().toString();
-            art = BitmapHelper.readFromDisk(path, UAMPApplication.getArtSizeIcon());
+            art = BitmapHelper.readFromDisk(path, MusicApplication.getArtSizeIcon());
             if (art == null) {
                 fetchArtUrl = path;
                 // use a placeholder art while the remote art is being downloaded
-                art = BitmapFactory.decodeResource(mService.getResources(),
-                    R.drawable.ic_default_art);
+                art = BitmapHelper.getDefault(mService.getResources(),
+                        MusicApplication.DEF_ART_SIZE_ICON);
             }
         }
 
@@ -295,7 +294,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
                         new int[]{playPauseButtonPosition})  // show only play/pause in compact view
                     .setMediaSession(mSessionToken))
                 .setColor(mNotificationColor)
-                .setSmallIcon(R.drawable.ic_notification)
+                .setSmallIcon(R.drawable.ic_headset_white_24dp)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setUsesChronometer(true)
                 .setContentIntent(createContentIntent(description))
@@ -316,7 +315,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
         setNotificationPlaybackState(notificationBuilder);
         if (fetchArtUrl != null) {
-            Bitmap bitmap = BitmapHelper.readFromDisk(fetchArtUrl, UAMPApplication.getArtSizeIcon());
+            Bitmap bitmap = BitmapHelper.readFromDisk(fetchArtUrl, MusicApplication.getArtSizeIcon());
             notificationBuilder.setLargeIcon(bitmap);
             mNotificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         }
