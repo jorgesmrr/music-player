@@ -14,10 +14,10 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import br.jm.music.R;
-
 import java.util.Collections;
 import java.util.List;
+
+import br.jm.music.R;
 
 /**
  * Created by Jorge on 11/06/2015.
@@ -99,7 +99,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.QueueItemHol
 
     public void setCurrentIndex(int currentIndex) {
         int aux = mCurrentIndex;
-        this.mCurrentIndex = currentIndex;
+        mCurrentIndex = currentIndex;
         notifyItemChanged(aux);
         notifyItemChanged(currentIndex);
     }
@@ -108,6 +108,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.QueueItemHol
     public void onItemMove(int fromPosition, int toPosition) {
         Collections.swap(mQueue, fromPosition, toPosition);
         notifyItemMoved(fromPosition, toPosition);
+        mListener.onItemMove(fromPosition, toPosition);
     }
 
     @Override
@@ -173,5 +174,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.QueueItemHol
         void onMenuItemClick(MenuItem item, int position);
 
         void onItemDismiss(int position);
+
+        void onItemMove(int fromPosition, int toPosition);
     }
 }

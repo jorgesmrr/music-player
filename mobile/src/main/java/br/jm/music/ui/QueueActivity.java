@@ -12,8 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.MenuItem;
 
-import java.util.List;
-
 import br.jm.music.MusicService;
 import br.jm.music.R;
 import br.jm.music.utils.LogHelper;
@@ -34,11 +32,6 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
         public void onMetadataChanged(MediaMetadata metadata) {
             if (metadata != null)
                 updateCurrentMediaId(metadata.getDescription().getMediaId());
-        }
-
-        @Override
-        public void onQueueChanged(List<MediaSession.QueueItem> queue) {
-            updateQueue(queue);
         }
     };
 
@@ -101,6 +94,14 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
                         .putExtra(MusicService.CMD_NAME, MusicService.CMD_DEL_FROM_QUEUE)
                         .putExtra(MusicService.EXTRA_QUEUE_INDEX, position));
             }
+
+            @Override
+            public void onItemMove(int fromPosition, int toPosition) {
+                startService(new Intent(QueueActivity.this, MusicService.class)
+                        .setAction(MusicService.ACTION_CMD)
+                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_SWAP_QUEUE)
+                        .putExtra(MusicService.EXTRA_QUEUE_INDEX, new int[]{fromPosition, toPosition}));
+            }
         });
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list);
@@ -137,7 +138,10 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
         }
         setMediaController(mediaController);
         mediaController.registerCallback(mCallback);
-        updateQueue(getMediaController().getQueue());
+        mAdapter.setQueue(getMediaController().getQueue());
+        MediaMetadata metadata = mediaController.getMetadata();
+        if (metadata != null)
+            updateCurrentMediaId(metadata.getDescription().getMediaId());
     }
 
     @Override
@@ -157,14 +161,6 @@ public class QueueActivity extends ActionBarCastActivity implements QueueAdapter
         if (getMediaController() != null) {
             getMediaController().unregisterCallback(mCallback);
         }
-    }
-
-    private void updateQueue(List<MediaSession.QueueItem> queue){
-        MediaController mediaController = getMediaController();
-        mAdapter.setQueue(mediaController.getQueue());
-        MediaMetadata metadata = mediaController.getMetadata();
-        if (metadata != null)
-            updateCurrentMediaId(metadata.getDescription().getMediaId());
     }
 
     private void updateCurrentMediaId(String mediaId) {

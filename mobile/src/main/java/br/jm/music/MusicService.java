@@ -143,6 +143,8 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
     public static final String CMD_GET_ARTIST = "CMD_GET_ARTIST";
     // A value of a CMD_NAME key that indicates that a song should be added to the queue.
     public static final String CMD_ADD_TO_QUEUE = "CMD_ADD_TO_QUEUE";
+    // A value of a CMD_NAME key that indicates that two song should be swapped in the queue.
+    public static final String CMD_SWAP_QUEUE = "CMD_SWAP_QUEUE";
     // A value of a CMD_NAME key that indicates that a song should be removed from the queue.
     public static final String CMD_DEL_FROM_QUEUE = "CMD_DEL_FROM_QUEUE";
     // A value of a CMD_NAME key that indicates that a song should be deleted from the device.
@@ -351,6 +353,21 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     if (queueInitialized) {
                         mSession.setPlaybackState(new PlaybackState.Builder(mSession.getController().getPlaybackState()).setState(PlaybackState.STATE_STOPPED, 0, 1).build());
                         updateMetadata();
+                    }
+                } else if(CMD_SWAP_QUEUE.equals(command)){
+                    if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
+                        int[] positions = startIntent.getIntArrayExtra(EXTRA_QUEUE_INDEX);
+                        if (positions != null) {
+                            Collections.swap(mPlayingQueue, positions[0], positions[1]);
+                            mSession.setQueue(mPlayingQueue);
+
+                            // Check if it affects the currently playing song
+                            if (mCurrentIndexOnQueue == positions[0]) {
+                                mCurrentIndexOnQueue = positions[1];
+                            } else if (mCurrentIndexOnQueue == positions[1]){
+                                mCurrentIndexOnQueue = positions[0];
+                            }
+                        }
                     }
                 } else if (CMD_DEL_FROM_QUEUE.equals(command)) {
                     if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {

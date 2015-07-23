@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Universal Music Player</string>
+    <string name="app_name">Music Player</string>
     <string name="error_no_metadata">Unable to retrieve metadata.</string>
     <string name="browse_artists">Artists</string>
     <string name="browse_artists_subtitle">Songs by artist</string>

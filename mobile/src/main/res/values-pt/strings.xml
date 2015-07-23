@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Universal Music Player</string>
+    <string name="app_name">Músicas</string>
     <string name="about">Sobre</string>
     <string name="add_queue">Adicionar à fila</string>
     <string name="albums">Álbums</string>
