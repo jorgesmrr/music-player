@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Universal Music Player</string>
+    <string name="about">Sobre</string>
+    <string name="add_queue">Adicionar à fila</string>
+    <string name="albums">Álbums</string>
+    <string name="browse_albums_subtitle">Músicas por álbum</string>
+    <string name="browse_artists">Artistas</string>
+    <string name="browse_artists_subtitle">Músicas por artista</string>
+    <string name="browse_songs_subtitle">Todas as músicas</string>
+    <string name="casting_to_device">Transmitindo para %1$s</string>
+    <string name="delete">Excluir</string>
+    <string name="error_loading_media">Erro ao carregar dados</string>
+    <string name="error_no_metadata">Não possível carregar os dados</string>
+    <string name="go_album">Ir para álbum</string>
+    <string name="go_artist">Ir para artista</string>
+    <string name="label_next">Próxima</string>
+    <string name="label_pause">Pausar</string>
+    <string name="label_play">Tocar</string>
+    <string name="label_previous">Anterior</string>
+    <string name="no_search_results">Nenhum resultado.</string>
+    <string name="play_next">Tocar próxima</string>
+    <string name="queue">Fila</string>
+    <string name="random_queue_title">Aleatório</string>
+    <string name="remove_ads">Remover anúncios</string>
+    <string name="show_queue">Mostrar fila</string>
+    <string name="shuffle_all">Aleatório</string>
+    <string name="songs">Músicas</string>
+    <string name="stop_casting">Encerrar transmissão</string>
+    <string name="touch_to_cast">Toque para transmitir</string>
+</resources>

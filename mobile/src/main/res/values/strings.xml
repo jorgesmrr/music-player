@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">Universal Music Player</string>
-    <string name="favorite">Favorite</string>
     <string name="error_no_metadata">Unable to retrieve metadata.</string>
     <string name="browse_artists">Artists</string>
     <string name="browse_artists_subtitle">Songs by artist</string>
@@ -11,24 +10,12 @@
     <string name="songs">Songs</string>
     <string name="browse_songs_subtitle">All songs</string>
     <string name="random_queue_title">Random music</string>
-    <string name="error_no_connection">Cannot connect to server. Please, check your Internet connectivity.</string>
     <string name="error_loading_media">Error Loading Media</string>
     <string name="casting_to_device">Casting to %1$s</string>
-    <string name="play_item">Play item</string>
-    <string name="play_pause">play or pause</string>
-    <string name="skip_next">skip to next</string>
-    <string name="skip_prev">skip to previous</string>
     <string name="touch_to_cast">Touch to Cast</string>
     <!-- Use the default receiver. To customize a styled media receiver, you can use
          the css and images under <project-root>/docs/cast_styled_receiver -->
     <string name="cast_application_id" translatable="false">CC1AD845</string>
-    <string name="home_title">Home</string>
-    <string name="related_content_header">You may also like</string>
-    <string name="action_listen">Listen</string>
-    <string name="open_content_drawer">Open the main menu</string>
-    <string name="close_content_drawer">Close the main menu</string>
-    <string name="placeholder_message">This is a placeholder for your application code.</string>
-    <string name="now_playing">Now Playing</string>
     <string name="no_search_results">No search results.</string>
 
     <!-- Plurals -->
@@ -51,9 +38,7 @@
     <string name="go_album">Go to album</string>
     <string name="delete">Delete</string>
     <string name="shuffle_all">Shuffle_all</string>
-    <string name="remove_queue">Remove from queue</string>
     <string name="play_next">Play next</string>
-    <string name="cast_to">Cast to…</string>
     <string name="remove_ads">Remove ads</string>
     <string name="about">About</string>
     <string name="show_queue">Show queue</string>

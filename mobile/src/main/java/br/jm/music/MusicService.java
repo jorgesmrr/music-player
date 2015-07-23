@@ -47,7 +47,7 @@ import java.util.List;
 import br.jm.music.model.Album;
 import br.jm.music.model.MusicProvider;
 import br.jm.music.ui.BaseActivity;
-import br.jm.music.ui.NowPlayingActivity;
+import br.jm.music.ui.MainActivity;
 import br.jm.music.utils.BitmapHelper;
 import br.jm.music.utils.CarHelper;
 import br.jm.music.utils.LogHelper;
@@ -242,7 +242,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         mPlayback.start();
 
         Context context = getApplicationContext();
-        Intent intent = new Intent(context, NowPlayingActivity.class);
+        Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pi = PendingIntent.getActivity(context, 99 /*request code*/,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mSession.setSessionActivity(pi);
@@ -516,7 +516,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                             .setMediaId(MEDIA_ID_BY_ARTIST)
                             .setTitle(getString(R.string.browse_artists))
                             .setIconUri(Uri.parse("android.resource://" +
-                                    "br.jm.music/drawable/ic_by_genre"))
+                                    "br.jm.music/drawable/ic_person_white_24dp"))
                             .setSubtitle(getString(R.string.browse_artists_subtitle))
                             .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
             ));
@@ -525,7 +525,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                             .setMediaId(MEDIA_ID_BY_ALBUM)
                             .setTitle(getString(R.string.albums))
                             .setIconUri(Uri.parse("android.resource://" +
-                                    "br.jm.music/drawable/ic_by_genre"))
+                                    "br.jm.music/drawable/ic_album_white_24dp"))
                             .setSubtitle(getString(R.string.browse_albums_subtitle))
                             .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
             ));
@@ -534,7 +534,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                             .setMediaId(MEDIA_ID_MUSICS_ALL)
                             .setTitle(getString(R.string.songs))
                             .setIconUri(Uri.parse("android.resource://" +
-                                    "br.jm.music/drawable/ic_by_genre"))
+                                    "br.jm.music/drawable/ic_audiotrack_white_24dp"))
                             .setSubtitle(getString(R.string.browse_songs_subtitle))
                             .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
             ));
@@ -553,6 +553,8 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                                         + " | " +
                                         getResources().getQuantityString(R.plurals.n_songs,
                                                 songsCount, songsCount))
+                                .setIconUri(Uri.parse("android.resource://" +
+                                        "br.jm.music/drawable/ic_person_white_24dp"))
                                 .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
                 );
                 mediaItems.add(item);

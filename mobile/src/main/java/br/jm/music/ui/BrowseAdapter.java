@@ -113,7 +113,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 case TYPE_NONE:
                     switch (mMediaType) {
                         case MEDIA_ARTIST:
-                            holder.mImageView.setImageResource(R.drawable.ic_by_genre);
+                            holder.mImageView.setImageResource(R.drawable.ic_person_white_24dp);
                             holder.mOverflowView.setVisibility(View.GONE);
                             break;
                         case MEDIA_ALBUM:

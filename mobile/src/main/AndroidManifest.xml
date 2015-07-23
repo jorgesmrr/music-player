@@ -1,18 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  Copyright (C) 2014 The Android Open Source Project
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  -->
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="br.jm.music">
@@ -21,19 +7,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <!-- Set android.software.leanback to false, so the APK will be available to both
-    TV and regular devices. -->
-    <uses-feature
-        android:name="android.software.leanback"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.touchscreen"
-        android:required="false" />
-
     <application
-        android:name=".UAMPApplication"
+        android:name="br.jm.music.UAMPApplication"
         android:allowBackup="true"
-        android:banner="@drawable/banner_tv"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/UAmpAppTheme">
@@ -47,7 +23,7 @@
 
         <!-- Main activity for music browsing on phone -->
         <activity
-            android:name=".ui.MainActivity"
+            android:name="br.jm.music.ui.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -71,34 +47,6 @@
 
         <!-- Activity for display queue -->
         <activity android:name=".ui.QueueActivity" />
-
-        <!-- Proxy activity that opens either the NowPlaying TV or the mobile UI, depending on
-        the current environment -->
-        <activity
-            android:name=".ui.NowPlayingActivity"
-            android:icon="@drawable/ic_launcher" />
-
-        <!-- Main activity for Android TV user interface -->
-        <activity
-            android:name=".ui.tv.TvBrowseActivity"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.UAmp.TVLeanback">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".ui.tv.TvVerticalGridActivity"
-            android:parentActivityName=".ui.tv.TvBrowseActivity"
-            android:theme="@style/Theme.UAmp.TVLeanback" />
-
-        <!-- Android TV UI when playing a song -->
-        <activity
-            android:name=".ui.tv.TvPlaybackActivity"
-            android:parentActivityName=".ui.tv.TvBrowseActivity"
-            android:theme="@style/Theme.UAmp.TVLeanback" />
 
         <!--
              (OPTIONAL) use this meta data to indicate which icon should be

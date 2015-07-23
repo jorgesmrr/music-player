@@ -43,17 +43,18 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import br.jm.music.MusicService;
-import br.jm.music.R;
-import br.jm.music.UAMPApplication;
-import br.jm.music.utils.BitmapHelper;
-import br.jm.music.utils.LogHelper;
 import com.google.android.libraries.cast.companionlibrary.utils.Utils;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import br.jm.music.MusicService;
+import br.jm.music.R;
+import br.jm.music.UAMPApplication;
+import br.jm.music.utils.BitmapHelper;
+import br.jm.music.utils.LogHelper;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -100,7 +101,6 @@ public class PlayerActivity extends ActionBarCastActivity {
 
     private ScheduledFuture<?> mScheduleFuture;
     private PlaybackState mLastPlaybackState;
-    private boolean mIsPortrait;
 
     private MediaController.Callback mCallback = new MediaController.Callback() {
         @Override
@@ -147,7 +147,7 @@ public class PlayerActivity extends ActionBarCastActivity {
 
         mRepeatMode = MusicService.REPEAT_NONE;
         mShuffling = false;
-        mIsPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
         mVibrantColor = getResources().getColor(R.color.default_vibrant_color);
         mDarkVibrantColor = getResources().getColor(R.color.default_dark_vibrant_color);
@@ -239,7 +239,7 @@ public class PlayerActivity extends ActionBarCastActivity {
 
         // Translates seekbar
         mBar = findViewById(R.id.bar);
-        if (mIsPortrait) {
+        if (isPortrait) {
             mBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @SuppressWarnings("deprecation")
                 @Override
