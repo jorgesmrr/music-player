@@ -32,9 +32,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import br.jm.music.MusicService;
-import br.jm.music.R;
 import br.jm.music.MusicApplication;
+import br.jm.music.R;
 import br.jm.music.utils.BitmapHelper;
 import br.jm.music.utils.LogHelper;
 
@@ -199,12 +198,6 @@ public class PlaybackControlsFragment extends Fragment {
 
         MediaController controller = getActivity().getMediaController();
         String extraInfo = null;
-        if (controller != null && controller.getExtras() != null) {
-            String castName = controller.getExtras().getString(MusicService.EXTRA_CONNECTED_CAST);
-            if (castName != null) {
-                extraInfo = getResources().getString(R.string.casting_to_device, castName);
-            }
-        }
         setExtraInfo(extraInfo);
     }
 

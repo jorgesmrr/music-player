@@ -19,13 +19,7 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-
-import br.jm.music.ui.PlayerActivity;
 import br.jm.music.utils.LruBitmapCache;
-
-import static com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager.FEATURE_DEBUGGING;
-import static com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager.FEATURE_WIFI_RECONNECT;
 
 /**
  * The {@link Application} for the uAmp application.
@@ -53,11 +47,6 @@ public class MusicApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
-
-        String applicationId = getResources().getString(R.string.cast_application_id);
-        VideoCastManager castManager = VideoCastManager.initialize(
-                getApplicationContext(), applicationId, PlayerActivity.class, null);
-        castManager.enableFeatures(FEATURE_WIFI_RECONNECT | FEATURE_DEBUGGING);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mArtSizeNormal = sharedPreferences.getInt(PREF_ART_SIZE_NORMAL, 0);

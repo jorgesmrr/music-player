@@ -19,7 +19,6 @@
     <string name="browse_artists">Artistas</string>
     <string name="browse_artists_subtitle">Músicas por artista</string>
     <string name="browse_songs_subtitle">Todas as músicas</string>
-    <string name="casting_to_device">Transmitindo para %1$s</string>
     <string name="delete">Excluir</string>
     <string name="error_loading_media">Erro ao carregar dados</string>
     <string name="error_no_metadata">Não possível carregar os dados</string>

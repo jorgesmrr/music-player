@@ -5,6 +5,17 @@ package br.jm.music.utils;
  */
 public class StringUtils {
 
+    public static String formatMillis(int milliseconds) {
+        long second = (milliseconds / 1000) % 60;
+        long minute = (milliseconds / (1000 * 60)) % 60;
+        long hour = (milliseconds / (1000 * 60 * 60)) % 24;
+
+        if (hour > 0)
+            return String.format("%02d:%02d:%02d", hour, minute, second);
+        else
+            return String.format("%02d:%02d", minute, second);
+    }
+
     public static String getReversedString(){
         // A reversed public key piece (from 14 to 60)
         String text = "u5OFArtnQx2v9XT0aeqackGcbiima8qacoaafeqab0W9gI";

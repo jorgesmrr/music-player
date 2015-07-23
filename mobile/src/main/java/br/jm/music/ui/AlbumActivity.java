@@ -178,9 +178,10 @@ public class AlbumActivity extends MediaContainerActivity {
                 new Palette.Builder(art).generate(new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
+                        int vibrantColor = palette.getVibrantColor(getResources().getColor(R.color.default_vibrant_color));
                         int darkVibrantColor = palette.getDarkVibrantColor(getResources().getColor(R.color.default_dark_vibrant_color));
                         mHeaderBar.setBackgroundColor(darkVibrantColor);
-                        ColorStateList stateList = new ColorStateList(new int[][]{new int[]{}}, new int[]{palette.getVibrantColor(getResources().getColor(R.color.default_vibrant_color))});
+                        ColorStateList stateList = new ColorStateList(new int[][]{new int[]{}}, new int[]{vibrantColor});
                         mFab.setBackgroundTintList(stateList);
                         if (mIsPortrait) {
                             mHeaderImageView.setImageBitmap(art);

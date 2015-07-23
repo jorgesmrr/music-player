@@ -43,18 +43,17 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.android.libraries.cast.companionlibrary.utils.Utils;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import br.jm.music.MusicApplication;
 import br.jm.music.MusicService;
 import br.jm.music.R;
-import br.jm.music.MusicApplication;
 import br.jm.music.utils.BitmapHelper;
 import br.jm.music.utils.LogHelper;
+import br.jm.music.utils.StringUtils;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -222,7 +221,7 @@ public class PlayerActivity extends ActionBarCastActivity {
         mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mPosition.setText(Utils.formatMillis(seekBar.getProgress()) + " | " + Utils.formatMillis(seekBar.getMax()));
+                mPosition.setText(StringUtils.formatMillis(seekBar.getProgress()) + " | " + StringUtils.formatMillis(seekBar.getMax()));
             }
 
             @Override
@@ -432,7 +431,7 @@ public class PlayerActivity extends ActionBarCastActivity {
         LogHelper.d(TAG, "updateDuration called ");
         int duration = (int) metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
         mSeekbar.setMax(duration);
-        mPosition.setText(Utils.formatMillis(mSeekbar.getProgress()) + " / " + Utils.formatMillis(duration));
+        mPosition.setText(StringUtils.formatMillis(mSeekbar.getProgress()) + " / " + StringUtils.formatMillis(duration));
     }
 
     private void updatePlaybackState(PlaybackState state) {

@@ -32,11 +32,6 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.service.media.MediaBrowserService;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.media.MediaRouter;
-
-import com.google.android.gms.cast.ApplicationMetadata;
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -119,8 +114,6 @@ import static br.jm.music.utils.MediaIDHelper.createBrowseCategoryMediaID;
  */
 public class MusicService extends MediaBrowserService implements Playback.Callback {
 
-    // Extra on MediaSession that contains the Cast device name currently connected to
-    public static final String EXTRA_CONNECTED_CAST = "br.jm.music.CAST_NAME";
     // Extra on MediaSession that indicates if we are shuffling
     public static final String EXTRA_SHUFFLING = "br.jm.music.EXTRA_SHUFFLING";
     // Extra on MediaSession that indicates if we are repeating
@@ -136,8 +129,6 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
     public static final String CMD_PAUSE = "CMD_PAUSE";
     // A value of a CMD_NAME key that indicates that the music playback should switch
     // to local playback from cast playback.
-    public static final String CMD_STOP_CASTING = "CMD_STOP_CASTING";
-    // A value of a CMD_NAME key that indicates that the album ID of a song should be returned.
     public static final String CMD_GET_ALBUM = "CMD_GET_ALBUM";
     // A value of a CMD_NAME key that indicates that the artist ID of a song should be returned.
     public static final String CMD_GET_ARTIST = "CMD_GET_ARTIST";
@@ -184,39 +175,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
     private Bundle mSessionExtras;
     private DelayedStopHandler mDelayedStopHandler = new DelayedStopHandler(this);
     private Playback mPlayback;
-    private MediaRouter mMediaRouter;
     private PackageValidator mPackageValidator;
-
-    /**
-     * Consumer responsible for switching the Playback instances depending on whether
-     * it is connected to a remote player.
-     */
-    private final VideoCastConsumerImpl mCastConsumer = new VideoCastConsumerImpl() {
-
-        @Override
-        public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId,
-                                           boolean wasLaunched) {
-            // In case we are casting, send the device name as an extra on MediaSession metadata.
-            mSessionExtras.putString(EXTRA_CONNECTED_CAST, mCastManager.getDeviceName());
-            mSession.setExtras(mSessionExtras);
-            // Now we can switch to CastPlayback
-            Playback playback = new CastPlayback(mMusicProvider);
-            mMediaRouter.setMediaSession(mSession);
-            switchToPlayer(playback, true);
-        }
-
-        @Override
-        public void onDisconnected() {
-            LogHelper.d(TAG, "onDisconnected");
-            mSessionExtras.remove(EXTRA_CONNECTED_CAST);
-            mSession.setExtras(mSessionExtras);
-            Playback playback = new LocalPlayback(MusicService.this, mMusicProvider);
-            mMediaRouter.setMediaSession(null);
-            switchToPlayer(playback, false);
-        }
-    };
-
-    private VideoCastManager mCastManager;
 
     /*
      * (non-Javadoc)
@@ -260,9 +219,6 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         updatePlaybackState(null);
 
         mMediaNotificationManager = new MediaNotificationManager(this);
-        mCastManager = VideoCastManager.getInstance();
-        mCastManager.addVideoCastConsumer(mCastConsumer);
-        mMediaRouter = MediaRouter.getInstance(getApplicationContext());
     }
 
     /**
@@ -280,8 +236,6 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     if (mPlayback != null && mPlayback.isPlaying()) {
                         handlePauseRequest();
                     }
-                } else if (CMD_STOP_CASTING.equals(command)) {
-                    mCastManager.disconnect();
                 } else if (CMD_GET_ALBUM.equals(command)) {
                     String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
                     String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
@@ -456,9 +410,6 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         // Service is being killed, so make sure we release our resources
         handleStopRequest(null);
 
-        mCastManager = VideoCastManager.getInstance();
-        mCastManager.removeVideoCastConsumer(mCastConsumer);
-
         mDelayedStopHandler.removeCallbacksAndMessages(null);
         // Always release the MediaSession to clean up resources
         // and notify associated MediaController(s).
@@ -479,7 +430,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             return null;
         }
         //noinspection StatementWithEmptyBody
-        if (CarHelper.isValidCarPackage(clientPackageName)) {
+        /*if (CarHelper.isValidCarPackage(clientPackageName)) {
             // Optional: if your app needs to adapt ads, music library or anything else that
             // needs to run differently when connected to the car, this is where you should handle
             // it.
@@ -489,7 +440,7 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             // Optional: if your app needs to adapt the music library for when browsing from a
             // Wear device, you should return a different MEDIA ROOT here, and then,
             // on onLoadChildren, handle it accordingly.
-        }
+        }*/
         return new BrowserRoot(MEDIA_ID_ROOT, null);
     }
 
