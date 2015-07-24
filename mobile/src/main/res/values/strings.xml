@@ -16,11 +16,10 @@
     <string name="drawable_vector_resume_left" translatable="false">M24,10 l0,0 0,28 -16,0 z</string>
     <string name="drawable_vector_resume_right" translatable="false">M24,10 l0,0 16,28 -16,0 z</string>
 
-    <!--todo mudar-->
-    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-2714828414543515/2976564988</string>
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-2714828414543515/9192184580</string>
 
     <string name="app_name">Music Player</string>
-    <string name="error_no_metadata">Unable to retrieve metadata.</string>
+    <string name="error_no_metadata">Unable to retrieve data.</string>
     <string name="browse_artists">Artists</string>
     <string name="browse_artists_subtitle">Songs by artist</string>
     <string name="albums">Albums</string>

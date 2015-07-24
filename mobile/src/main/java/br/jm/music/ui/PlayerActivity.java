@@ -221,7 +221,8 @@ public class PlayerActivity extends ActionBarCastActivity {
         mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mPosition.setText(StringUtils.formatMillis(seekBar.getProgress()) + " | " + StringUtils.formatMillis(seekBar.getMax()));
+                if (mPosition != null)
+                    mPosition.setText(StringUtils.formatMillis(seekBar.getProgress()) + " | " + StringUtils.formatMillis(seekBar.getMax()));
             }
 
             @Override

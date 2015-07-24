@@ -21,7 +21,7 @@
     <string name="browse_songs_subtitle">Todas as músicas</string>
     <string name="delete">Excluir</string>
     <string name="error_loading_media">Erro ao carregar dados</string>
-    <string name="error_no_metadata">Não possível carregar os dados</string>
+    <string name="error_no_metadata">Não foi possível carregar os dados</string>
     <string name="go_album">Ir para álbum</string>
     <string name="go_artist">Ir para artista</string>
     <string name="label_next">Próxima</string>

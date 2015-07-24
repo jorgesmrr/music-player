@@ -335,7 +335,8 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                                     mSession.getController().getTransportControls().skipToQueueItem(nextId);
                                 } else
                                     mSession.getController().getTransportControls().stop();
-                            }
+                            } else if(indexToRemove < mCurrentIndexOnQueue)
+                                mCurrentIndexOnQueue--;
                         }
                     }
                 } else if (CMD_DEL_FROM_DEVICE.equals(command)) {
@@ -637,6 +638,11 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             LogHelper.d(TAG, "play");
 
             if (mPlayingQueue == null || mPlayingQueue.isEmpty()) {
+                // Clear queue-related extras
+                mSessionExtras.putBoolean(EXTRA_SHUFFLING, false);
+                mSessionExtras.putInt(EXTRA_REPEAT_MODE, REPEAT_NONE);
+                mSession.setExtras(mSessionExtras);
+
                 mPlayingQueue = QueueHelper.getRandomQueue(mMusicProvider);
                 mSession.setQueue(mPlayingQueue);
                 mSession.setQueueTitle(getString(R.string.random_queue_title));
@@ -670,6 +676,11 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             LogHelper.d(TAG, "playFromMediaId mediaId:", mediaId, "  extras=", extras);
+
+            // Clear queue-related extras
+            mSessionExtras.putBoolean(EXTRA_SHUFFLING, false);
+            mSessionExtras.putInt(EXTRA_REPEAT_MODE, REPEAT_NONE);
+            mSession.setExtras(mSessionExtras);
 
             // The mediaId used here is not the unique musicId. This one comes from the
             // MediaBrowser, and is actually a "hierarchy-aware mediaID": a concatenation of
@@ -769,6 +780,11 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
             mMusicProvider.retrieveMediaAsync(getContentResolver(), new MusicProvider.Callback() {
                 @Override
                 public void onMusicCatalogReady(boolean success) {
+                    // Clear queue-related extras
+                    mSessionExtras.putBoolean(EXTRA_SHUFFLING, false);
+                    mSessionExtras.putInt(EXTRA_REPEAT_MODE, REPEAT_NONE);
+                    mSession.setExtras(mSessionExtras);
+
                     mPlayingQueue = QueueHelper.getPlayingQueueFromSearch(query, extras,
                             mMusicProvider);
 

@@ -19,6 +19,9 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Tracker;
+
 import br.jm.music.utils.LruBitmapCache;
 
 /**
@@ -40,6 +43,7 @@ public class MusicApplication extends Application {
     private int mArtSizeSmall;
 
     private LruBitmapCache lruBitmapCache;
+    private Tracker mTracker;
 
     private static MusicApplication mInstance;
 
@@ -93,5 +97,13 @@ public class MusicApplication extends Application {
             lruBitmapCache = new LruBitmapCache();
         }
         return this.lruBitmapCache;
+    }
+
+    public synchronized Tracker getTracker() {
+        if (mTracker == null) {
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            mTracker = analytics.newTracker(R.xml.tracker);
+        }
+        return mTracker;
     }
 }

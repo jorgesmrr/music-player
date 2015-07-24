@@ -18,7 +18,7 @@ public class StringUtils {
 
     public static String getReversedString(){
         // A reversed public key piece (from 14 to 60)
-        String text = "u5OFArtnQx2v9XT0aeqackGcbiima8qacoaafeqab0W9gI";
+        String text = "blvJosYlKdWdbRGLaeqackGcbiima8qacoaafeqab0W9gI";
 
         char[] chars = text.toCharArray();
         int indexOfLastChar = chars.length - 1;

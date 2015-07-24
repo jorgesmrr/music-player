@@ -20,6 +20,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
+
+import br.jm.music.MusicApplication;
 import br.jm.music.R;
 import br.jm.music.utils.LogHelper;
 
@@ -47,6 +50,9 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LogHelper.d(TAG, "Activity onCreate");
+
+        // Analytics
+        MusicApplication.getInstance().getTracker();
     }
 
     @Override
@@ -56,11 +62,13 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
             throw new IllegalStateException("You must run super.initializeToolbar at " +
                     "the end of your onCreate method");
         }
+        GoogleAnalytics.getInstance(this).reportActivityStart(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        GoogleAnalytics.getInstance(this).reportActivityStop(this);
     }
 
     @Override

@@ -205,7 +205,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void handleAds() {
         mPurchaseInprogress = false;
-        String base64EncodedPublicKey = "miibiJanbGKQHKWht+e3AvLAp5fzBegjVyW8nRCu8Lm5KWD3UDC1tyyPJoYDfW+FpEYPUoyfHRLXo0wzNLTi8mpxj+sIPl+mHFpINeqd3MjqP6220J2GeW1ytolnY3Wu93XXjelLKuIv/4Y6fNDoqPUXjU0e1XX8BT+uo0qPp/fQUU1mcb7O7/WWpXHJuydg+mx66w6bi5vv4mvM7MH/CGnUie4Pw27Zihxz1Zeh07IbwUhpO9AYZogUxPj44kH+xDmlm5xoh7tjI5enjoVh4MyAGak8f260qq2ybFymch67+nevI+hn7ocXqMCJ/fmirDYUu3vmmEXK0AEPADtqidaqab";
+        String base64EncodedPublicKey = "miibiJanbGKQHKBH4PjgOlfVnRm8sw4QEVHtr9vrVITPRl2eMuu8ZVEDrdsXUpvEpLftFqlLpxEO7x8qfUoroPivCGwxpEeopygJpXO0eOTW1urFyZik0FyiAojQUErOa6zCO81R9M+r7KReqBIunMRrVmP+sc55+JuwURTd4pE9rqDIbIqExf8XbJG5dtV00U08zpVyfA+g8+8FXatMTJB3wDVzX6sFOhK94KkgABzHmznlA6UZvfujWfM+j1+AlyklU1QqC9+SGzJG1+l5fuaZRC9krQaj5unpiRwQWN/chzGzG1zSBqcG5ERzkESRbf/ivn4o1SnxriW4k+Jqidaqab";
         mHelper = new IabHelper(this, StringUtils.swapCases(base64EncodedPublicKey.substring(0, 14) + StringUtils.getReversedString() + base64EncodedPublicKey.substring(14)));
         mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
             @Override
