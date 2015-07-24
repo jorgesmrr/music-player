@@ -47,4 +47,9 @@ public class StringUtils {
         return new String(bytes);
     }
 
+    public static String decodeTrackNumber(long track){
+        if (track < 1000) return track + "";
+        else return track / 1000 + "-" + track % 1000;
+    }
+
 }

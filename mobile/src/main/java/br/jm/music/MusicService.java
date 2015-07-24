@@ -380,7 +380,6 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                         }
                         mSessionExtras.putBoolean(EXTRA_SHUFFLING, !shuffling);
                         mSession.setExtras(mSessionExtras);
-                        //todo resetar flag ao criar nova fila
                     }
                 } else if (CMD_TOGGLE_REPEAT.equals(command)) {
                     int repeatMode = mSessionExtras.getInt(EXTRA_REPEAT_MODE, REPEAT_NONE);
@@ -389,7 +388,6 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     else repeatMode++;
                     mSessionExtras.putInt(EXTRA_REPEAT_MODE, repeatMode);
                     mSession.setExtras(mSessionExtras);
-                    //todo resetar flag ao criar nova fila
                 }
             }
         }

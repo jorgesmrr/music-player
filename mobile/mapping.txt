@@ -29689,20 +29689,20 @@ br.jm.music.MusicService -> br.jm.music.MusicService:
     br.jm.music.Playback mPlayback -> j
     br.jm.music.PackageValidator mPackageValidator -> k
     186:222:void onCreate() -> onCreate
-    231:400:int onStartCommand(android.content.Intent,int,int) -> onStartCommand
-    410:418:void onDestroy() -> onDestroy
-    422:445:android.service.media.MediaBrowserService$BrowserRoot onGetRoot(java.lang.String,int,android.os.Bundle) -> onGetRoot
-    450:470:void onLoadChildren(java.lang.String,android.service.media.MediaBrowserService$Result) -> onLoadChildren
-    478:633:void loadChildrenImpl(java.lang.String,android.service.media.MediaBrowserService$Result) -> a
-    812:832:void handlePlayRequest() -> c
-    838:843:void handlePauseRequest() -> d
-    849:860:void handleStopRequest(java.lang.String) -> b
-    863:916:void updateMetadata() -> e
-    924:955:void updatePlaybackState(java.lang.String) -> c
-    958:972:long getAvailableActions() -> f
-    995:1016:void onCompletion() -> a
-    1020:1021:void onPlaybackStatusChanged(int) -> a
-    1025:1026:void onError(java.lang.String) -> a
+    231:398:int onStartCommand(android.content.Intent,int,int) -> onStartCommand
+    408:416:void onDestroy() -> onDestroy
+    420:443:android.service.media.MediaBrowserService$BrowserRoot onGetRoot(java.lang.String,int,android.os.Bundle) -> onGetRoot
+    448:468:void onLoadChildren(java.lang.String,android.service.media.MediaBrowserService$Result) -> onLoadChildren
+    476:631:void loadChildrenImpl(java.lang.String,android.service.media.MediaBrowserService$Result) -> a
+    810:830:void handlePlayRequest() -> c
+    836:841:void handlePauseRequest() -> d
+    847:858:void handleStopRequest(java.lang.String) -> b
+    861:914:void updateMetadata() -> e
+    922:953:void updatePlaybackState(java.lang.String) -> c
+    956:970:long getAvailableActions() -> f
+    993:1014:void onCompletion() -> a
+    1018:1019:void onPlaybackStatusChanged(int) -> a
+    1023:1024:void onError(java.lang.String) -> a
     115:115:void access$200(br.jm.music.MusicService,java.lang.String,android.service.media.MediaBrowserService$Result) -> a
     115:115:void access$300(br.jm.music.MusicService,java.lang.String) -> a
     115:115:java.lang.String access$400() -> b
@@ -29728,27 +29728,27 @@ br.jm.music.MusicService$2 -> br.jm.music.f:
     java.lang.String val$parentMediaId -> a
     android.service.media.MediaBrowserService$Result val$result -> b
     br.jm.music.MusicService this$0 -> c
-    457:463:void onMusicCatalogReady(boolean) -> a
+    455:461:void onMusicCatalogReady(boolean) -> a
 br.jm.music.MusicService$DelayedStopHandler -> br.jm.music.g:
     java.lang.ref.WeakReference mWeakReference -> a
-    1095:1105:void handleMessage(android.os.Message) -> handleMessage
+    1093:1103:void handleMessage(android.os.Message) -> handleMessage
 br.jm.music.MusicService$MediaSessionCallback -> br.jm.music.h:
     br.jm.music.MusicService this$0 -> a
-    638:656:void onPlay() -> onPlay
-    660:668:void onSkipToQueueItem(long) -> onSkipToQueueItem
-    672:674:void onSeekTo(long) -> onSeekTo
-    678:715:void onPlayFromMediaId(java.lang.String,android.os.Bundle) -> onPlayFromMediaId
-    719:721:void onPause() -> onPause
-    725:727:void onStop() -> onStop
-    731:746:void onSkipToNext() -> onSkipToNext
-    750:765:void onSkipToPrevious() -> onSkipToPrevious
-    769:770:void onCustomAction(java.lang.String,android.os.Bundle) -> onCustomAction
-    774:805:void onPlayFromSearch(java.lang.String,android.os.Bundle) -> onPlayFromSearch
+    636:654:void onPlay() -> onPlay
+    658:666:void onSkipToQueueItem(long) -> onSkipToQueueItem
+    670:672:void onSeekTo(long) -> onSeekTo
+    676:713:void onPlayFromMediaId(java.lang.String,android.os.Bundle) -> onPlayFromMediaId
+    717:719:void onPause() -> onPause
+    723:725:void onStop() -> onStop
+    729:744:void onSkipToNext() -> onSkipToNext
+    748:763:void onSkipToPrevious() -> onSkipToPrevious
+    767:768:void onCustomAction(java.lang.String,android.os.Bundle) -> onCustomAction
+    772:803:void onPlayFromSearch(java.lang.String,android.os.Bundle) -> onPlayFromSearch
 br.jm.music.MusicService$MediaSessionCallback$1 -> br.jm.music.i:
     java.lang.String val$query -> a
     android.os.Bundle val$extras -> b
     br.jm.music.MusicService$MediaSessionCallback this$1 -> c
-    784:803:void onMusicCatalogReady(boolean) -> a
+    782:801:void onMusicCatalogReady(boolean) -> a
 br.jm.music.PackageValidator -> br.jm.music.j:
     java.lang.String TAG -> a
     java.util.Map mValidCertificates -> b
@@ -30489,45 +30489,54 @@ br.jm.music.model.MusicProvider -> br.jm.music.b.b:
     java.util.concurrent.ConcurrentMap mAlbumListByArtist -> e
     java.util.concurrent.ConcurrentMap mAlbumListById -> f
     br.jm.music.model.MusicProvider$State mCurrentState -> g
-    71:71:br.jm.music.model.Album getAlbum(int) -> a
-    78:84:java.util.List getMusics() -> a
-    93:96:java.lang.Iterable getAlbums() -> b
-    105:108:java.lang.Iterable getArtists() -> c
-    115:118:java.util.List getMusicsByAlbum(int) -> b
-    125:128:java.util.List getMusicsByArtist(java.lang.String) -> a
-    135:138:java.util.List getAlbumsByArtist(java.lang.String) -> b
-    146:146:java.util.List searchMusicBySongTitle(java.lang.String) -> c
-    154:154:java.lang.Iterable searchMusicByAlbum(java.lang.String) -> d
-    162:162:java.lang.Iterable searchMusicByArtist(java.lang.String) -> e
-    166:177:java.util.List searchMusic(java.lang.String,java.lang.String) -> a
-    187:187:android.media.MediaMetadata getMusic(java.lang.String) -> f
-    191:191:int getAlbumIdFromMusic(java.lang.String) -> g
-    195:201:void updateMusic(android.content.Context,java.lang.String,android.media.MediaMetadata) -> a
-    205:207:void delete(java.lang.String,android.content.ContentResolver) -> a
-    210:210:boolean isInitialized() -> d
-    218:240:void retrieveMediaAsync(android.content.ContentResolver,br.jm.music.model.MusicProvider$Callback) -> a
-    243:266:void buildAlbumListById(android.content.ContentResolver) -> a
-    270:364:void retrieveMedia(android.content.ContentResolver) -> b
-    38:38:void access$000(br.jm.music.model.MusicProvider,android.content.ContentResolver) -> a
-    38:38:br.jm.music.model.MusicProvider$State access$100(br.jm.music.model.MusicProvider) -> a
+    72:72:br.jm.music.model.Album getAlbum(int) -> a
+    79:85:java.util.List getMusics() -> a
+    94:105:java.lang.Iterable getAlbums() -> b
+    114:125:java.lang.Iterable getArtists() -> c
+    132:135:java.util.List getMusicsByAlbum(int) -> b
+    142:145:java.util.List getMusicsByArtist(java.lang.String) -> a
+    152:155:java.util.List getAlbumsByArtist(java.lang.String) -> b
+    163:163:java.util.List searchMusicBySongTitle(java.lang.String) -> c
+    171:171:java.lang.Iterable searchMusicByAlbum(java.lang.String) -> d
+    179:179:java.lang.Iterable searchMusicByArtist(java.lang.String) -> e
+    183:194:java.util.List searchMusic(java.lang.String,java.lang.String) -> a
+    204:204:android.media.MediaMetadata getMusic(java.lang.String) -> f
+    208:208:int getAlbumIdFromMusic(java.lang.String) -> g
+    212:218:void updateMusic(android.content.Context,java.lang.String,android.media.MediaMetadata) -> a
+    222:224:void delete(java.lang.String,android.content.ContentResolver) -> a
+    227:227:boolean isInitialized() -> d
+    235:257:void retrieveMediaAsync(android.content.ContentResolver,br.jm.music.model.MusicProvider$Callback) -> a
+    260:283:void buildAlbumListById(android.content.ContentResolver) -> a
+    287:381:void retrieveMedia(android.content.ContentResolver) -> b
+    39:39:java.util.concurrent.ConcurrentMap access$000(br.jm.music.model.MusicProvider) -> a
+    39:39:void access$100(br.jm.music.model.MusicProvider,android.content.ContentResolver) -> a
+    39:39:br.jm.music.model.MusicProvider$State access$200(br.jm.music.model.MusicProvider) -> b
 br.jm.music.model.MusicProvider$1 -> br.jm.music.b.c:
+    br.jm.music.model.MusicProvider this$0 -> a
+    102:102:int compare(java.lang.Integer,java.lang.Integer) -> a
+    99:99:int compare(java.lang.Object,java.lang.Object) -> compare
+br.jm.music.model.MusicProvider$2 -> br.jm.music.b.d:
+    br.jm.music.model.MusicProvider this$0 -> a
+    122:122:int compare(java.lang.String,java.lang.String) -> a
+    119:119:int compare(java.lang.Object,java.lang.Object) -> compare
+br.jm.music.model.MusicProvider$3 -> br.jm.music.b.e:
     android.content.ContentResolver val$contentResolver -> a
     br.jm.music.model.MusicProvider$Callback val$callback -> b
     br.jm.music.model.MusicProvider this$0 -> c
-    229:230:br.jm.music.model.MusicProvider$State doInBackground(java.lang.Void[]) -> a
-    235:238:void onPostExecute(br.jm.music.model.MusicProvider$State) -> a
-    226:226:void onPostExecute(java.lang.Object) -> onPostExecute
-    226:226:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-br.jm.music.model.MusicProvider$Callback -> br.jm.music.b.d:
+    246:247:br.jm.music.model.MusicProvider$State doInBackground(java.lang.Void[]) -> a
+    252:255:void onPostExecute(br.jm.music.model.MusicProvider$State) -> a
+    243:243:void onPostExecute(java.lang.Object) -> onPostExecute
+    243:243:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+br.jm.music.model.MusicProvider$Callback -> br.jm.music.b.f:
     void onMusicCatalogReady(boolean) -> a
-br.jm.music.model.MusicProvider$State -> br.jm.music.b.e:
+br.jm.music.model.MusicProvider$State -> br.jm.music.b.g:
     br.jm.music.model.MusicProvider$State NON_INITIALIZED -> a
     br.jm.music.model.MusicProvider$State INITIALIZING -> b
     br.jm.music.model.MusicProvider$State INITIALIZED -> c
     br.jm.music.model.MusicProvider$State[] $VALUES -> d
-    53:53:br.jm.music.model.MusicProvider$State[] values() -> values
-    53:53:br.jm.music.model.MusicProvider$State valueOf(java.lang.String) -> valueOf
-br.jm.music.model.MutableMediaMetadata -> br.jm.music.b.f:
+    54:54:br.jm.music.model.MusicProvider$State[] values() -> values
+    54:54:br.jm.music.model.MusicProvider$State valueOf(java.lang.String) -> valueOf
+br.jm.music.model.MutableMediaMetadata -> br.jm.music.b.h:
     android.media.MediaMetadata metadata -> a
     java.lang.String trackId -> b
     int albumId -> c
@@ -30643,21 +30652,21 @@ br.jm.music.ui.BrowseAdapter -> br.jm.music.ui.j:
     br.jm.music.ui.BrowseAdapter$OnItemClickListener mListener -> f
     int mMediaType -> g
     int mPlaceholderHeight -> h
-    91:147:android.support.v7.widget.RecyclerView$ViewHolder onCreateViewHolder(android.view.ViewGroup,int) -> onCreateViewHolder
-    153:194:void onBindViewHolder(android.support.v7.widget.RecyclerView$ViewHolder,int) -> onBindViewHolder
-    198:211:int getItemCount() -> getItemCount
-    216:242:int getItemViewType(int) -> getItemViewType
-    254:263:int getMediaItemIndex(int) -> b
-    267:271:android.support.v7.widget.RecyclerView$LayoutManager getSuitableLayoutManager(android.app.Activity) -> a
-    276:289:void add(android.media.browse.MediaBrowser$MediaItem) -> a
-    292:292:android.media.browse.MediaBrowser$MediaItem get(int) -> a
-    301:304:void clear() -> a
-    43:43:int access$000(br.jm.music.ui.BrowseAdapter) -> a
-    43:43:int access$100(br.jm.music.ui.BrowseAdapter,int) -> a
-    43:43:java.util.ArrayList access$200(br.jm.music.ui.BrowseAdapter) -> b
-    43:43:br.jm.music.ui.BrowseAdapter$OnItemClickListener access$300(br.jm.music.ui.BrowseAdapter) -> c
-    43:43:android.app.Activity access$400(br.jm.music.ui.BrowseAdapter) -> d
-    43:43:int access$500(br.jm.music.ui.BrowseAdapter) -> e
+    92:148:android.support.v7.widget.RecyclerView$ViewHolder onCreateViewHolder(android.view.ViewGroup,int) -> onCreateViewHolder
+    154:196:void onBindViewHolder(android.support.v7.widget.RecyclerView$ViewHolder,int) -> onBindViewHolder
+    200:213:int getItemCount() -> getItemCount
+    218:244:int getItemViewType(int) -> getItemViewType
+    256:265:int getMediaItemIndex(int) -> b
+    269:273:android.support.v7.widget.RecyclerView$LayoutManager getSuitableLayoutManager(android.app.Activity) -> a
+    278:291:void add(android.media.browse.MediaBrowser$MediaItem) -> a
+    294:294:android.media.browse.MediaBrowser$MediaItem get(int) -> a
+    303:306:void clear() -> a
+    44:44:int access$000(br.jm.music.ui.BrowseAdapter) -> a
+    44:44:int access$100(br.jm.music.ui.BrowseAdapter,int) -> a
+    44:44:java.util.ArrayList access$200(br.jm.music.ui.BrowseAdapter) -> b
+    44:44:br.jm.music.ui.BrowseAdapter$OnItemClickListener access$300(br.jm.music.ui.BrowseAdapter) -> c
+    44:44:android.app.Activity access$400(br.jm.music.ui.BrowseAdapter) -> d
+    44:44:int access$500(br.jm.music.ui.BrowseAdapter) -> e
 br.jm.music.ui.BrowseAdapter$HeaderHolder -> br.jm.music.ui.k:
     br.jm.music.ui.BrowseAdapter this$0 -> a
 br.jm.music.ui.BrowseAdapter$MediaItemViewHolder -> br.jm.music.ui.l:
@@ -30670,14 +30679,14 @@ br.jm.music.ui.BrowseAdapter$MediaItemViewHolder -> br.jm.music.ui.l:
 br.jm.music.ui.BrowseAdapter$MediaItemViewHolder$1 -> br.jm.music.ui.m:
     br.jm.music.ui.BrowseAdapter val$this$0 -> a
     br.jm.music.ui.BrowseAdapter$MediaItemViewHolder this$1 -> b
-    349:350:void onClick(android.view.View) -> onClick
+    351:352:void onClick(android.view.View) -> onClick
 br.jm.music.ui.BrowseAdapter$MediaItemViewHolder$2 -> br.jm.music.ui.n:
     br.jm.music.ui.BrowseAdapter val$this$0 -> a
     br.jm.music.ui.BrowseAdapter$MediaItemViewHolder this$1 -> b
-    357:379:void onClick(android.view.View) -> onClick
+    359:381:void onClick(android.view.View) -> onClick
 br.jm.music.ui.BrowseAdapter$MediaItemViewHolder$2$1 -> br.jm.music.ui.o:
     br.jm.music.ui.BrowseAdapter$MediaItemViewHolder$2 this$2 -> a
-    361:362:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
+    363:364:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
 br.jm.music.ui.BrowseAdapter$OnItemClickListener -> br.jm.music.ui.p:
     void onItemClick(android.media.browse.MediaBrowser$MediaItem,android.view.View) -> a
     void onMenuItemClick(android.view.MenuItem,int) -> a
@@ -31119,6 +31128,7 @@ br.jm.music.utils.StringUtils -> br.jm.music.c.n:
     9:16:java.lang.String formatMillis(int) -> a
     21:31:java.lang.String getReversedString() -> a
     36:47:java.lang.String swapCases(java.lang.String) -> a
+    51:52:java.lang.String decodeTrackNumber(long) -> a
 br.jm.music.utils.WearHelper -> br.jm.music.c.o:
     43:43:void setUseBackgroundFromTheme(android.os.Bundle,boolean) -> a
     57:57:void setSlotReservationFlags(android.os.Bundle,boolean,boolean) -> a

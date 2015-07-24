@@ -25,6 +25,7 @@ import android.provider.MediaStore;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,7 +94,15 @@ public class MusicProvider {
         if (mCurrentState != State.INITIALIZED) {
             return Collections.emptyList();
         }
-        return mMusicListByAlbum.keySet();
+        //todo melhorar performance
+        List<Integer> albums = new ArrayList<>(mMusicListByAlbum.keySet());
+        Collections.sort(albums, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer lhs, Integer rhs) {
+                return mAlbumListById.get(lhs).getTitle().compareTo(mAlbumListById.get(rhs).getTitle());
+            }
+        });
+        return albums;
     }
 
     /**
@@ -105,7 +114,15 @@ public class MusicProvider {
         if (mCurrentState != State.INITIALIZED) {
             return Collections.emptyList();
         }
-        return mAlbumListByArtist.keySet();
+        //todo melhorar performance
+        List<String> artists = new ArrayList<>(mAlbumListByArtist.keySet());
+        Collections.sort(artists, new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+                return lhs.compareTo(rhs);
+            }
+        });
+        return artists;
     }
 
     /**

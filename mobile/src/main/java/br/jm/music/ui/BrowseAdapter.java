@@ -31,6 +31,7 @@ import br.jm.music.utils.ColoredFileBitmapWorkerTask;
 import br.jm.music.utils.FileBitmapWorkerTask;
 import br.jm.music.utils.LogHelper;
 import br.jm.music.utils.MediaIDHelper;
+import br.jm.music.utils.StringUtils;
 
 import static br.jm.music.utils.MediaIDHelper.MEDIA_ID_BY_ALBUM;
 import static br.jm.music.utils.MediaIDHelper.MEDIA_ID_BY_ARTIST;
@@ -181,7 +182,8 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             BitmapHelper.getDefault(mActivity.getResources(), MusicApplication.DEF_ART_SIZE_SMALL));
                 }
             } else if (mMediaType == MEDIA_SONG_IN_ALBUM && mediaItemViewHolder.mExtraView != null && description.getExtras() != null)
-                mediaItemViewHolder.mExtraView.setText(description.getExtras().getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, -1) + "");
+                mediaItemViewHolder.mExtraView.setText(
+                        StringUtils.decodeTrackNumber(description.getExtras().getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, -1)));
         } else if (holder instanceof HeaderHolder) {
             String text;
             if (mMediaItems.get(getMediaItemIndex(position + 1)).isPlayable())
