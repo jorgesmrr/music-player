@@ -47,6 +47,12 @@ public abstract class MediaContainerActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.go_artist:
+                startService(new Intent(this, MusicService.class)
+                        .setAction(MusicService.ACTION_CMD)
+                        .putExtra(MusicService.CMD_NAME, MusicService.CMD_GET_ARTIST)
+                        .putExtra(MusicService.EXTRA_MEDIA_ID, mMediaId));
+                return true;
             case R.id.add_queue:
                 startService(new Intent(this, MusicService.class)
                         .setAction(MusicService.ACTION_CMD)

@@ -181,9 +181,13 @@ public class BrowseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     mediaItemViewHolder.mImageView.setImageBitmap(
                             BitmapHelper.getDefault(mActivity.getResources(), MusicApplication.DEF_ART_SIZE_SMALL));
                 }
-            } else if (mMediaType == MEDIA_SONG_IN_ALBUM && mediaItemViewHolder.mExtraView != null && description.getExtras() != null)
-                mediaItemViewHolder.mExtraView.setText(
-                        StringUtils.decodeTrackNumber(description.getExtras().getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, -1)));
+            } else if (mMediaType == MEDIA_SONG_IN_ALBUM && mediaItemViewHolder.mExtraView != null && description.getExtras() != null) {
+                long track = description.getExtras().getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, -1);
+                if (track != -1)
+                    mediaItemViewHolder.mExtraView.setText(StringUtils.decodeTrackNumber(track));
+                else
+                    mediaItemViewHolder.mExtraView.setText("");
+            }
         } else if (holder instanceof HeaderHolder) {
             String text;
             if (mMediaItems.get(getMediaItemIndex(position + 1)).isPlayable())

@@ -247,14 +247,20 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                     String albumMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ALBUM, album + "");
                     LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, albumMediaId));
                 } else if (CMD_GET_ARTIST.equals(command)) {
+                    String artistId;
                     String mediaId = startIntent.getStringExtra(EXTRA_MEDIA_ID);
                     String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-                    if (musicId == null)
-                        musicId = mediaId;
-                    MediaMetadata mediaMetadata = mMusicProvider.getMusic(musicId);
-                    if (mediaMetadata == null)
-                        return START_STICKY;
-                    String artistId = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+                    if (musicId != null) {
+                        MediaMetadata mediaMetadata = mMusicProvider.getMusic(musicId);
+                        if (mediaMetadata == null)
+                            return START_STICKY;
+                        artistId = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+
+                    } else {
+                        String album = MediaIDHelper.extractBrowseCategoryValueFromMediaID(mediaId);
+                        artistId = mMusicProvider.getAlbum(Integer.parseInt(album)).getArtist();
+                    }
+
                     String artistMediaId = createBrowseCategoryMediaID(MEDIA_ID_BY_ARTIST, artistId);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BaseActivity.ACTION_OPEN_MEDIA_ID).putExtra(EXTRA_MEDIA_ID, artistMediaId));
                 } else if (CMD_ADD_TO_QUEUE.equals(command)) {
@@ -291,13 +297,13 @@ public class MusicService extends MediaBrowserService implements Playback.Callba
                         MediaSession.QueueItem item = new MediaSession.QueueItem(
                                 trackCopy.getDescription(), mPlayingQueue.size());
                         if (playNext)
-                            mPlayingQueue.add(mCurrentIndexOnQueue + 1, item);
+                            mPlayingQueue.add(mPlayingQueue.isEmpty() ? 0 : mCurrentIndexOnQueue + 1, item);
                         else
                             mPlayingQueue.add(item);
                     } else {
                         // Add the album or artist
                         if (playNext)
-                            mPlayingQueue.addAll(mCurrentIndexOnQueue + 1, QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mSessionExtras.getBoolean(EXTRA_SHUFFLING), mPlayingQueue.size()));
+                            mPlayingQueue.addAll(mPlayingQueue.isEmpty() ? 0 : mCurrentIndexOnQueue + 1, QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mSessionExtras.getBoolean(EXTRA_SHUFFLING), mPlayingQueue.size()));
                         else
                             mPlayingQueue.addAll(QueueHelper.getPlayingQueue(mediaId, mMusicProvider, mSessionExtras.getBoolean(EXTRA_SHUFFLING), mPlayingQueue.size()));
                     }

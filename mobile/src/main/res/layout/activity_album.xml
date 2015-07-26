@@ -65,6 +65,7 @@
             android:layout_height="@dimen/top_anim_height"
             android:layout_above="@+id/bar"
             android:background="@color/default_dark_vibrant_color"
+            android:elevation="@dimen/elevation_toolbar"
             android:visibility="invisible" />
 
     </RelativeLayout>

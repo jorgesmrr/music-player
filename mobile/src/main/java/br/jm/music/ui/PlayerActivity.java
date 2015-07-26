@@ -84,6 +84,7 @@ public class PlayerActivity extends ActionBarCastActivity {
 
     private int mVibrantColor;
     private int mDarkVibrantColor;
+    private boolean mIsPortrait;
 
     private Handler mHandler = new Handler();
     private MediaBrowser mMediaBrowser;
@@ -146,7 +147,7 @@ public class PlayerActivity extends ActionBarCastActivity {
 
         mRepeatMode = MusicService.REPEAT_NONE;
         mShuffling = false;
-        boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        mIsPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
         mVibrantColor = getResources().getColor(R.color.default_vibrant_color);
         mDarkVibrantColor = getResources().getColor(R.color.default_dark_vibrant_color);
@@ -239,7 +240,7 @@ public class PlayerActivity extends ActionBarCastActivity {
 
         // Translates seekbar
         mBar = findViewById(R.id.bar);
-        if (isPortrait) {
+        if (mIsPortrait) {
             mBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @SuppressWarnings("deprecation")
                 @Override
@@ -260,9 +261,8 @@ public class PlayerActivity extends ActionBarCastActivity {
         }
 
         // Only update from the intent if we are not recreating from a config change:
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null)
             updateFromParams(getIntent());
-        }
 
         mMediaBrowser = new MediaBrowser(this,
                 new ComponentName(this, MusicService.class), mConnectionCallback, null);
@@ -407,6 +407,9 @@ public class PlayerActivity extends ActionBarCastActivity {
                         mSeekbar.getThumb().setColorFilter(colorFilter);
 
                         mArt.setImageBitmap(art);
+
+                        if (!mIsPortrait)
+                            getToolbar().setBackgroundColor(mDarkVibrantColor);
                     }
                 });
             } else
@@ -430,9 +433,11 @@ public class PlayerActivity extends ActionBarCastActivity {
             return;
         }
         LogHelper.d(TAG, "updateDuration called ");
-        int duration = (int) metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
-        mSeekbar.setMax(duration);
-        mPosition.setText(StringUtils.formatMillis(mSeekbar.getProgress()) + " / " + StringUtils.formatMillis(duration));
+        if (mSeekbar != null && mPosition != null) {
+            int duration = (int) metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+            mSeekbar.setMax(duration);
+            mPosition.setText(StringUtils.formatMillis(mSeekbar.getProgress()) + " / " + StringUtils.formatMillis(duration));
+        }
     }
 
     private void updatePlaybackState(PlaybackState state) {
