@@ -4,36 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <br.jm.music.ui.SquaredImageView
-        android:id="@+id/art"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="@dimen/elevation_toolbar"
-        android:scaleType="centerCrop"
-        android:transitionName="image"
-        app:measure_with="width" />
-
-    <View
-        android:id="@+id/shadow"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/shadow_topdown"
-        android:elevation="@dimen/elevation_toolbar" />
-
-    <include
-        layout="@layout/include_toolbar"
-        android:elevation="@dimen/elevation_toolbar" />
+        android:background="@color/default_dark_vibrant_color"
+        android:elevation="@dimen/elevation_toolbar"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:contentInsetStart="@dimen/keyline"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <LinearLayout
         android:id="@+id/bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/art"
+        android:layout_below="@+id/toolbar"
         android:background="@color/default_dark_vibrant_color"
         android:elevation="@dimen/elevation_toolbar"
         android:orientation="vertical"
-        android:padding="@dimen/margin_screen">
+        android:paddingBottom="@dimen/margin_screen"
+        android:paddingLeft="@dimen/keyline"
+        android:paddingRight="@dimen/margin_screen">
 
         <TextView
             android:id="@+id/title"
@@ -47,20 +41,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/position"
-            style="@style/SubtitleInverse.SingleLine"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/art"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/bar"
+        android:layout_above="@+id/controllers"
+        android:scaleType="centerCrop"
+        android:transitionName="image" />
+
+    <TextView
+        android:id="@+id/position"
+        style="@style/PlayerTimeText"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touchable"
+        android:layout_above="@id/controllers" />
+
+    <TextView
+        android:id="@+id/duration"
+        style="@style/PlayerTimeText"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touchable"
+        android:layout_above="@id/controllers"
+        android:layout_alignParentRight="true" />
 
     <LinearLayout
         android:id="@+id/controllers"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="88dp"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/bar"
+        android:elevation="@dimen/elevation_toolbar"
         android:gravity="center"
         android:orientation="horizontal">
 
@@ -89,6 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin_view"
+            android:elevation="@dimen/fab_elevation"
             android:src="@drawable/ic_pause_resume"
             app:backgroundTint="@color/default_vibrant_color"
             app:borderWidth="0dp" />

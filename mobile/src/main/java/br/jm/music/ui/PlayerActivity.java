@@ -73,6 +73,7 @@ public class PlayerActivity extends ActionBarCastActivity {
     private ImageView mRepeat;
     private FloatingActionButton mPlayPause;
     private TextView mPosition;
+    private TextView mDuration;
     private SeekBar mSeekbar;
     private TextView mTitle;
     private TextView mSubtitle;
@@ -153,15 +154,18 @@ public class PlayerActivity extends ActionBarCastActivity {
         mDarkVibrantColor = getResources().getColor(R.color.default_dark_vibrant_color);
 
         mArt = (ImageView) findViewById(R.id.art);
-        mPlayPause = (FloatingActionButton) findViewById(R.id.play_pause);
-        mSkipNext = findViewById(R.id.next);
-        mSkipPrev = findViewById(R.id.prev);
-        mShuffle = (ImageView) findViewById(R.id.shuffle);
-        mRepeat = (ImageView) findViewById(R.id.repeat);
         mPosition = (TextView) findViewById(R.id.position);
+        mDuration = (TextView) findViewById(R.id.duration);
         mSeekbar = (SeekBar) findViewById(R.id.seekBar);
         mTitle = (TextView) findViewById(R.id.title);
         mSubtitle = (TextView) findViewById(R.id.subtitle);
+        mBar = findViewById(R.id.bar);
+        final View controlBar = findViewById(R.id.controllers);
+        mPlayPause = (FloatingActionButton) controlBar.findViewById(R.id.play_pause);
+        mSkipNext = controlBar.findViewById(R.id.next);
+        mSkipPrev = controlBar.findViewById(R.id.prev);
+        mShuffle = (ImageView) controlBar.findViewById(R.id.shuffle);
+        mRepeat = (ImageView) controlBar.findViewById(R.id.repeat);
 
         mTitle.setSelected(true);
 
@@ -222,8 +226,10 @@ public class PlayerActivity extends ActionBarCastActivity {
         mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (mPosition != null)
-                    mPosition.setText(StringUtils.formatMillis(seekBar.getProgress()) + " | " + StringUtils.formatMillis(seekBar.getMax()));
+                if (mPosition != null) {
+                    mPosition.setText(StringUtils.formatMillis(seekBar.getProgress()));
+                    mDuration.setText("-" + StringUtils.formatMillis(seekBar.getMax() - seekBar.getProgress()));
+                }
             }
 
             @Override
@@ -239,9 +245,8 @@ public class PlayerActivity extends ActionBarCastActivity {
         });
 
         // Translates seekbar
-        mBar = findViewById(R.id.bar);
         if (mIsPortrait) {
-            mBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            controlBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @SuppressWarnings("deprecation")
                 @Override
                 public void onGlobalLayout() {
@@ -250,14 +255,9 @@ public class PlayerActivity extends ActionBarCastActivity {
                     else
                         mBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                    mSeekbar.setTranslationY(mBar.getTop() - mSeekbar.getHeight() / 2/* + getResources().getDimensionPixelSize(R.dimen.two_dp)*/);
+                    mSeekbar.setTranslationY(controlBar.getTop() - mSeekbar.getHeight() / 2);
                 }
             });
-
-            View topShadow = findViewById(R.id.shadow);
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) topShadow.getLayoutParams();
-            params.height += getStatusBarHeight();
-            topShadow.setLayoutParams(params);
         }
 
         // Only update from the intent if we are not recreating from a config change:
@@ -408,8 +408,7 @@ public class PlayerActivity extends ActionBarCastActivity {
 
                         mArt.setImageBitmap(art);
 
-                        if (!mIsPortrait)
-                            getToolbar().setBackgroundColor(mDarkVibrantColor);
+                        getToolbar().setBackgroundColor(mDarkVibrantColor);
                     }
                 });
             } else
@@ -436,7 +435,8 @@ public class PlayerActivity extends ActionBarCastActivity {
         if (mSeekbar != null && mPosition != null) {
             int duration = (int) metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
             mSeekbar.setMax(duration);
-            mPosition.setText(StringUtils.formatMillis(mSeekbar.getProgress()) + " / " + StringUtils.formatMillis(duration));
+            mPosition.setText(StringUtils.formatMillis(mSeekbar.getProgress()));
+            mDuration.setText("-" + StringUtils.formatMillis(mSeekbar.getMax() - mSeekbar.getProgress()));
         }
     }
 
